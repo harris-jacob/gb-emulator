@@ -1,0 +1,25 @@
+{
+    "name": "gb-emulator-dev",
+    "dockerFile": "Dockerfile",
+    // Set *default* container specific settings.json values on container create.
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "ms-azuretools.vscode-docker",
+        "twxs.cmake",
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "xaver.clang-format",
+        "robbowen.synthwave-vscode" // Very important
+    ],
+    "runArgs": [
+        "--security-opt",
+        "seccomp=unconfined", // ptrace-based debugger like C++, Go, and Rust
+        "-e",
+        "-v",
+    ],
+    // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode"
+}
