@@ -5,10 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* 
- * CPU is 8bit, registers can be accessed in pairs. A, F, B, C, 
- * H can be accessed AF, BC and HL. PC and SP are 16 bit only.
- * 
+/*
+ * 16 bit addressable memory space
  */
 typedef struct _mmu_t
 {
@@ -16,7 +14,7 @@ typedef struct _mmu_t
 	uint8_t bios[0x100];
 	struct
 	{
-		// union allows us to access each segment of memeory directly
+		// union allows us to access each segment of memory directly
 		union
 		{
 			uint8_t addr[0x10000];
