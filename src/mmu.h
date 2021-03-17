@@ -45,7 +45,7 @@ typedef struct _mmu_t
 mmu_t* mmu_create();
 
 /* destroy set of memory */
-void mmu_destroy(mmu_t* mmu);
+void mmu_destroy(mmu_t** mmu);
 
 /* read 8 bit values of memory */
 uint8_t mmu_read_addr8(mmu_t* mmu, uint16_t addr);

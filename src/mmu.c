@@ -10,9 +10,9 @@ mmu_t* mmu_create() {
 	return mmu;
 }
 
-void mmu_destroy(mmu_t* mmu) {
-	free(mmu);
-	mmu = NULL;
+void mmu_destroy(mmu_t	**mmu) {
+	free(*mmu);
+	*mmu = NULL;
 }
 
 uint8_t mmu_read_addr8(mmu_t* mmu, uint16_t addr) {
