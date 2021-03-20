@@ -1,4 +1,4 @@
-FROM ubuntu:18.04 as DEV-BASE
+FROM ubuntu:18.04 as gbemulator-dev
 
 # Global settings
 ENV CMAKE_VERSION=3.17.2
@@ -43,7 +43,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 USER $USERNAME
 
 
-FROM DEV_BASE as TEST
+FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
 RUN sudo ./scripts/test-build.sh
