@@ -1,6 +1,4 @@
 name: PR
-
-name: Docker Compose Actions Workflow
 on: 
   pull_request:
     branches:
