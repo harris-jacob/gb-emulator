@@ -24,9 +24,7 @@ RUN rm -r ~/temp \
     && apt-get clean -y
 
 # make workdir
-RUN mkdir /gb-emulator/ 
-WORKDIR /gb-emulator/
-COPY . .
+COPY . /
 # Configure a SUDO non-root user (no password)
 ARG USERNAME=vscode
 ARG USER_UID=1000
@@ -46,7 +44,7 @@ USER $USERNAME
 FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
-RUN "ls"
+RUN ["chmod", "+x", "/scripts/test-build.sh"]
 # Run tests
-CMD "./build/bin/test"
+CMD "/build/bin/test"
 
