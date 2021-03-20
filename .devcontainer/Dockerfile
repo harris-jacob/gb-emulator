@@ -18,6 +18,24 @@ RUN mkdir -p ~/temp \
     && ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake \
     && cmake --version
 
+# Install docker
+RUN apt-get update \
+    && apt-get -y install git gcc curl zip unzip apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common \
+    # Install Docker - x86_64 / amd64 stable
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
+    && add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable" \
+    && apt-get update \
+    && apt-get -y install docker-ce docker-ce-cli containerd.io
+
+# act to test actions: https://github.com/nektos/act
+RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
 
 # Clean up
 RUN rm -r ~/temp \ 

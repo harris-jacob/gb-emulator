@@ -1,5 +1,7 @@
 version: "3.9"
 services:
   test:
-    build: .
-    command: sudo ./scripts/test-build.sh
+    build:
+      context: .
+      target: TEST
+    command: "./build/bin/test"

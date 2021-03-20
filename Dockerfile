@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 as DEV-BASE
 
 # Global settings
 ENV CMAKE_VERSION=3.17.2
@@ -42,5 +42,11 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # [Optional] Set the default user. Omit if you want to keep the default as root.
 USER $USERNAME
 
-CMD sudo ./scripts/test-build.sh
+
+FROM DEV_BASE as TEST
+
+# Configure and build dev target
+RUN sudo ./scripts/test-build.sh
+# Run tests
+CMD "./build/bin/test"
 
