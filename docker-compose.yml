@@ -2,7 +2,7 @@ version: "3.9"
 services:
   test:
     build: .
-    command: bash -c "./scripts/test-build.sh
+    command: ./scripts/test-build.sh
 
 
     
