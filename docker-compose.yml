@@ -2,8 +2,4 @@ version: "3.9"
 services:
   test:
     build: .
-    command: ./scripts/test-build.sh
-
-
-    
-    
+    command: sudo ./scripts/test-build.sh
