@@ -46,7 +46,7 @@ USER $USERNAME
 FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
-RUN "sudo ./scripts/test-build.sh"
+RUN "ls"
 # Run tests
 CMD "./build/bin/test"
 
