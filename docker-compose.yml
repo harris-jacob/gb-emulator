@@ -3,5 +3,5 @@ services:
   test:
     build:
       context: .
-      target: TEST
+      target: gbemulator-test
     command: "./build/bin/test"
