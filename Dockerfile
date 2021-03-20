@@ -44,7 +44,8 @@ USER $USERNAME
 FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
-RUN ["chmod", "+x", "/scripts/test-build.sh"]
+RUN ["sudo chmod", "+x", "/scripts/test-build.sh"]
+RUN "/scripts/test-build.sh"
 # Run tests
 CMD "/build/bin/test"
 
