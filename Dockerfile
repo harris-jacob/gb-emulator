@@ -35,5 +35,4 @@ RUN cd gb-emu/ \
     && /gb-emu/scripts/test-build.sh \
     && chmod +x /gb-emu/build/bin/test
 
-CMD "ls /gb-emu/build"
 
