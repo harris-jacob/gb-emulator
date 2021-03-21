@@ -1,9 +1,7 @@
 version: "3.9"
 services:
   test:
-    build: .
-    command: bash -c "./scripts/test-build.sh
-
-
-    
-    
+    build:
+      context: .
+      target: gbemulator-test
+    command: "/gb-emu/build/bin/test"

@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:18.04 as gbemulator-dev
 
 # Global settings
 ENV CMAKE_VERSION=3.17.2
@@ -24,9 +24,15 @@ RUN rm -r ~/temp \
     && apt-get clean -y
 
 # make workdir
-RUN mkdir /gb-emulator/ 
-WORKDIR /gb-emulator/
-COPY . .
+COPY . /gb-emu
 
-CMD ./scripts/test-build.sh
+
+FROM gbemulator-dev as gbemulator-test
+
+# Configure and build dev target
+RUN cd gb-emu/ \
+    && chmod +x /gb-emu/scripts/test-build.sh \
+    && /gb-emu/scripts/test-build.sh \
+    && chmod +x /gb-emu/build/bin/test
+
 
