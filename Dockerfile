@@ -24,15 +24,14 @@ RUN rm -r ~/temp \
     && apt-get clean -y
 
 # make workdir
-COPY . /gb-emu
+COPY . /gb-emu/
 
 
 FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
-RUN "cd /gb-emu/"
-RUN ["chmod", "+x", "/gb-emu/scripts/test-build.sh"]
-RUN "/gb-emu/scripts/test-build.sh"
-# Run tests
-CMD "/gb-emu/build/bin/test"
+RUN cd gb-emu/ \
+    && /gb-emu/scripts/test-build.sh
+
+CMD ["/gb-emu/build/bin/test"]
 

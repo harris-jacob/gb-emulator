@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # TODO
-cmake . -UTARGET_GROUP -DTARGET_GROUP=production
+cmake . -UTARGET_GROUP -DTARGET_GROUP=production -b ./build
