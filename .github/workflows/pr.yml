@@ -11,5 +11,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Submodules
+        uses: textbook/git-checkout-submodule-action@master
+
       - name: Run Tests
         run: docker-compose up test
