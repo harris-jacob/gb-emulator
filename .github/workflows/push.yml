@@ -8,10 +8,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v2
+        with:
+          branches: | [
+            'main'
+          ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
       - name: Build Notifications
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
         uses: Ilshidur/action-discord@0.3.0
         with:
-          args: "{{EVENT_PAYLOAD.repository.full_name}} update: Commit {{github.event.head_commit.message}} has been merged to master."
+          args: "{{EVENT_PAYLOAD.repository.full_name}} version ${{steps.semantic.outputes.new_releas_version}}
+                 has been pushed to main. See latest changes at: https://github.com/harris-jacob/gb-emulator"
