@@ -30,8 +30,9 @@ COPY . /gb-emu
 FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
+RUN ["cd", "/gb-emu/"]
 RUN ["chmod", "+x", "/gb-emu/scripts/test-build.sh"]
 RUN "/gb-emu/scripts/test-build.sh"
 # Run tests
-CMD "/build/bin/test"
+CMD "/gb-emu/build/bin/test"
 
