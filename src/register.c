@@ -1,15 +1,12 @@
 #include "register.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 
-reg* mmu_create() {
-	reg* registers = (reg*)malloc(sizeof(reg));
+reg_t* reg_create() {
+	reg_t* registers = (reg_t*)malloc(sizeof(reg_t));
     return registers;
 }
 
-void mmu_destroy(reg* registers) {
-	free(registers);
-	registers = NULL;
+void reg_destroy(reg_t** registers) {
+	free(*registers);
+	*registers = NULL;
 }
