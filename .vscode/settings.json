@@ -2,6 +2,11 @@
     "files.associations": {
         "stdint.h": "c",
         "mmu.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "runner.h": "c",
+        "unity.h": "c",
+        "unity_fixture.h": "c",
+        "register.h": "c"
     }
 }

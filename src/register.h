@@ -49,14 +49,14 @@ typedef struct _reg_t
 	
 	uint16_t sp;
 	uint16_t pc;
-} reg;
+} reg_t;
 
 
 /* Create a set of CPU registers */
-reg* reg_create();
+reg_t* reg_create();
 
 /* Destroy register */
-void reg_destroy();
+void reg_destroy(reg_t** registers);
 
 
 #endif
