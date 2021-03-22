@@ -16,5 +16,11 @@ cpu_t* cpu_create();
 /* Destroy a CPU instance */
 void cpu_destroy(cpu_t** cpu);
 
-/* handle an op code */
+/* handle CPU op code */
 static void handle_op(cpu_t* cpu, uint8_t op);
+
+/* Tick of CPU clock */
+static void tick();
+
+
+
