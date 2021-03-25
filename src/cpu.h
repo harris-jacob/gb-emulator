@@ -1,6 +1,13 @@
 #include "mmu.h"
 #include "register.h"
 
+
+// Shortcut defs for CPU flags all live in the F register
+#define ZERO_FLAG(n) uint8_t 7;
+#define CARRY_FLAG uint8_t 6;
+#define BCD_FLAGS
+
+
 typedef struct cpu_t_ {
     /* CPU registers */
     reg_t reg;
