@@ -84,7 +84,7 @@ void reg_dec16(reg_t* reg, uint8_t* inc_reg);
 
 
 // FLAG SETTERS
-void set_carry(reg_t* reg);S
+void set_carry(reg_t* reg);
 void set_halfcarry(reg_t* reg);
 void set_zero(reg_t* reg);
 void set_subtract(reg_t* reg);
