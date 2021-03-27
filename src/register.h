@@ -58,5 +58,51 @@ reg_t* reg_create();
 /* Destroy register */
 void reg_destroy(reg_t** registers);
 
+/* 
+* Perform increment on uint8 in register
+* handles setting flags
+*/ 
+void reg_inc8(reg_t* reg, uint8_t* inc_Reg);
+
+/* 
+* Perform decrement on uint8 in register
+* handles flag setting
+*/
+void reg_dec8(reg_t* reg, uint8_t* inc_reg);
+
+/*
+* Perform 16 bit increment on a uint16 in register.
+* handles flag setting.
+*/
+void reg_inc16(reg_t* reg, uint8_t* inc_reg);
+
+/*
+* Perform 16 bit decrement on a given in register.
+* handles flag setting.
+*/
+void reg_dec16(reg_t* reg, uint8_t* inc_reg);
+
+
+// FLAG SETTERS
+void set_carry(reg_t* reg);S
+void set_halfcarry(reg_t* reg);
+void set_zero(reg_t* reg);
+void set_subtract(reg_t* reg);
+
+// FLAG RESETERS
+void reset_carry(reg_t* reg);
+void reset_halfcarry(reg_t* reg);
+void reset_zero(reg_t* reg);
+void reset_subtract(reg_t* reg);
+
+// FLAG GETTERS
+uint8_t get_carry(reg_t* reg);
+uint8_t get_halfcarry(reg_t* reg);
+uint8_t get_zero(reg_t* reg);
+uint8_t get_subtract(reg_t* reg);
+
+
+/*  */
+
 
 #endif

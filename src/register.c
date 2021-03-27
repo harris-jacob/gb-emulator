@@ -10,3 +10,7 @@ void reg_destroy(reg_t** registers) {
 	free(*registers);
 	*registers = NULL;
 }
+
+void PC_inc(reg_t* reg, uint8_t val) {
+	reg->pc+=val;
+}
