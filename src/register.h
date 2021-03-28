@@ -2,6 +2,7 @@
 #define REGISTER_H_
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 
@@ -102,7 +103,14 @@ uint8_t get_zero(reg_t* reg);
 uint8_t get_subtract(reg_t* reg);
 
 
-/*  */
+/* Should a half carry be set 8bit  */
+bool should_halfcarry8(uint8_t prev, uint8_t curr);
+/* should a carry be set 8bit */
+bool should_carry8(uint8_t prev, uint8_t curr);
+/* Should a half carry be set 16bit  */
+bool should_halfcarry16(uint8_t prev, uint8_t curr);
+/* should a carry be set 16bit */
+bool should_carry16(uint8_t prev, uint8_t curr);
 
 
 #endif
