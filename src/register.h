@@ -59,31 +59,6 @@ reg_t* reg_create();
 /* Destroy register */
 void reg_destroy(reg_t** registers);
 
-/* 
-* Perform increment on uint8 in register
-* handles setting flags
-*/ 
-void reg_inc8(reg_t* reg, uint8_t* inc_Reg);
-
-/* 
-* Perform decrement on uint8 in register
-* handles flag setting
-*/
-void reg_dec8(reg_t* reg, uint8_t* inc_reg);
-
-/*
-* Perform 16 bit increment on a uint16 in register.
-* handles flag setting.
-*/
-void reg_inc16(reg_t* reg, uint8_t* inc_reg);
-
-/*
-* Perform 16 bit decrement on a given in register.
-* handles flag setting.
-*/
-void reg_dec16(reg_t* reg, uint8_t* inc_reg);
-
-
 // FLAG SETTERS
 void set_carry(reg_t* reg);
 void set_halfcarry(reg_t* reg);
@@ -108,9 +83,28 @@ bool should_halfcarry8(uint8_t prev, uint8_t curr);
 /* should a carry be set 8bit */
 bool should_carry8(uint8_t prev, uint8_t curr);
 /* Should a half carry be set 16bit  */
-bool should_halfcarry16(uint8_t prev, uint8_t curr);
+bool should_halfcarry16(uint16_t prev, uint16_t curr);
 /* should a carry be set 16bit */
-bool should_carry16(uint8_t prev, uint8_t curr);
-
+bool should_carry16(uint16_t prev, uint16_t curr);
+/* 
+ * Adds two 8 bit numbers, sets register flags if necessary, 
+ * returns the outcome
+ */
+uint8_t alu_add8(reg_t* reg, uint8_t a, uint8_t b);
+/* 
+ * Adds two 16 bit numbers, sets register flags if necessary, 
+ * returns the outcome
+ */
+uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b);
+/* 
+ * Adds two 8 bit numbers, sets register flags if necessary, 
+ * returns the outcome
+ */
+uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b);
+/* 
+ * Adds two 16 bit numbers, sets register flags if necessary, 
+ * returns the outcome
+ */
+uint16_t alu_subtract16(reg_t* reg, uint16_t a, uint16_t b);
 
 #endif
