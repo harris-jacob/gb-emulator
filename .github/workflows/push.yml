@@ -12,7 +12,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         
-
       - name: Build Notifications
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
@@ -20,4 +19,4 @@ jobs:
         uses: Ilshidur/action-discord@0.3.0
         with:
           args: "{{EVENT_PAYLOAD.repository.full_name}}
-                 has nerw changes on main. See latest: https://github.com/harris-jacob/gb-emulator"
+                 has new changes on main. See latest at: https://github.com/harris-jacob/gb-emulator"
