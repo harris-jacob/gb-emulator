@@ -128,9 +128,38 @@ static void OP_14(cpu_t* cpu) {
 }
 
 /* OP15 - DEC D */
-static void OP_14(cpu_t* cpu) {
+static void OP_15(cpu_t* cpu) {
     uint8_t val = alu_subtract8(cpu->reg, cpu->reg->d, 1);
     cpu->reg->d = val;
 }
 
+/* LD D,d8 */
+static void OP_16(cpu_t* cpu, uint8_t val) {
+    cpu->reg->d = val;
+}
 
+/* RLA */
+static void OP_17(cpu_t* cpu) {
+    // TODO
+}
+
+/* JR r8 */
+static void OP_18(cpu_t* cpu) {
+    // TODO
+}
+
+/* ADD HL, DE */
+static void OP_19(cpu_t* cpu) {
+    cpu->reg->hl = alu_add16(cpu->reg, cpu->reg->hl, cpu->reg->de);
+}
+
+/* LD A (DE) */
+static void OP_1A(cpu_t* cpu) {
+    uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->de);
+    cpu->reg->a = val;
+}
+
+/* DEC DE */
+static void OP_1B(cpu_t* cpu) {
+    cpu->reg->de = alu_subtract16(cpu->reg->de, 1);
+}
