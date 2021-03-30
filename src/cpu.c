@@ -102,9 +102,35 @@ static void OP_0F(cpu_t* cpu, uint8_t val) {
 
 /* OP10 - LD, C, d8 */
 static void OP_10(cpu_t* cpu, uint8_t val) {
-
+    // TODO
 }
 
+/* OP11 - LD DE d16 */
+static void OP_11(cpu_t* cpu, uint16_t val) {
+    cpu->reg->de = val;
+} 
 
+/* OP12- LD (DE) A */
+static void OP_12(cpu_t* cpu) {
+    mmu_write_addr8(cpu->mmu, cpu->reg->de, cpu->reg->a);
+}
+
+/* OP13 - INC DE */   
+static void OP_13(cpu_t* cpu) {
+    uint16_t val = alu_add16(cpu->reg, cpu->reg->de, 1);
+    cpu->reg->de = val;
+}
+
+/* OP14 - INC D */
+static void OP_14(cpu_t* cpu) {
+    uint8_t val = alu_add8(cpu->reg, cpu->reg->d, 1);
+    cpu->reg->d = val;
+}
+
+/* OP15 - DEC D */
+static void OP_14(cpu_t* cpu) {
+    uint8_t val = alu_subtract8(cpu->reg, cpu->reg->d, 1);
+    cpu->reg->d = val;
+}
 
 
