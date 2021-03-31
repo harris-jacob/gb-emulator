@@ -121,13 +121,7 @@ uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b) {
 		reset_halfcarry(reg);
 	}
 
-	uint16_t val = a + b;
-	if (val == 0)
-	{
-		set_zero(reg);
-	} else {
-		reset_zero(reg);
-	} 
+	uint16_t val = a + b; 
 
 	return val;
 }
@@ -158,31 +152,41 @@ uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b) {
 	return val;
 }
 
-uint16_t alu_subtract16(reg_t* reg, uint16_t a, uint16_t b) {
-	set_subtract(reg);
 
-	if(should_carry16(a, b)) {
-		set_carry(reg);
-	} else {
-		reset_carry(reg);
-	}
+uint8_t alu_inc8(reg_t* reg, uint8_t a) {
+	reset_subtract(reg);
 
-	if(should_halfcarry16(a, b)) {
+	if(should_halfcarry8(a, 1)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);
 	}
 
-	uint16_t val = a - b;
-	if (val == 0)
-	{
+	a++;
+
+	if(a == 0) {
 		set_zero(reg);
 	} else {
 		reset_zero(reg);
-	} 
+	}
 
-	return val;
+	return a;
 }
 
+uint8_t alu_dec8(reg_t* reg, uint8_t a) {
+	set_subtract(reg);
 
+	if(should_halfcarry8(a, 1)) {
+		set_halfcarry(reg);
+	} else {
+		reset_halfcarry(reg);
+	}
 
+	a--;
+
+	if(a == 0 ) {
+		set_zero(reg);
+	} else {
+		reset_zero(reg);
+	}
+}
