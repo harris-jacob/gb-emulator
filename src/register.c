@@ -64,32 +64,48 @@ uint8_t get_subtract(reg_t* reg) {
 	return ((1 << 6) & val) >> 6;
 }
 
-bool should_halfcarry8(uint8_t a, uint8_t b) {	
+bool should_add_halfcarry8(uint8_t a, uint8_t b) {	
 	return ((a & 0xf) + (b & 0xf) & 0x10) == 0x10;
 }
 
-bool should_halfcarry16(uint16_t a, uint16_t b) {
+bool should_add_halfcarry16(uint16_t a, uint16_t b) {
 	return ((a & 0xff) + (b & 0xff) & 0x100) == 0x100;
 }
 
-bool should_carry8(uint8_t a, uint8_t b) {
+bool should_add_carry8(uint8_t a, uint8_t b) {
 	return ((a & 0xff) + (b & 0xff) & 0x100) == 0x100;
 }
 
-bool should_carry16(uint16_t a, uint16_t b) {
+bool should_add_carry16(uint16_t a, uint16_t b) {
 	return ((a & 0xffff) + (b & 0xffff) & 0x10000) == 0x10000;
+}
+
+bool should_sub_halfcarry8(uint8_t a, uint8_t b) {	
+	return ((a & 0xf) - (b & 0xf) & 0x10) == 0x10;
+}
+
+bool should_sub_halfcarry16(uint16_t a, uint16_t b) {
+	return ((a & 0xff) - (b & 0xff) & 0x100) == 0x100;
+}
+
+bool should_sub_carry8(uint8_t a, uint8_t b) {
+	return ((a & 0xff) - (b & 0xff) & 0x100) == 0x100;
+}
+
+bool should_sub_carry16(uint16_t a, uint16_t b) {
+	return ((a & 0xffff) - (b & 0xffff) & 0x10000) == 0x10000;
 }
 
 uint8_t alu_add8(reg_t* reg, uint8_t a, uint8_t b) {
 	reset_subtract(reg);
 
-	if(should_carry8(a, b)) {
+	if(should_add_carry8(a, b)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(should_halfcarry8(a, b)) {
+	if(should_add_halfcarry8(a, b)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);
@@ -109,13 +125,13 @@ uint8_t alu_add8(reg_t* reg, uint8_t a, uint8_t b) {
 uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b) {
 	reset_subtract(reg);
 
-	if(should_carry16(a, b)) {
+	if(should_sub_carry16(a, b)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(should_halfcarry16(a, b)) {
+	if(should_sub_halfcarry16(a, b)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);
@@ -129,13 +145,13 @@ uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b) {
 uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b) {
 	set_subtract(reg);
 
-	if(should_carry8(a, b)) {
+	if(should_sub_carry8(a, b)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(should_halfcarry8(a, b)) {
+	if(should_sub_halfcarry8(a, b)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);
@@ -156,7 +172,7 @@ uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b) {
 uint8_t alu_inc8(reg_t* reg, uint8_t a) {
 	reset_subtract(reg);
 
-	if(should_halfcarry8(a, 1)) {
+	if(should_add_halfcarry8(a, 1)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);
@@ -176,7 +192,7 @@ uint8_t alu_inc8(reg_t* reg, uint8_t a) {
 uint8_t alu_dec8(reg_t* reg, uint8_t a) {
 	set_subtract(reg);
 
-	if(should_halfcarry8(a, 1)) {
+	if(should_sub_halfcarry8(a, 1)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);

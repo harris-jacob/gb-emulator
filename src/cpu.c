@@ -295,7 +295,7 @@ static void OP_34(cpu_t* cpu) {
 /* OP35 - DEC (HL) */
 static void OP_35(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    uint8_t newVal = alu_de8(cpu->reg, val);
+    uint8_t newVal = alu_dec8(cpu->reg, val);
     mmu_write_addr8(cpu->mmu, cpu->reg->hl, newVal);
 }
 
@@ -421,12 +421,12 @@ static void OP_4D(cpu_t* cpu) {
 }
 
 /* OP4E- LD C, (HL)*/
-static void OP_4D(cpu_t* cpu) {
+static void OP_4E(cpu_t* cpu) {
     cpu->reg->c = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
 }
 
 /* OP4F- LD C, A */
-static void OP_4D(cpu_t* cpu) {
+static void OP_4F(cpu_t* cpu) {
     cpu->reg->c = cpu->reg->a;
 }
 
@@ -586,7 +586,7 @@ static void OP_6E(cpu_t* cpu) {
 }
 
 /* OP6F L A */
-static void OP_6E(cpu_t* cpu) {
+static void OP_6F(cpu_t* cpu) {
     cpu->reg->l = cpu->reg->a;
 }
 
@@ -669,3 +669,155 @@ static void OP_7E(cpu_t* cpu) {
 static void OP_7F(cpu_t* cpu) {
     cpu->reg->a = cpu->reg->a;
 }
+
+/* OP80 ADD A,B */
+static void OP_80(cpu_t* cpu) {
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->b);
+}
+
+/* OP81 ADD A, C */ 
+static void OP_81(cpu_t* cpu) {
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->c);
+}
+
+/* OP82 ADD A, D */
+static void OP_82(cpu_t* cpu) {
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->d);
+}
+
+/* OP83 ADD A, E */
+static void OP_83(cpu_t* cpu) {
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->e);
+}
+
+/* OP84 ADD A, H */
+static void OP_84(cpu_t* cpu) {
+    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->h);
+}
+
+/* OP85 ADD A, L */
+static void OP_85(cpu_t* cpu) {
+    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->l);
+}
+
+/* OP86 ADD A, (HL) */
+static void OP_86(cpu_t* cpu) {
+    uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl); 
+    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, val);
+}
+
+/* OP87 ADD A, A */
+static void OP_87(cpu_t* cpu) {
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->a);
+}
+
+/* OP88 ADC A, B */
+static void OP_88(cpu_t* cpu) {
+    // TODO
+}
+
+/* OP89 ADC A, C */
+static void OP_89(cpu_t* cpu) {
+    // TODO
+}
+
+/* OP8A ADC A, D */
+static void OP_8A(cpu_t* cpu) {
+    // TODO
+}
+
+/* OP8B ADC A, E */
+static void OP_8B(cpu_t* cpu) {
+    // TODO
+}
+
+/* OP8C ADC A, E */
+static void OP_8C(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_8D(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_8E(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_8F(cpu_t* cpu) {
+    // TODO
+}
+
+/* OP90 SUB B */
+static void OP_90(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->b);
+}
+
+/* OP91 SUB C */
+static void OP_91(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->c);
+}
+
+/* OP92 SUB D */
+static void OP_92(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->d);
+}
+
+/* OP93 SUB E */
+static void OP_93(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->e);
+}
+
+/* OP94 SUB H */
+static void OP_94(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->h);
+}
+
+/* OP95 SUB H */
+static void OP_95(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->l);
+}
+
+/* OP95 SUB (HL) */
+static void OP_96(cpu_t* cpu) {
+    uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, val);
+}
+
+/* OP96 SUB A */
+static void OP_97(cpu_t* cpu) {
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->a);
+}
+
+static void OP_98(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_99(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9A(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9B(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9C(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9D(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9E(cpu_t* cpu) {
+    // TODO
+}
+
+static void OP_9F(cpu_t* cpu) {
+    // TODO
+}
+
