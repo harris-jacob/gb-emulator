@@ -632,40 +632,40 @@ static void OP_77(cpu_t* cpu) {
 
 /* OP78 LD A B  */
 static void OP_78(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->b;
+    cpu->reg->a = cpu->reg->b;
 }
 
 /* OP79 LD A C  */
 static void OP_79(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->c;
+    cpu->reg->a = cpu->reg->c;
 }
 
 /* OP7A LD A D  */
 static void OP_7A(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->d;
+    cpu->reg->a = cpu->reg->d;
 }
 
 /* OP7B LD A E  */
 static void OP_7B(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->e;
+    cpu->reg->a = cpu->reg->e;
 }
 
 /* OP7C LD A H  */
 static void OP_7C(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->h;
+    cpu->reg->a = cpu->reg->h;
 }
 
 /* OP7D LD A L  */
 static void OP_7D(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->l;
+    cpu->reg->a = cpu->reg->l;
 }
 
 /* OP7E LD A (HL)  */
 static void OP_7E(cpu_t* cpu) {
-    cpu->mmu->a =mmu_read_addr8(cpu->mmu, cpu->reg->hl);
+    cpu->reg->a =mmu_read_addr8(cpu->mmu, cpu->reg->hl);
 }
 
 /* OP7F LD A A   */
 static void OP_7F(cpu_t* cpu) {
-    cpu->mmu->a = cpu->mmu->a;
+    cpu->reg->a = cpu->reg->a;
 }
