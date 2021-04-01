@@ -184,12 +184,12 @@ TEST(registers, alu_add16_ShouldSetHalfCarry) {
     uint16_t val = alu_add16(reg, 0xff, 10);
 
     TEST_ASSERT_EQUAL_UINT16(265, val);
-    TEST_ASSERT_EQUAL_UINT8(0b00100000, reg->f);
+    TEST_ASSERT_EQUAL_UINT8(160, reg->f);
 
 }
 
 TEST(registers, alu_add16_ShouldSetCarry) {
-    reg->f = 0b10000000;
+    reg->f = 0b00000000;
     uint16_t val = alu_add16(reg, 0b01100000000000000, 0b001000000000000000);
 
     TEST_ASSERT_EQUAL_UINT16(16384, val);
