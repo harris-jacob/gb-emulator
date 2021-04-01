@@ -101,10 +101,16 @@ uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b);
  * returns the outcome
  */
 uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b);
-/* 
- * Adds two 16 bit numbers, sets register flags if necessary, 
- * returns the outcome
- */
-uint16_t alu_subtract16(reg_t* reg, uint16_t a, uint16_t b);
+/*
+* Increment a uint8, set necessary flags
+* returns outcome
+*/
+uint8_t alu_inc8(reg_t* reg, uint8_t a);
+
+/*
+* Decrement a uint8, set necesarry flags
+* returns outcome
+*/
+uint8_t alu_dec8(reg_t* reg, uint8_t a);
 
 #endif
