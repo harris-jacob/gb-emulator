@@ -121,4 +121,28 @@ uint8_t alu_inc8(reg_t* reg, uint8_t a);
 */
 uint8_t alu_dec8(reg_t* reg, uint8_t a);
 
+/*
+* 8 bit addition which also adds the carry flag to the output
+* handles flags returns outcome.
+*/
+uint8_t alu_adc8(reg_t* reg, uint8_t a, uint8_t b);
+
+/*
+* 8 bit subtraction which also adds the carry flag to the output
+* handles flags returns outcome.
+*/
+uint8_t alu_sbc8(reg_t* reg, uint8_t a, uint8_t b);
+
+/*
+* Rotate right by n
+* returns outcome.
+*/
+uint8_t rotate_r(uint8_t a, uint8_t n);
+
+/*
+* Rotate left by n
+* returns outcome.
+*/
+uint8_t rotate_l(uint8_t a, uint8_t n);
+
 #endif

@@ -41,3 +41,51 @@ void mmu_load_bios(mmu_t* mmu) {
 	memcpy((void*)mmu->bios, (const void*)BIOS, sizeof(BIOS));
 	(*mmu->finished_bios) = false;
 }
+
+void mmu_disable_all_interrupts(mmu_t* mmu) {
+	mmu->interupts = 0
+}
+
+void mmu_enable_all_interrupts(mmu_t* mmu) {
+	mmu->interupts = 0x100;
+}
+
+void set_vblank(mmu_t* mmu) {
+	mmu->interupts |= 1;
+}
+
+void set_lcdstat(mmu_t* mmu) {
+	mmu->interupts |= (1 << 1);
+}
+
+void set_timer(mmu_t* mmu {
+	mmu->interupts |= (1 << 2);
+}
+
+void set_serial(mmu_t* mmu) {
+	mmu->interupts |= (1 << 3);
+}
+
+void set_joypad(mmu_t* mmu) {
+	mmu->interupts |= (1 << 4);
+}
+
+void reset_vblank(mmu_t* mmu) {
+	mmu->interupts &= ~(1);
+}
+
+void reset_lcdstat(mmu_t* mmu) {
+	mmu->interupts &= ~(1 << 1);
+}
+
+void reset_timer(mmu_t* mmu) {
+	mmu->interupts &= ~(1 << 2);
+}
+
+void reset_serial(mmu_t* mmu) {
+	mmu->interupts &= ~(1 << 3);
+}
+
+void reset_joypad(mmu_t* mmu) {
+	mmu->interupts &= ~(1 << 4);
+}

@@ -17,6 +17,12 @@ cpu_t* cpu_create();
 /* Destroy a CPU instance */
 void cpu_destroy(cpu_t** cpu);
 
+/* Push data onto the stack and adjust the SP */
+void stack_push(cpu_t* cpu, uint16_t data);
+
+/* Pop 16 bits off bottom of stack, return data and adjust SP */
+uint16_t stack_pop(cpu_t* cpu);
+
 
 
 
