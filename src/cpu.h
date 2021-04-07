@@ -34,7 +34,20 @@ void cpu_reset(cpu_t* cpu);
 void cpu_step(cpu_t* cpu);
 
 /* Handle Opcode */
-void cpu_handle_op(cpu_t* cpu, uint8_t opcode);
+int cpu_handle_op(cpu_t* cpu, uint8_t opcode);
+
+
+/* Operation container */
+struct op_t_ {
+    /* Name of the operation */
+    char* name;
+    /* length of the operand */
+    uint8_t operand_size;
+    /* Func to execute */
+    void* execute;
+    /* number of cpu ticks */
+    uint8_t ticks;
+} extern const ops[256];
 
 
 

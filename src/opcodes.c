@@ -1360,7 +1360,7 @@ static void OP_C3(cpu_t* cpu, uint16_t addr) {
 
 /* OPCE ADC A, d8 */
 static void OP_C3(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, val)
+    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, val);
 }
 
 /* OPCF RST 08H */
@@ -1401,7 +1401,7 @@ static void OP_D5(cpu_t* cpu) {
 
 /* OPD6 SUB d8 */
 static void OP_D6(cpu_t* cpu, uint16_t val) {
-    cpu->reg->a = alu_subtract8(cpu->reg, val);
+    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, val);
 }
 
 /* OPD7 RST 10H */
@@ -1462,18 +1462,18 @@ static void OP_E1(cpu_t* cpu) {
 
 /* OP E2LD (C), A */
 static void OP_E2(cpu_t* cpu) {
-    uint16_t addr = cpu->reg->c
+    uint16_t addr = cpu->reg->c;
     mmu_write_addr8(cpu->mmu, addr, cpu->reg->a);
 }
 
 /* OPE5 PUSH HL */
 static void OP_E5(cpu_t* cpu) {
-    stack_push(cpu->reg->hl);
+    stack_push(cpu, cpu->reg->hl);
 }
 
 /* OPE6 ADD A d8*/
 static void OP_E6(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_add8(cpu->reg->a, val);
+    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, val);
 }
 
 /* OPE7 RST 20H */
@@ -1491,7 +1491,7 @@ static void OP_E8(cpu_t* cpu, uint8_t addr) {
 
 /* OPE9 JP (HL) */
 static void OP_E9(cpu_t* cpu) {
-    cpu->reg->pc = mmu_read_addr16(cpu->reg, cpu->reg->hl)
+    cpu->reg->pc = mmu_read_addr16(cpu->reg, cpu->reg->hl);
 }
 /* OPEA LD (a16) A */
 static void OP_EA(cpu_t* cpu, uint16_t addr) {
@@ -1511,7 +1511,7 @@ static void OP_EE(cpu_t* cpu, uint8_t val) {
 }
 /* OPEF RST 28H */
 static void OP_EF(cpu_t* cpu) {
-    stack_push(cpu->reg->pc);
+    stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = 0x28;
 }
 /* OPF0 LDH A (a8) */
@@ -1546,7 +1546,7 @@ static void OP_F6(cpu_t* cpu, uint8_t val) {
 
     reset_halfcarry(cpu->reg);
     reset_carry(cpu->reg);
-    reset_subtract(cpu->reg)
+    reset_subtract(cpu->reg);
 }
 
 /* OPF7 RST 30H */
@@ -1600,5 +1600,3 @@ static void OP_FF(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = 0x38;
 }
-
-
