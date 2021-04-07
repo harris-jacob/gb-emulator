@@ -43,7 +43,7 @@ void mmu_load_bios(mmu_t* mmu) {
 }
 
 void mmu_disable_all_interrupts(mmu_t* mmu) {
-	mmu->interupts = 0
+	mmu->interupts = 0;
 }
 
 void mmu_enable_all_interrupts(mmu_t* mmu) {

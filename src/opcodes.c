@@ -1597,6 +1597,8 @@ static void OP_FE(cpu_t* cpu, uint8_t val) {
 
 /* OPFF RST 38H */
 static void OP_FF(cpu_t* cpu) {
-    stack_push(cpu->reg->pc);
+    stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = 0x38;
 }
+
+
