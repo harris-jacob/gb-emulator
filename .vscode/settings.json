@@ -7,6 +7,7 @@
         "runner.h": "c",
         "unity.h": "c",
         "unity_fixture.h": "c",
-        "register.h": "c"
+        "register.h": "c",
+        "string_view": "c"
     }
 }

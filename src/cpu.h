@@ -42,7 +42,7 @@ int cpu_handle_op(cpu_t* cpu, uint8_t opcode);
 void unknown_opcode(cpu_t* cpu);
 
 
-/* Operation container */
+/* Operation container stolen from https://github.com/CTurt/Cinoop/blob/master/include/cpu.h */
 struct op_t_ {
     /* Name of the operation */
     char* name;
