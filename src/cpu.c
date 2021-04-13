@@ -1,6 +1,5 @@
 #include "cpu.h"
-#include "register.h"
-#include "mmu.h"
+#include <stdlib.h>
 
 
 cpu_t* cpu_create() {
@@ -56,4 +55,11 @@ void cpu_step(cpu_t* cpu) {
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
 
     cpu_handle_op(cpu, opcode);
+}
+
+void unknown_opcode(cpu_t* cpu) {
+    uint8_t op = mmu_read_addr8(cpu->mmu, --cpu->reg->sp);
+    char s[50];
+    sprintf(s,"Tried to execute unknown opcode: 0x%03x.", op);
+    printf(s);
 }

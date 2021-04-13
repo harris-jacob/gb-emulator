@@ -1,3 +1,5 @@
+#ifndef CPU_H_
+#define CPU_H_
 #include "mmu.h"
 #include "register.h"
 
@@ -36,6 +38,9 @@ void cpu_step(cpu_t* cpu);
 /* Handle Opcode */
 int cpu_handle_op(cpu_t* cpu, uint8_t opcode);
 
+/* Handle unknown opcode */
+void unknown_opcode(cpu_t* cpu);
+
 
 /* Operation container */
 struct op_t_ {
@@ -52,4 +57,4 @@ struct op_t_ {
 
 
 
-
+#endif

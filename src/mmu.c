@@ -58,7 +58,7 @@ void set_lcdstat(mmu_t* mmu) {
 	mmu->interupts |= (1 << 1);
 }
 
-void set_timer(mmu_t* mmu {
+void set_timer(mmu_t* mmu) {
 	mmu->interupts |= (1 << 2);
 }
 
