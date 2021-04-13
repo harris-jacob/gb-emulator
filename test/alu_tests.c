@@ -39,11 +39,11 @@ TEST(alu, alu_add8_ShouldSetCarry) {
 }
 
 TEST(alu, alu_add16_ShouldSetHalfCarry) {
-    reg->f = 0b10000000;
+    reg->f = 0b00000000;
     uint16_t val = alu_add16(reg, 0xff, 10);
 
     TEST_ASSERT_EQUAL_UINT16(265, val);
-    TEST_ASSERT_EQUAL_UINT8(160, reg->f);
+    TEST_ASSERT_EQUAL_UINT8(32, reg->f);
 
 }
 
@@ -52,7 +52,7 @@ TEST(alu, alu_add16_ShouldSetCarry) {
     uint16_t val = alu_add16(reg, 0b01100000000000000, 0b001000000000000000);
 
     TEST_ASSERT_EQUAL_UINT16(16384, val);
-    TEST_ASSERT_EQUAL_UINT16(0b00010000, reg->f);
+    TEST_ASSERT_EQUAL_UINT16(16, reg->f);
 }
 
 

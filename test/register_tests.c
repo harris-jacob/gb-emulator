@@ -173,7 +173,7 @@ TEST(registers, should_sub_halfcarry8_ShouldReturnFalseIfNoCarry) {
     uint8_t a = 0b0000010;
     uint8_t b = 0b0001010;
 
-    TEST_ASSERT_FALSE(should_sub_halfcarry8(a, b));
+    TEST_ASSERT_FALSE(should_sub_halfcarry8(b, a));
 }
 
 TEST(registers, should_sub_carry8_ShouldAlertCarry) {
@@ -218,7 +218,7 @@ TEST(registers, should_sub_carry16_ShouldReturnFalseIfNoCarry) {
     uint16_t a = 0xff;
     uint16_t b = 0xfff;
 
-    TEST_ASSERT_FALSE(should_sub_carry16(a, b));
+    TEST_ASSERT_FALSE(should_sub_carry16(b, a));
 }
 
 

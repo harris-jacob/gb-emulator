@@ -184,13 +184,13 @@ uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b) {
 	reset_subtract(reg);
 
 
-	if(should_sub_carry16(a, b)) {
+	if(should_add_carry16(a, b)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(should_sub_halfcarry16(a, b)) {
+	if(should_add_halfcarry16(a, b)) {
 		set_halfcarry(reg);
 	} else {
 		reset_halfcarry(reg);

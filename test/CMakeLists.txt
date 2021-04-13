@@ -1,5 +1,5 @@
 # project test runner setup
-add_executable(test runner.c mmu_tests.c register_tests.c alu_tests.c)
+add_executable(test runner.c mmu_tests.c register_tests.c alu_tests.c cpu_tests.c)
 
 target_include_directories(test PUBLIC
   ${mmu_SOURCE_DIR}
@@ -8,6 +8,6 @@ target_include_directories(test PUBLIC
   .
 )
 
-target_link_libraries(test PUBLIC mmu register unity)
+target_link_libraries(test PUBLIC cpu mmu register unity)
 
 add_test(test test)

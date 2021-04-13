@@ -44,7 +44,7 @@ void cpu_reset(cpu_t* cpu) {
     cpu->reg->pc = 0x100;
 
     // reset memory
-    mmu_destroy(cpu->mmu);
+    mmu_destroy(&cpu->mmu);
     cpu->mmu = mmu_create();
 
     // Reset interrupts
@@ -61,5 +61,34 @@ void unknown_opcode(cpu_t* cpu) {
     uint8_t op = mmu_read_addr8(cpu->mmu, --cpu->reg->sp);
     char s[50];
     sprintf(s,"Tried to execute unknown opcode: 0x%03x.", op);
-    printf(s);
+    printf("%s",s);
+}
+
+void cpu_handle_op(cpu_t* cpu, uint8_t op) {
+
+    // Print for debug
+    if(cpu->debug) {
+        printf("%d \n %s", op, ops[op].name);
+    }
+
+    // Handle opcode
+    switch (ops[op].operand_size)
+    {
+    case 0:
+        ((void (*)(void))ops[op].execute)();
+    case 1: ;
+        uint8_t operand_8 = mmu_read_addr8(cpu->mmu, cpu->reg->sp++);
+        ((void (*)(u_int8_t))ops[op].execute)(operand_8);
+        break;
+
+    case 2: ; 
+        uint16_t operand_16 = mmu_read_addr16(cpu->mmu, cpu->reg->sp);
+        cpu->reg->sp+=2;
+        ((void (*)(uint16_t))ops[op].execute)(operand_16);
+    
+    default:
+        break;
+    }
+
+    cpu->clock_cycle+= ops[op].ticks;
 }

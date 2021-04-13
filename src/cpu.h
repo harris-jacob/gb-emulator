@@ -36,7 +36,7 @@ void cpu_reset(cpu_t* cpu);
 void cpu_step(cpu_t* cpu);
 
 /* Handle Opcode */
-int cpu_handle_op(cpu_t* cpu, uint8_t opcode);
+void cpu_handle_op(cpu_t* cpu, uint8_t opcode);
 
 /* Handle unknown opcode */
 void unknown_opcode(cpu_t* cpu);

@@ -933,7 +933,7 @@ static void OP_A5(cpu_t* cpu) {
 
 /* OPA6 AND (HL) */
 static void OP_A6(cpu_t* cpu) {
-    uint8_t val = mmu_read_addr8(cpu->reg, cpu->reg->hl);
+    uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
     cpu->reg->a = cpu->reg->a & val;
 
     if(cpu->reg->a == 0) {
@@ -1168,7 +1168,7 @@ static void OP_B5(cpu_t* cpu) {
 
 /* OPB6 OR (HL) */
 static void OP_B6(cpu_t* cpu) {
-    uint8_t val = mmu_read_addr8(cpu->reg, cpu->reg->hl);
+    uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
     cpu->reg->a = cpu->reg->a | val;
 
     if(cpu->reg->a == 0) {
@@ -1491,7 +1491,7 @@ static void OP_E8(cpu_t* cpu, uint8_t addr) {
 
 /* OPE9 JP (HL) */
 static void OP_E9(cpu_t* cpu) {
-    cpu->reg->pc = mmu_read_addr16(cpu->reg, cpu->reg->hl);
+    cpu->reg->pc = mmu_read_addr16(cpu->mmu, cpu->reg->hl);
 }
 /* OPEA LD (a16) A */
 static void OP_EA(cpu_t* cpu, uint16_t addr) {
@@ -1602,7 +1602,7 @@ static void OP_FF(cpu_t* cpu) {
 }
 
 // IMPL stolen from: https://github.com/CTurt/Cinoop
-const struct opcodes ops[256] = {
+const struct op_t_ ops[256] = {
     { "NOP", 0, OP_00, 4 },
     { "LD BC d16", 2, OP_01, 12 },
     { "LD (BC) A", 0, OP_02, 8 },
@@ -1643,7 +1643,7 @@ const struct opcodes ops[256] = {
     { "DEC H", 0, OP_25, 4 },
     { "LD H d8", 1, OP_26, 8 },
     { "DAA", 0, OP_27, 4 },
-    { "JR Z r8", OP_28, 8 },
+    { "JR Z r8", 1, OP_28, 8 },
     { "ADD HL, HL", 0, OP_29, 8 },
     { "LD A (HL+)", 0, OP_2A, 8 },
     { "DEC HL", 0, OP_2B, 8 },
@@ -1798,7 +1798,7 @@ const struct opcodes ops[256] = {
     { "RET NZ", 0, OP_C0, 8 },
     { "POP BC", 0, OP_C1, 12 },
     { "JP NZ a16", 2, OP_C2, 12 },
-    { "JP a16" 0, OP_C3, 16 },
+    { "JP a16", 0, OP_C3, 16 },
     { "CALL NZ,a16", 2, OP_C4, 12 },
     { "PUSH BC", 0, OP_C5, 16 },
     { "ADD A d8", 0, OP_C6, 8 },
@@ -1847,7 +1847,7 @@ const struct opcodes ops[256] = {
     { "POP AF", 0, OP_F1, 12 },
     { "LD A (C)", 1, OP_F2, 8 },
     { "DI", 0, OP_F3, 4 },
-    { "UNDEFINED", 0, OP_F4, 4 },
+    { "UNDEFINED", 0, unknown_opcode, 4 },
     { "PUSH AF", 0, OP_F5, 4 },
     { "OR d8", 0, OP_F6, 4 },
     { "RST 30H", 0, OP_F7, 4 },
@@ -1855,7 +1855,8 @@ const struct opcodes ops[256] = {
     { "LD SP HL", 0, OP_F9, 4 },
     { "LD A (a16)", 0, OP_FA, 4 },
     { "EI", 0, OP_FB, 4 },
-    { "UNDEFINED", 0, OP_FC, 4 },
-    { "UNDEFINED", 0, OP_FD, 4 },
+    { "UNDEFINED", 0, unknown_opcode, 4 },
+    { "UNDEFINED", 0, unknown_opcode, 4 },
     { "CP d8", 0, OP_FE, 4 },
-    { "RST 38H", 0, OP_FF, 4 },
+    { "RST 38H", 0, OP_FF, 4 }
+}; 

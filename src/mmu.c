@@ -47,7 +47,7 @@ void mmu_disable_all_interrupts(mmu_t* mmu) {
 }
 
 void mmu_enable_all_interrupts(mmu_t* mmu) {
-	mmu->interupts = 0x100;
+	mmu->interupts = 0xFF;
 }
 
 void set_vblank(mmu_t* mmu) {
