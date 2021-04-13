@@ -30,6 +30,10 @@ TEST(cpu, cpu_destroy_ShouldDestroyCPU) {
     TEST_ASSERT_NULL(cpu);
 }
 
+/* The CPU should support all ld r,r operations */
+TEST(cpu, cpu_ShouldSupportLoads) {
+    
+}
 
 TEST_GROUP_RUNNER(cpu) {
     RUN_TEST_CASE(cpu, cpu_create_ShouldCreateCPU);

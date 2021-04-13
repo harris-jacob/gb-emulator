@@ -213,7 +213,6 @@ TEST(registers, should_sub_carry16_ShouldAlertCarry) {
     TEST_ASSERT_TRUE(should_sub_carry16(a, b));
 }
 
-
 TEST(registers, should_sub_carry16_ShouldReturnFalseIfNoCarry) {
     uint16_t a = 0xff;
     uint16_t b = 0xfff;
