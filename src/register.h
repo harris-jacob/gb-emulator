@@ -78,14 +78,22 @@ uint8_t get_zero(reg_t* reg);
 uint8_t get_subtract(reg_t* reg);
 
 
-/* Should a half carry be set 8bit  */
-bool should_halfcarry8(uint8_t prev, uint8_t curr);
-/* should a carry be set 8bit */
-bool should_carry8(uint8_t prev, uint8_t curr);
-/* Should a half carry be set 16bit  */
-bool should_halfcarry16(uint16_t prev, uint16_t curr);
-/* should a carry be set 16bit */
-bool should_carry16(uint16_t prev, uint16_t curr);
+/* Should a half carry be set during addition 8bit  */
+bool should_add_halfcarry8(uint8_t prev, uint8_t curr);
+/* should a carry be set during addition 8bit */
+bool should_add_carry8(uint8_t prev, uint8_t curr);
+/* Should a half carry be set during addition 16bit  */
+bool should_add_halfcarry16(uint16_t prev, uint16_t curr);
+/* should a carry be set during addition 16bit */
+bool should_add_carry16(uint16_t prev, uint16_t curr);
+/* Should a half carry be set during subtract 8bit  */
+bool should_sub_halfcarry8(uint8_t prev, uint8_t curr);
+/* should a carry be set during subtract 8bit */
+bool should_sub_carry8(uint8_t prev, uint8_t curr);
+/* Should a half carry be set during subtract 16bit  */
+bool should_sub_halfcarry16(uint16_t prev, uint16_t curr);
+/* should a carry be set during subtract 16bit */
+bool should_sub_carry16(uint16_t prev, uint16_t curr);
 /* 
  * Adds two 8 bit numbers, sets register flags if necessary, 
  * returns the outcome
@@ -112,5 +120,29 @@ uint8_t alu_inc8(reg_t* reg, uint8_t a);
 * returns outcome
 */
 uint8_t alu_dec8(reg_t* reg, uint8_t a);
+
+/*
+* 8 bit addition which also adds the carry flag to the output
+* handles flags returns outcome.
+*/
+uint8_t alu_adc8(reg_t* reg, uint8_t a, uint8_t b);
+
+/*
+* 8 bit subtraction which also adds the carry flag to the output
+* handles flags returns outcome.
+*/
+uint8_t alu_sbc8(reg_t* reg, uint8_t a, uint8_t b);
+
+/*
+* Rotate right by n
+* returns outcome.
+*/
+uint8_t rotate_r(uint8_t a, uint8_t n);
+
+/*
+* Rotate left by n
+* returns outcome.
+*/
+uint8_t rotate_l(uint8_t a, uint8_t n);
 
 #endif

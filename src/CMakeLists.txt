@@ -9,10 +9,7 @@ add_library(register
 add_library(
     cpu
     cpu.c
-)
-
-target_link_libraries(cpu PUBLIC
-    .
+    opcodes.c
 )
 
 target_link_libraries(cpu PUBLIC mmu register
@@ -21,6 +18,8 @@ target_link_libraries(cpu PUBLIC mmu register
 target_include_directories(mmu PUBLIC
     .
 )
+
+target_include_directories(cpu PUBLIC .)
 
 target_include_directories(register PUBLIC
     .

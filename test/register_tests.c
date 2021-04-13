@@ -101,100 +101,125 @@ TEST(registers, reset_zero_ShouldResetBitVal) {
     TEST_ASSERT_EQUAL_UINT8(3, reg->f);
 } 
 
-TEST(registers, should_halfcarry8_ShouldAlertHalfCarry) {
+TEST(registers, should_add_halfcarry8_ShouldAlertHalfCarry) {
     uint8_t a = 0b0001010;
     uint8_t b = 0b0001100;
 
-    TEST_ASSERT_TRUE(should_halfcarry8(a, b));
+    TEST_ASSERT_TRUE(should_add_halfcarry8(a, b));
 
 }
 
-TEST(registers, should_halfcarry8_ShouldReturnFalseIfNoCarry) {
+TEST(registers, should_add_halfcarry8_ShouldReturnFalseIfNoCarry) {
     uint8_t a = 0b0000010;
     uint8_t b = 0b0001010;
 
-    TEST_ASSERT_FALSE(should_halfcarry8(a, b));
+    TEST_ASSERT_FALSE(should_add_halfcarry8(a, b));
 }
 
-TEST(registers, should_carry8_ShouldAlertCarry) {
+TEST(registers, should_add_carry8_ShouldAlertCarry) {
     uint8_t a = 0b010000000;
     uint8_t b = 0b011000000;
 
-    TEST_ASSERT_TRUE(should_carry8(a, b));
+    TEST_ASSERT_TRUE(should_add_carry8(a, b));
 }
 
 
-TEST(registers, should_carry8_ShouldReturnFalseIfNoCarry) {
+TEST(registers, should_add_carry8_ShouldReturnFalseIfNoCarry) {
     uint8_t a = 0b011000000;
     uint8_t b = 0b000100000;
 
-    TEST_ASSERT_FALSE(should_carry8(a, b));
+    TEST_ASSERT_FALSE(should_add_carry8(a, b));
 }
 
-TEST(registers, should_halfcarry16_ShouldAlertHalfCarry) {
+TEST(registers, should_add_halfcarry16_ShouldAlertHalfCarry) {
     uint8_t a = 0b010000000;
     uint8_t b = 0b011000000;
     
-    TEST_ASSERT_TRUE(should_halfcarry16(a, b));
+    TEST_ASSERT_TRUE(should_add_halfcarry16(a, b));
 
 }
 
-TEST(registers, should_halfcarry16_ShouldReturnFalseIfNoCarry) {
+TEST(registers, should_add_halfcarry16_ShouldReturnFalseIfNoCarry) {
     uint8_t a = 0b011000000;
     uint8_t b = 0b000100000;
 
-    TEST_ASSERT_FALSE(should_halfcarry16(a, b));
+    TEST_ASSERT_FALSE(should_add_halfcarry16(a, b));
 }
 
-TEST(registers, should_carry16_ShouldAlertCarry) {
+TEST(registers, should_add_carry16_ShouldAlertCarry) {
     uint16_t a = 0xfff1;
     uint16_t b = 0xffff;
 
-    TEST_ASSERT_TRUE(should_carry16(a, b));
+    TEST_ASSERT_TRUE(should_add_carry16(a, b));
 }
 
 
-TEST(registers, should_carry16_ShouldReturnFalseIfNoCarry) {
+TEST(registers, should_add_carry16_ShouldReturnFalseIfNoCarry) {
     uint16_t a = 0xff;
     uint16_t b = 0xfff;
 
-    TEST_ASSERT_FALSE(should_carry16(a, b));
+    TEST_ASSERT_FALSE(should_add_carry16(a, b));
 }
 
-TEST(registers, alu_add8_ShouldSetHalfCarry) {
-    reg->f = 0b10000000;
-    uint8_t val = alu_add8(reg, 11, 5);
+TEST(registers, should_sub_halfcarry8_ShouldAlertHalfCarry) {
+    uint8_t a = 0b0011010;
+    uint8_t b = 0b0011100;
 
-    TEST_ASSERT_EQUAL_UINT8(16, val);
-    TEST_ASSERT_EQUAL_UINT8(0b00100000, reg->f);
+    TEST_ASSERT_TRUE(should_sub_halfcarry8(a, b));
+
+}
+
+TEST(registers, should_sub_halfcarry8_ShouldReturnFalseIfNoCarry) {
+    uint8_t a = 0b0000010;
+    uint8_t b = 0b0001010;
+
+    TEST_ASSERT_FALSE(should_sub_halfcarry8(b, a));
+}
+
+TEST(registers, should_sub_carry8_ShouldAlertCarry) {
+    uint8_t a = 0b010000000;
+    uint8_t b = 0b011000000;
+
+    TEST_ASSERT_TRUE(should_sub_carry8(a, b));
+}
+
+
+TEST(registers, should_sub_carry8_ShouldReturnFalseIfNoCarry) {
+    uint8_t a = 0b011000000;
+    uint8_t b = 0b000100000;
+
+    TEST_ASSERT_FALSE(should_sub_carry8(a, b));
+}
+
+TEST(registers, should_sub_halfcarry16_ShouldAlertHalfCarry) {
+    uint8_t a = 0b010000000;
+    uint8_t b = 0b011000000;
     
-}
-
-TEST(registers, alu_add8_ShouldSetCarry) {
-    reg->f = 0b11000000;
-    uint8_t val = alu_add8(reg, 0xff, 128);
-
-    TEST_ASSERT_EQUAL_UINT8(127, val);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
-    
-}
-
-TEST(registers, alu_add16_ShouldSetHalfCarry) {
-    reg->f = 0b10000000;
-    uint16_t val = alu_add16(reg, 0xff, 10);
-
-    TEST_ASSERT_EQUAL_UINT16(265, val);
-    TEST_ASSERT_EQUAL_UINT8(160, reg->f);
+    TEST_ASSERT_TRUE(should_sub_halfcarry16(a, b));
 
 }
 
-TEST(registers, alu_add16_ShouldSetCarry) {
-    reg->f = 0b00000000;
-    uint16_t val = alu_add16(reg, 0b01100000000000000, 0b001000000000000000);
+TEST(registers, should_sub_halfcarry16_ShouldReturnFalseIfNoCarry) {
+    uint8_t a = 0b011000000;
+    uint8_t b = 0b000100000;
 
-    TEST_ASSERT_EQUAL_UINT16(16384, val);
-    TEST_ASSERT_EQUAL_UINT16(0b00010000, reg->f);
+    TEST_ASSERT_FALSE(should_sub_halfcarry16(a, b));
 }
+
+TEST(registers, should_sub_carry16_ShouldAlertCarry) {
+    uint16_t a = 0xfff1;
+    uint16_t b = 0xffff;
+
+    TEST_ASSERT_TRUE(should_sub_carry16(a, b));
+}
+
+TEST(registers, should_sub_carry16_ShouldReturnFalseIfNoCarry) {
+    uint16_t a = 0xff;
+    uint16_t b = 0xfff;
+
+    TEST_ASSERT_FALSE(should_sub_carry16(b, a));
+}
+
 
 
 TEST_GROUP_RUNNER(registers) {
@@ -220,22 +245,24 @@ TEST_GROUP_RUNNER(registers) {
     RUN_TEST_CASE(registers, reset_zero_ShouldResetBitVal);
 
 
-    // CARRY CHECKERS
-    RUN_TEST_CASE(registers, should_halfcarry8_ShouldAlertHalfCarry);
-    RUN_TEST_CASE(registers, should_halfcarry8_ShouldReturnFalseIfNoCarry);
-    RUN_TEST_CASE(registers, should_carry8_ShouldAlertCarry);
-    RUN_TEST_CASE(registers, should_carry8_ShouldReturnFalseIfNoCarry);
-    RUN_TEST_CASE(registers, should_halfcarry16_ShouldAlertHalfCarry);
-    RUN_TEST_CASE(registers, should_halfcarry16_ShouldReturnFalseIfNoCarry);
-    RUN_TEST_CASE(registers, should_carry16_ShouldAlertCarry);
-    RUN_TEST_CASE(registers, should_carry16_ShouldReturnFalseIfNoCarry);
+    // ADD CARRY CHECKERS
+    RUN_TEST_CASE(registers, should_add_halfcarry8_ShouldAlertHalfCarry);
+    RUN_TEST_CASE(registers, should_add_halfcarry8_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_add_carry8_ShouldAlertCarry);
+    RUN_TEST_CASE(registers, should_add_carry8_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_add_halfcarry16_ShouldAlertHalfCarry);
+    RUN_TEST_CASE(registers, should_add_halfcarry16_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_add_carry16_ShouldAlertCarry);
+    RUN_TEST_CASE(registers, should_add_carry16_ShouldReturnFalseIfNoCarry);
 
+    // SUB CARRY CHECKERS
+    RUN_TEST_CASE(registers, should_sub_halfcarry8_ShouldAlertHalfCarry);
+    RUN_TEST_CASE(registers, should_sub_halfcarry8_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_sub_carry8_ShouldAlertCarry);
+    RUN_TEST_CASE(registers, should_sub_carry8_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_sub_halfcarry16_ShouldAlertHalfCarry);
+    RUN_TEST_CASE(registers, should_sub_halfcarry16_ShouldReturnFalseIfNoCarry);
+    RUN_TEST_CASE(registers, should_sub_carry16_ShouldAlertCarry);
+    RUN_TEST_CASE(registers, should_sub_carry16_ShouldReturnFalseIfNoCarry);
 
-    // ALU OPS
-    RUN_TEST_CASE(registers, alu_add8_ShouldSetHalfCarry);
-    RUN_TEST_CASE(registers, alu_add8_ShouldSetCarry);
-    RUN_TEST_CASE(registers, alu_add16_ShouldSetHalfCarry);
-    RUN_TEST_CASE(registers, alu_add16_ShouldSetCarry);
 }
-
-

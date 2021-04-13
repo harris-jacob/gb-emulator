@@ -95,4 +95,40 @@ void mmu_write_addr16(mmu_t* mmu, uint16_t addr, uint16_t data);
 /* Load the bios */
 void mmu_load_bios(mmu_t* mmu);
 
+/* reset all bits in the interrupt byte */
+void mmu_disable_all_interrupts(mmu_t* mmu);
+
+/* set all bits in the interrupt byte */
+void mmu_enable_all_interrupts(mmu_t* mmu);
+
+/* set the vblank interrupt */
+void set_vblank(mmu_t* mmu);
+
+/* set the lcd stat register */
+void set_lcdstat(mmu_t* mmu);
+
+/* set the timer register */
+void set_timer(mmu_t* mmu);
+
+/* set the serial register */
+void set_serial(mmu_t* mmu);
+
+/* set the joypad register */
+void set_joypad(mmu_t* mmu);
+
+/* reset the vblank interrupt */
+void reset_vblank(mmu_t* mmu);
+
+/* reset the lcd stat register */
+void reset_lcdstat(mmu_t* mmu);
+
+/* reset the timer register */
+void reset_timer(mmu_t* mmu);
+
+/* reset the serial register */
+void reset_serial(mmu_t* mmu);
+
+/* reset the joypad register */
+void reset_joypad(mmu_t* mmu);
+
 #endif
