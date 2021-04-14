@@ -54,7 +54,4 @@ struct op_t_ {
     uint8_t ticks;
 } extern const ops[256];
 
-
-
-
 #endif
