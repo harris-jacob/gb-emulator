@@ -7,7 +7,6 @@ typedef struct emu_t_ {
     /* CPU */
     cpu_t* cpu
     /* ROM */
-    
 
 } emu_t;
 

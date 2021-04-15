@@ -12,6 +12,15 @@ add_library(
     opcodes.c
 )
 
+add_library(
+    rom
+    rom.c
+)
+
+target_include_directories(rom PUBLIC .)
+
+target_link_libraries(rom PUBLIC mmu)
+
 target_link_libraries(cpu PUBLIC mmu register
 )
 

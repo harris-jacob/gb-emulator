@@ -8,6 +8,14 @@
         "unity.h": "c",
         "unity_fixture.h": "c",
         "register.h": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "fstream": "cpp",
+        "iosfwd": "cpp",
+        "new": "cpp",
+        "sstream": "cpp",
+        "utility": "cpp"
     }
 }

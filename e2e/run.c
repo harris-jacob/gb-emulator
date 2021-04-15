@@ -1,7 +1,7 @@
 #include "cpu.h"
-
+#include "rom.h"
 
 int main() {
-    cpu_t* cpu = cpu_create();
-    
+    // Try loading a rom
+    rom_t* rom = load_rom("./tetris.gb")
 }
