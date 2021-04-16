@@ -17,6 +17,6 @@ target_include_directories(e2e PRIVATE
 
 target_link_libraries(e2e PUBLIC 
 cpu
+rom
+mmu
 )
-
-target_link_libraries(e2e PUBLIC rom)

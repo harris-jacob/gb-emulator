@@ -4,7 +4,7 @@
 
 mmu_t* mmu_create() {
 	mmu_t* mmu = (mmu_t*)malloc(sizeof(mmu_t));
-	mmu->finished_bios = mmu->addr + 0xFF50;
+	mmu->finished_bios = mmu->addr;
 	return mmu;
 }
 

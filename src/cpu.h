@@ -17,7 +17,7 @@ typedef struct cpu_t_ {
 } cpu_t;
 
 /* Create a CPU instance and initialize memory, reg etc. */
-cpu_t* cpu_create();
+cpu_t* cpu_create(mmu_t* mmu);
 
 /* Destroy a CPU instance */
 void cpu_destroy(cpu_t** cpu);

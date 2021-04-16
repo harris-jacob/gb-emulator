@@ -16,6 +16,7 @@
         "iosfwd": "cpp",
         "new": "cpp",
         "sstream": "cpp",
-        "utility": "cpp"
+        "utility": "cpp",
+        "cpu.h": "c"
     }
 }

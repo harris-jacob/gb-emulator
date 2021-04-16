@@ -2,15 +2,16 @@
 #include <stdlib.h>
 
 
-cpu_t* cpu_create() {
+cpu_t* cpu_create(mmu_t* mmu) {
     reg_t* reg = reg_create();
-    mmu_t* mmu = mmu_create();
-    cpu_t cpu;
+    cpu_t* cpu = (cpu_t*)(malloc(sizeof(cpu_t)));
 
-    cpu.mmu = mmu;
-    cpu.reg = reg;
+    cpu->mmu = mmu;
+    cpu->reg = reg;
 
-    cpu.debug = false;
+    cpu->debug = false;
+
+    return cpu;
 }
 
 void cpu_destroy(cpu_t	**cpu) {
@@ -42,10 +43,6 @@ void cpu_reset(cpu_t* cpu) {
     cpu->reg->l = 0x4d;
     cpu->reg->sp = 0xfffe;
     cpu->reg->pc = 0x100;
-
-    // reset memory
-    mmu_destroy(&cpu->mmu);
-    cpu->mmu = mmu_create();
 
     // Reset interrupts
     mmu_disable_all_interrupts(cpu->mmu);
