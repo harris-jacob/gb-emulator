@@ -17,6 +17,15 @@ add_library(
     rom.c
 )
 
+add_library(
+    lcd
+    lcd.c
+)
+
+target_include_directories(lcd PUBLIC .)
+
+target_link_libraries(lcd PUBLIC mmu)
+
 target_include_directories(rom PUBLIC .)
 
 target_link_libraries(rom PUBLIC mmu)
