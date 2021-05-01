@@ -100,9 +100,9 @@ static void OP_0F(cpu_t* cpu, uint8_t val) {
    }
 }
 
-/* OP10 - LD, C, d8 */
+/* OP10 - STOP d8 */
 static void OP_10(cpu_t* cpu, uint8_t val) {
-    // TODO
+    cpu->stopped = true;
 }
 
 /* OP11 - LD DE d16 */
@@ -117,7 +117,6 @@ static void OP_12(cpu_t* cpu) {
 
 /* OP13 - INC DE */   
 static void OP_13(cpu_t* cpu) {
-    uint16_t val = alu_add16(cpu->reg, cpu->reg->de, 1);
     cpu->reg->de++;
 }
 
@@ -139,12 +138,29 @@ static void OP_16(cpu_t* cpu, uint8_t val) {
 
 /* OP17 - RLA */
 static void OP_17(cpu_t* cpu) {
-    // TODO
+    
+    reset_zero(cpu->reg);
+    reset_halfcarry(cpu->reg);
+    reset_subtract(cpu->reg);
+    uint8_t prev_car = get_carry(cpu->reg);
+    if(cpu->reg->a & 1 == 1) {
+       set_carry(cpu->reg);
+    } else {
+       reset_carry(cpu->reg);
+    }
+
+    if(prev_car == 0) {
+       cpu->reg->a = cpu->reg->a >> 1;
+    } else {
+        cpu->reg->a = (cpu->reg->a >> 1) | 128;
+    }
 }
 
 /* OP18 - JR r8 */
-static void OP_18(cpu_t* cpu) {
-    // TODO
+static void OP_18(cpu_t* cpu, uint8_t val) {
+     short result = cpu->reg->pc + (short)val;
+     cpu->reg->pc = result;
+     printf("pc has moved to: %x \n", cpu->reg->pc);
 }
 
 /* OP19 - ADD HL, DE */
@@ -199,8 +215,12 @@ static void OP_1F(cpu_t* cpu) {
 }
 
 /* OP20 - JR NZ r8 */
-static void OP_20(cpu_t* cpu) {
-    // TODO
+static void OP_20(cpu_t* cpu, signed char val) {
+    if(!get_zero(cpu->reg)) {
+     
+     short result = cpu->reg->pc + (short)val;
+     cpu->reg->pc = result;
+    }
 }
 
 /* OP21 - LD HL d16 */
@@ -208,9 +228,9 @@ static void OP_21(cpu_t* cpu, uint16_t val) {
     cpu->reg->hl = val; 
 }
 
-/* OP22 - LD (DE) A */
+/* OP22 - LD (HL+) A */
 static void OP_22(cpu_t* cpu) {
-    mmu_write_addr8(cpu->mmu, cpu->reg->de, cpu->reg->a);
+    mmu_write_addr8(cpu->mmu, cpu->reg->hl++, cpu->reg->a);
 }
 
 /* OP23 - INC DE */
@@ -239,8 +259,11 @@ static void OP_27(cpu_t* cpu) {
 }
 
 /* OP28 - JR Z, r8 */
-static void OP_28(cpu_t* cpu) {
-    // TODO
+static void OP_28(cpu_t* cpu, uint8_t val) {
+   if(get_zero(cpu->reg)) {
+     short result = cpu->reg->pc + (short)val;
+     cpu->reg->pc = result;
+   } 
 }
 
 /* OP29 - ADD HL HL */
@@ -250,8 +273,7 @@ static void OP_29(cpu_t* cpu) {
 
 /* OP2A - LD A (HL+) */
 static void OP_2A(cpu_t* cpu) {
-    cpu->reg->a = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    cpu->reg->hl++;
+    cpu->reg->a = mmu_read_addr8(cpu->mmu, cpu->reg->hl++);
 }
 
 /* OP2B - DEC HL */
@@ -274,14 +296,17 @@ static void OP_2E(cpu_t* cpu, uint8_t val) {
     cpu->reg->l = val; 
 }
 
-/* OP2F - LD L  */
+/* OP2F - CPL */
 static void OP_2F(cpu_t* cpu) {
     // CPL
 }
 
 /* OP30 - JR NC r8 */ 
-static void OP_30(cpu_t* cpu) {
-    //TODO
+static void OP_30(cpu_t* cpu, uint8_t val) {
+    if(!get_carry(cpu->reg)) {
+        short result = cpu->reg->pc + (short)val;
+        cpu->reg->pc = result;
+    }
 }
 
 /* OP31 - LD SP d16*/
@@ -326,7 +351,10 @@ static void OP_37(cpu_t* cpu, uint8_t val) {
 
 /* OP38 - JR C, r8 */
 static void OP_38(cpu_t* cpu, uint8_t val) {
-    // TODO
+    if(get_carry(cpu->reg)) {
+        short result = cpu->reg->pc + (short)val;
+        cpu->reg->pc = result;
+    }
 }
 
 /* OP39 - ADD HL, SP */
@@ -360,9 +388,9 @@ static void OP_3E(cpu_t* cpu, uint8_t val) {
     cpu->reg->a = val; 
 }
 
-/* OP38 - JR C, r8 */
+/* OP3F - CCF */
 static void OP_3F(cpu_t* cpu, uint8_t val) {
-    // TODO
+
 }
 
 /* OP40 - LD B, B  */
@@ -1283,7 +1311,7 @@ static void OP_C1(cpu_t* cpu) {
 
 /* OPC2 JP NZ a16 */
 static void OP_C2(cpu_t* cpu, uint16_t val) {
-    if(get_zero(cpu->reg) != 0) {
+    if(!get_zero(cpu->reg)) {
         cpu->reg->pc = val; 
     }
 }
@@ -1483,10 +1511,22 @@ static void OP_E7(cpu_t* cpu) {
 }
 
 /* OPE8 ADD SP r8 */
-static void OP_E8(cpu_t* cpu, uint8_t addr) {
-    reset_zero(cpu->reg);
-    uint16_t val = addr;
-    cpu->reg->sp = alu_add16(cpu->reg, cpu->reg->sp, val);
+static void OP_E8(cpu_t* cpu, char addr) {
+    int signed_result = (int)cpu->reg->sp + addr;
+    uint16_t result = (uint16_t)signed_result;
+    if(signed_result > 0xFFFF) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
+    // Not too sure about this?
+    if(should_add_halfcarry16(cpu->reg->sp, addr)) {
+        set_halfcarry(cpu->reg);
+    } else {
+        reset_halfcarry(cpu->reg); 
+    }
+
+    cpu->reg->sp = result;
 }
 
 /* OPE9 JP (HL) */
@@ -1555,20 +1595,26 @@ static void OP_F7(cpu_t* cpu) {
     cpu->reg->pc = 0x30;
 }
 /* OPF8 LD HL SP+r8 */
-static void OP_F8(cpu_t* cpu, uint8_t val) {
-    uint16_t val_u16 = val;
-    if(should_add_carry16(cpu->reg->sp, val_u16)) {
+static void OP_F8(cpu_t* cpu, signed char addr) {
+    // reset some flags
+    reset_zero(cpu->reg);
+    reset_subtract(cpu->reg);
+
+    int signed_val = (int)(cpu->reg->sp) + addr;
+    uint16_t val = (uint16_t)(signed_val);
+    if(signed_val > 0xFFFF) {
         set_carry(cpu->reg);
     } else {
         reset_carry(cpu->reg);
     }
 
-    if(should_add_halfcarry16(cpu->reg->sp, val_u16)) {
+    // Unsure about this?
+    if(should_add_halfcarry16(cpu->reg->sp, val)) {
         set_halfcarry(cpu->reg);
     } else {
         reset_halfcarry(cpu->reg);
     }
-    cpu->reg->hl = cpu->reg->sp + val_u16;
+    cpu->reg->hl = val;
 }
 
 /* OPF9 LD SP HL */
@@ -1619,7 +1665,7 @@ const struct op_t_ ops[256] = {
     { "DEC C", 0, OP_0D, 4 },
     { "LD C d8", 1, OP_0E, 8 },
     { "RRCA", 0, OP_0F, 4 },
-    { "STOP 0", 1, OP_10, 4 },
+    { "STOP d8", 1, OP_10, 4 },
     { "LD DE d16", 2, OP_11, 12 },
     { "LD (DE) A ", 0, OP_12, 8 },
     { "INC DE", 0, OP_13, 8 },
@@ -1636,7 +1682,7 @@ const struct op_t_ ops[256] = {
     { "LD E d8", 1, OP_1E, 8 },
     { "RRA", 0, OP_1F, 4 },
     { "JR NZ r8", 1, OP_20, 8 },
-    { "LD DE 16", 2, OP_21, 12 },
+    { "LD HL 16", 2, OP_21, 12 },
     { "LD (HL+) A", 0, OP_22, 8 },
     { "INC HL", 0, OP_23, 8 },
     { "INC H", 0, OP_24, 4 },
@@ -1652,7 +1698,7 @@ const struct op_t_ ops[256] = {
     { "LD L d8", 1, OP_2E, 8 },
     { "CPL", 0,  OP_2F, 4 },
     { "JR NC r8", 1, OP_30, 8 },
-    { "LD SP d16", 0, OP_31, 12 },
+    { "LD SP d16", 2, OP_31, 12 },
     { "LD (HL-) A", 0, OP_32, 8 },
     { "INC SP", 0, OP_33, 8 }, 
     { "INC (HL)", 0, OP_34, 12 },
@@ -1798,14 +1844,14 @@ const struct op_t_ ops[256] = {
     { "RET NZ", 0, OP_C0, 8 },
     { "POP BC", 0, OP_C1, 12 },
     { "JP NZ a16", 2, OP_C2, 12 },
-    { "JP a16", 0, OP_C3, 16 },
+    { "JP a16", 2, OP_C3, 16 },
     { "CALL NZ,a16", 2, OP_C4, 12 },
     { "PUSH BC", 0, OP_C5, 16 },
-    { "ADD A d8", 0, OP_C6, 8 },
+    { "ADD A d8", 1, OP_C6, 8 },
     { "RST 00H", 0, OP_C7, 16 },
     { "RETZ", 0, OP_C8, 8 },
     { "RET", 0, OP_C9, 16 },
-    { "JP Z a16", 0, OP_CA, 12 },
+    { "JP Z a16", 2, OP_CA, 12 },
     { "PREFIX CB", 0, OP_CB, 4 },
     { "CALL Z a16", 2, OP_CC, 12 },
     { "CALL a16", 2, OP_CD, 24 },
@@ -1813,9 +1859,9 @@ const struct op_t_ ops[256] = {
     { "RST 08H", 0, OP_CF, 16 },
     { "RET NC", 0, OP_D0, 20 },
     { "POP DE", 0, OP_D1, 12 },
-    { "JP NC a16", 0, OP_D2, 12 },
+    { "JP NC a16", 2, OP_D2, 12 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
-    { "CALL NZ a16", 0, OP_D4, 12 },
+    { "CALL NZ a16", 2, OP_D4, 12 },
     { "PUSH DE", 0, OP_D5, 16 },
     { "SUB d8", 0, OP_D6, 8 },
     { "RST 10H", 0, OP_D7, 16},
@@ -1825,7 +1871,7 @@ const struct op_t_ ops[256] = {
     { "UNDEFINED", 0, unknown_opcode, 0 },
     { "CALL c a16", 2, OP_DC, 12 },
     { "UNDEFINED", 0, unknown_opcode, 0  },
-    { "SBC A d8", 0, OP_DE, 8 },
+    { "SBC A d8", 1, OP_DE, 8 },
     { "RST 18H", 0, OP_DF, 16 },
     { "LDH (a8) A", 1, OP_E0, 12 },
     { "POP HL", 0, OP_E1, 12 },
@@ -1833,7 +1879,7 @@ const struct op_t_ ops[256] = {
     { "UNDEFINED", 0, unknown_opcode, 0 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
     { "PUSH HL", 0, OP_E5, 16 },
-    { "AND d8", 2, OP_E6, 8 },
+    { "AND d8", 1, OP_E6, 8 },
     { "RST 20H", 0, OP_E7, 16 },
     { "ADD SP r8", 1, OP_E8, 16 },
     { "JP (HL)", 0, OP_E9, 4 },
@@ -1845,18 +1891,18 @@ const struct op_t_ ops[256] = {
     { "RST 28H", 0, OP_EF, 16 },
     { "LDH A (a8)", 1, OP_F0, 12 },
     { "POP AF", 0, OP_F1, 12 },
-    { "LD A (C)", 1, OP_F2, 8 },
+    { "LD A (C)", 0, OP_F2, 8 },
     { "DI", 0, OP_F3, 4 },
-    { "UNDEFINED", 0, unknown_opcode, 4 },
+    { "UNDEFINED", 0, unknown_opcode, 0 },
     { "PUSH AF", 0, OP_F5, 4 },
-    { "OR d8", 0, OP_F6, 4 },
+    { "OR d8", 1, OP_F6, 4 },
     { "RST 30H", 0, OP_F7, 4 },
-    { "LD HL SP+r8", 0, OP_F8, 4 },
+    { "LD HL SP+r8", 1, OP_F8, 4 },
     { "LD SP HL", 0, OP_F9, 4 },
-    { "LD A (a16)", 0, OP_FA, 4 },
+    { "LD A (a16)", 2, OP_FA, 4 },
     { "EI", 0, OP_FB, 4 },
-    { "UNDEFINED", 0, unknown_opcode, 4 },
-    { "UNDEFINED", 0, unknown_opcode, 4 },
-    { "CP d8", 0, OP_FE, 4 },
+    { "UNDEFINED", 0, unknown_opcode, 0 },
+    { "UNDEFINED", 0, unknown_opcode, 0 },
+    { "CP d8", 1, OP_FE, 4 },
     { "RST 38H", 0, OP_FF, 4 }
 }; 

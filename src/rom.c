@@ -58,12 +58,6 @@ rom_t* load_rom(const char* filepath, mmu_t* mmu) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Extract metadata from the rom 
-	load_rom_header(fp, rom);
-
-	printf("%s", rom->name);
-
-
 	fread(rom->memory->rom, 32000, 1, fp);
 	
 	return rom;

@@ -13,6 +13,8 @@ typedef struct cpu_t_ {
     uint16_t clock_cycle;
     /* display debug logs */
     bool debug;
+    /* is GB stopped */
+    bool stopped;
 
 } cpu_t;
 
@@ -27,7 +29,6 @@ void stack_push(cpu_t* cpu, uint16_t data);
 
 /* Pop 16 bits off bottom of stack, return data and adjust SP */
 uint16_t stack_pop(cpu_t* cpu);
-
 
 /* Reset the cpu's registers, clock and memory */
 void cpu_reset(cpu_t* cpu);

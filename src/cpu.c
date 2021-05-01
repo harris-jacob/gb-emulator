@@ -33,14 +33,10 @@ uint16_t stack_pop(cpu_t* cpu) {
 
 void cpu_reset(cpu_t* cpu) {
     // Reset the registers
-    cpu->reg->a = 0x01;
-    cpu->reg->f = 0;
-    cpu->reg->b = 0;
-    cpu->reg->c = 0x13;
-    cpu->reg->d = 0;
-    cpu->reg->e = 0xd8;
-    cpu->reg->h = 0x01;
-    cpu->reg->l = 0x4d;
+    cpu->reg->af = 0x1B0;
+    cpu->reg->bc = 0x13;
+    cpu->reg->de = 0x0D8;
+    cpu->reg->hl = 0x14D;
     cpu->reg->sp = 0xfffe;
     cpu->reg->pc = 0x100;
 
@@ -50,41 +46,77 @@ void cpu_reset(cpu_t* cpu) {
 
 void cpu_step(cpu_t* cpu) {
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
+    if(cpu->stopped) return;
 
+
+    if(opcode ==0xC7) {
+        printf("hello");
+    }
+    
+    if(cpu->debug && opcode) {
+        printf("PC at: 0x%x\n",cpu->reg->pc - 1);
+        printf("SP at 0x%x\n", cpu->reg->sp);
+    }
     cpu_handle_op(cpu, opcode);
 }
 
 void unknown_opcode(cpu_t* cpu) {
-    uint8_t op = mmu_read_addr8(cpu->mmu, --cpu->reg->sp);
+    uint8_t op = mmu_read_addr8(cpu->mmu, --cpu->reg->pc);
     char s[50];
-    sprintf(s,"Tried to execute unknown opcode: 0x%03x.", op);
+    sprintf(s,"Tried to execute unknown opcode: 0x%x\n", op);
     printf("%s",s);
+    printf("PC at: 0x%x\n", cpu->reg->pc);
 }
 
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
 
     // Print for debug
-    if(cpu->debug) {
-        printf("%d \n %s", op, ops[op].name);
+    if(cpu->debug && op) {
+        printf("executing op number: %x  op name: %s \n", op, ops[op].name);
+        printf("register values:  af=0x%x;  bc=0x%x;  de=0x%x;  hl=0x%x\n", 
+            cpu->reg->af, cpu->reg->bc, cpu->reg->de, cpu->reg->hl);
+    }
+
+    if(cpu->reg->pc > 0x217) {
+        printf("helo");
     }
 
     // Handle opcode
     switch (ops[op].operand_size)
     {
     case 0:
-        ((void (*)(void))ops[op].execute)();
+        ((void (*)(cpu_t*))ops[op].execute)(cpu);
+        break;
+        
     case 1: ;
-        uint8_t operand_8 = mmu_read_addr8(cpu->mmu, cpu->reg->sp++);
-        ((void (*)(u_int8_t))ops[op].execute)(operand_8);
+        uint8_t operand_8 = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
+
+        if(cpu->debug) {
+            printf("OP called with value: 0x%x\n", operand_8);
+        }
+
+        ((void (*)(cpu_t*, u_int8_t))ops[op].execute)(cpu, operand_8);
         break;
 
     case 2: ; 
-        uint16_t operand_16 = mmu_read_addr16(cpu->mmu, cpu->reg->sp);
-        cpu->reg->sp+=2;
-        ((void (*)(uint16_t))ops[op].execute)(operand_16);
+        uint16_t operand_16 = mmu_read_addr16(cpu->mmu, cpu->reg->pc);
+        
+        if(cpu->debug) {
+            printf("OP called with value: 0x%x\n", operand_16);
+        }
+        
+        cpu->reg->pc+=2;
+        ((void (*)(cpu_t*, uint16_t))ops[op].execute)(cpu, operand_16);
+
+        break;
+
     
     default:
         break;
+    }
+
+    if(cpu->reg->pc == 0) {
+        printf("hello");
     }
 
     cpu->clock_cycle+= ops[op].ticks;
