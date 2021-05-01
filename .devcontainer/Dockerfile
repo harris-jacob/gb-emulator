@@ -16,7 +16,38 @@ RUN mkdir -p ~/temp \
     && mkdir /opt/cmake \
     && sh cmake-$CMAKE_VERSION-Linux-x86_64.sh --prefix=/opt/cmake --skip-license \
     && ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake \
-    && cmake --version
+    && cmake --version \
+
+    # emscripten
+    && cd ~ && git clone https://github.com/emscripten-core/emsdk.git && cd emsdk \
+    && ./emsdk install latest \
+    && ./emsdk activate latest \
+    && echo "source \"/home/${USERNAME}/emsdk/emsdk_env.sh\"" >> /home/${USERNAME}/.bashrc \
+    && cd ~ \
+
+    # OpenGL - (glvnd)
+    RUN apt-get update && apt-get install -y --no-install-recommends \
+    libxau6 \
+    libxdmcp6 \
+    libxcb1  \
+    libxext6 \
+    libx11-6 \
+    pkg-config \
+    libglvnd-dev \
+    libgl1-mesa-dev \
+    libegl1-mesa-dev \
+    libgles2-mesa-dev \
+    ligsdl2-dev \
+    mesa-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Deps
+RUN apt-get update \
+    && apt-get install -y libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+
+
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32
 
 # Install docker
 RUN apt-get update \

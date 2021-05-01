@@ -46,7 +46,9 @@ uint8_t bg_window_priority(lcd_t lcd);
  *        2: Searching OAM
  *        3: Transferring Data to LCD Controller
  */
-set_lcd_status(lcd_t lcd);
+void set_lcd_status(lcd_t lcd);
+
+void draw(lcd_t lcd);
 
 
 
