@@ -3,11 +3,11 @@ add_executable(test runner.c mmu_tests.c register_tests.c alu_tests.c cpu_tests.
 
 target_include_directories(test PUBLIC
   ${mmu_SOURCE_DIR}
-  ${register_SOURCE_DIR}
+  ${emulator_SOURCE_DIR}
   ${unity_PUBLIC_HEADERS}
   .
 )
 
-target_link_libraries(test PUBLIC cpu mmu register unity)
+target_link_libraries(test PUBLIC emulator unity)
 
 add_test(test test)
