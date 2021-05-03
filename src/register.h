@@ -134,15 +134,38 @@ uint8_t alu_adc8(reg_t* reg, uint8_t a, uint8_t b);
 uint8_t alu_sbc8(reg_t* reg, uint8_t a, uint8_t b);
 
 /*
-* Rotate right by n
-* returns outcome.
+* Rotate right - rotate through carry
 */
-uint8_t rotate_r(uint8_t a, uint8_t n);
+uint8_t rr(reg_t* reg, uint8_t n);
 
 /*
-* Rotate left by n
-* returns outcome.
+* Rotate left - rotate through carry
 */
-uint8_t rotate_l(uint8_t a, uint8_t n);
+uint8_t rl(reg_t* reg, uint8_t n);
+
+/* 
+* Rotate left circular
+*/
+uint8_t rlc(reg_t* reg, uint8_t a);
+
+/*
+* Rotate right circular
+*/
+uint8_t rrc(reg_t* reg, uint8_t a);
+
+/* Swap upper and lower nibbles of a */
+uint8_t swap(reg_t* reg, uint8_t a);
+
+/* Left arithmetic shift */
+uint8_t sla(reg_t* reg, uint8_t a);
+
+/* Right arithmetic shift */
+uint8_t sla(reg_t* reg, uint8_t a);
+
+/* Set nth bit of a */
+uint8_t set(uint8_t a, uint8_t n);
+
+/* Reset nth bit of a */
+uint8_t reset(uint8_t a, uint8_t n);
 
 #endif
