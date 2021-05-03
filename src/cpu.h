@@ -55,4 +55,15 @@ struct op_t_ {
     uint8_t ticks;
 } extern const ops[256];
 
+/* extended operation container */
+struct extended_op_t_ {
+    /* Name of the operation */
+    char* name;
+    /* Func to execute */
+    void* ececute;
+    /* number of cpu ticks */
+    uint8_t ticks;
+} extern const extended_ops[256];
+
+
 #endif

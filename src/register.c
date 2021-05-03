@@ -421,3 +421,15 @@ uint8_t set(uint8_t a, uint8_t n) {
 uint8_t reset(uint8_t a, uint8_t n) {
 	return a &= ~(1 << 7);
 }
+
+uint8_t bit(reg_t* reg, uint8_t a, uint8_t n) {
+	if((a>>n)&1) {
+		set_zero(reg);
+	} else {
+		reset_zero(reg);
+	}
+
+	// reset
+	set_halfcarry(reg);
+	reset_subtract(reg);
+}

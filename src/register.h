@@ -168,4 +168,7 @@ uint8_t set(uint8_t a, uint8_t n);
 /* Reset nth bit of a */
 uint8_t reset(uint8_t a, uint8_t n);
 
+/* check if bit is set, store result in zero flag */
+uint8_t bit(reg_t* reg, uint8_t a, uint8_t n);
+
 #endif

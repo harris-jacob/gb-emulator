@@ -7,6 +7,7 @@ add_library(emulator
     rom.c
     register.c
     opcodes.c
+    cb_opcodes.c
     lcd.c
 )
 
