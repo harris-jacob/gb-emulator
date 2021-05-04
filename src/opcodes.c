@@ -102,7 +102,7 @@ static void OP_0F(cpu_t* cpu, uint8_t val) {
 
 /* OP10 - STOP d8 */
 static void OP_10(cpu_t* cpu, uint8_t val) {
-    cpu->stopped = true;
+
 }
 
 /* OP11 - LD DE d16 */
@@ -196,22 +196,7 @@ static void OP_1E(cpu_t* cpu, uint8_t val) {
 
 /* OP1F - RRA */
 static void OP_1F(cpu_t* cpu) {
-    reset_zero(cpu->reg);
-    reset_halfcarry(cpu->reg);
-    reset_subtract(cpu->reg);
-    uint8_t prev_car = get_carry(cpu->reg);
-    if(cpu->reg->a & 1 == 1) {
-       set_carry(cpu->reg);
-    } else {
-       reset_carry(cpu->reg);
-    }
-
-    if(prev_car == 0) {
-       cpu->reg->a = cpu->reg->a >> 1;
-    } else {
-        cpu->reg->a = (cpu->reg->a >> 1) | 128;
-    }
-
+    cpu->reg->a =rr(cpu->reg, cpu->reg->a);
 }
 
 /* OP20 - JR NZ r8 */
@@ -255,7 +240,40 @@ static void OP_26(cpu_t* cpu, uint8_t val) {
 
 /* OP27 - DAA */
 static void OP_27(cpu_t* cpu) {
-    //TODO
+    uint16_t val = cpu->reg->a;
+
+    if(get_subtract(cpu->reg)) {
+        if(get_halfcarry(cpu->reg)) {
+          val = (val - 0x06)&0xff;
+        }
+        if(get_carry(cpu->reg)) {
+            val -= 0x60;
+        }
+    } else {
+        if(get_halfcarry(cpu->reg) || (val & 0xF) > 9) {
+            val += 0x06;
+        }
+        if(get_carry(cpu->reg) || val > 0x9f) {
+            val += 0x60;
+        }
+    }
+
+    reset_halfcarry(cpu->reg);
+
+    if(cpu->reg->a) {
+        reset_zero(cpu->reg);
+    } else {
+        set_zero(cpu->reg);
+    }
+
+    if(val >= 0x100) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
+
+    cpu->reg->a = (uint8_t)(val);
+
 }
 
 /* OP28 - JR Z, r8 */
@@ -298,7 +316,10 @@ static void OP_2E(cpu_t* cpu, uint8_t val) {
 
 /* OP2F - CPL */
 static void OP_2F(cpu_t* cpu) {
-    // CPL
+    cpu->reg->a = 0xff ^ cpu->reg->a;
+
+    set_subtract(cpu->reg);
+    set_halfcarry(cpu->reg);
 }
 
 /* OP30 - JR NC r8 */ 
@@ -346,7 +367,9 @@ static void OP_36(cpu_t* cpu, uint8_t val) {
 
 /* OP37 - SCF */
 static void OP_37(cpu_t* cpu, uint8_t val) {
-    // TODO
+    set_carry(cpu->reg);
+    reset_subtract(cpu->reg);
+    reset_halfcarry(cpu->reg);
 }
 
 /* OP38 - JR C, r8 */
@@ -390,7 +413,13 @@ static void OP_3E(cpu_t* cpu, uint8_t val) {
 
 /* OP3F - CCF */
 static void OP_3F(cpu_t* cpu, uint8_t val) {
+    if(get_carry(cpu->reg)) {
+        reset_carry(cpu->reg);
+    } else set_carry(cpu->reg);
 
+    // reset
+    reset_subtract(cpu->reg);
+    reset_halfcarry(cpu->reg);
 }
 
 /* OP40 - LD B, B  */
@@ -665,7 +694,7 @@ static void OP_75(cpu_t* cpu) {
 
 /* OP76 HALT  */
 static void OP_76(cpu_t* cpu) {
-    // TODO
+    cpu->halted = true;
 }
 
 /* OP77 LD (HL) A  */
@@ -1368,8 +1397,10 @@ static void OP_CA(cpu_t* cpu, uint16_t addr) {
 
 
 /* OPCB PREFIX CB */
-static void OP_CB(cpu_t* cpu) {
-    // TODO
+static void OP_CB(cpu_t* cpu, uint8_t instruction) {
+    extended_ops[instruction].execute();
+
+    cpu->clock_cycle += extended_ops[instruction].ticks;
 }
 
 /* OPCC CALL Z a16 */
@@ -1448,7 +1479,7 @@ static void OP_D8(cpu_t* cpu) {
 /* OPD9 RETI */
 static void OP_D9(cpu_t* cpu) {
     cpu->reg->pc = stack_pop(cpu);
-    mmu_enable_all_interrupts(cpu->mmu);
+    cpu->ime = true;
 }
 
 /* OPDA JP C a16 */
@@ -1570,7 +1601,7 @@ static void OP_F2(cpu_t* cpu) {
 }
 /* OPF3 DI */
 static void OP_F3(cpu_t* cpu) {
-    mmu_disable_all_interrupts(cpu->mmu);
+    cpu->ime = false;
 }
 /* OPF5 PUSH AF*/
 static void OP_F5(cpu_t* cpu) {
@@ -1629,7 +1660,7 @@ static void OP_FA(cpu_t* cpu, uint16_t addr) {
 
 /* OPFB EI */
 static void OP_FB(cpu_t* cpu) {
-    mmu_enable_all_interrupts(cpu->mmu);
+   cpu->ime = false;
 }
 
 /* OPFE CP d8 */
@@ -1852,7 +1883,7 @@ const struct op_t_ ops[256] = {
     { "RETZ", 0, OP_C8, 8 },
     { "RET", 0, OP_C9, 16 },
     { "JP Z a16", 2, OP_CA, 12 },
-    { "PREFIX CB", 0, OP_CB, 4 },
+    { "PREFIX CB", 1, OP_CB, 4 },
     { "CALL Z a16", 2, OP_CC, 12 },
     { "CALL a16", 2, OP_CD, 24 },
     { "ADC A d8", 1, OP_CE, 8 },

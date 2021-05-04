@@ -46,8 +46,11 @@ void cpu_reset(cpu_t* cpu) {
 
 void cpu_step(cpu_t* cpu) {
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
-    if(cpu->stopped) return;
 
+    // hadnle halt and interrupt
+    if(cpu->halted || cpu->ime) {
+        
+    }
 
     if(opcode ==0xC7) {
         printf("hello");
@@ -67,6 +70,65 @@ void unknown_opcode(cpu_t* cpu) {
     printf("%s",s);
     printf("PC at: 0x%x\n", cpu->reg->pc);
 }
+
+
+static void interrupt_handle(cpu_t* cpu, uint8_t i) {
+   // if just halt we can unhalt
+   if(!cpu->ime && cpu->halted) {
+       cpu->halted;
+       return;
+   }
+
+   // Turn off IME
+   cpu->ime = false;
+   cpu->halted = false;
+
+   stack_push(cpu, cpu->reg->pc);
+
+   switch (i) {
+       case 0:
+        cpu->reg->pc = 0x40;
+        reset_vblank(cpu->mmu);
+        return;
+       case 1:
+        cpu->reg->pc = 0x48;
+        reset_lcdstat(cpu->mmu);
+        return;
+       case 2:
+        cpu->reg->pc = 0x50;
+        reset_timer(cpu->mmu);
+        return;
+       case 3:
+        cpu->reg->pc = 0x58;
+        reset_serial(cpu->mmu);
+        return;
+       case 4:
+        cpu->reg->pc = 0x60;
+        reset_joypad(cpu->mmu);
+        return;
+        default:
+            return;
+   }
+}
+
+/* handle interrupts */
+void handle_interrupts(cpu_t* cpu) {
+    uint8_t interrupt = mmu_read_addr8(cpu->mmu, 0xFF0F);
+    uint8_t enabled = mmu_read_addr8(cpu->mmu, 0xFFFF);
+    
+    if(!interrupt) return;
+    // check interrupt and interrupt enable set
+    for(int i=0; i<4; i++) {
+        uint8_t int_bit = (interrupt>>i)&1;
+        uint8_t enabled_bit = (enabled>>i)&1;
+
+        if(int_bit && enabled_bit) {
+            interrupt_handle(cpu, i);
+        }
+
+    }
+}
+
 
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
 
