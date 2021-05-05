@@ -6,13 +6,13 @@
 
 int main(int argc, char* args[]) {
   SDL_Window* window = NULL;
-  SDL_Surface* screenSurface = NULL;
+  SDL_Renderer* renderer = NULL;
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
     return 1;
   }
   window = SDL_CreateWindow(
-			    "hello_sdl2",
+			    "tile_map",
 			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 			    SCREEN_WIDTH, SCREEN_HEIGHT,
 			    SDL_WINDOW_SHOWN
@@ -21,11 +21,25 @@ int main(int argc, char* args[]) {
     fprintf(stderr, "could not create window: %s\n", SDL_GetError());
     return 1;
   }
-  screenSurface = SDL_GetWindowSurface(window);
-  SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-  SDL_UpdateWindowSurface(window);
-  SDL_Delay(2000);
+
+  SDL_CreateWindowAndRenderer(160, 144, SDL_WINDOW_RESIZABLE, &window, &renderer);
+
+
+  for (int i=0; i<= 160; i++) {
+    for(int j=0; j<= 144; j++) {
+      SDL_RenderDrawPoint(renderer, i, j);
+      if(i%10 == 0) {
+        SDL_SetRenderDrawColor(renderer, 255 - i, 255 - i, 255 - i, 1);
+      }
+      SDL_UpdateWindowSurface(window);
+    }
+  }
+
+  SDL_Delay(10000);
   SDL_DestroyWindow(window);
+  SDL_DestroyRenderer(renderer);
+
   SDL_Quit();
+
   return 0;
 }
