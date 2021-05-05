@@ -65,83 +65,83 @@ uint16_t mmu_read_addr16(mmu_t* mmu, uint16_t addr);
 void mmu_write_addr16(mmu_t* mmu, uint16_t addr, uint16_t data);
 
 /* set vblank enable */
-inline void set_vblank_enable(mmu_t* mmu) {
+static inline void set_vblank_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= 1;
 }
 /* set lcdstat reg */
-inline void set_lcdstat_enable(mmu_t* mmu) {
+static inline void set_lcdstat_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= (1 << 1);
 }
 /* set timer enable */
-inline void set_timer_enable(mmu_t* mmu) {
+static inline void set_timer_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= (1 << 2);
 }
 /* set serial enable */
-inline void set_serial_enable(mmu_t* mmu) {
+static inline void set_serial_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= (1 << 3);
 }
 /* set joypad enable */
-inline void set_joypad_enable(mmu_t* mmu) {
+static inline void set_joypad_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= (1 << 4);
 }
 /* reset vblank enable */
-inline void reset_vblank_enable(mmu_t* mmu) {
+static inline void reset_vblank_enable(mmu_t* mmu) {
 	mmu->interrupt_enable &= ~(1);
 }
 /* reset lcdstat enable */
-inline void reset_lcdstat_enable(mmu_t* mmu) {
+static inline void reset_lcdstat_enable(mmu_t* mmu) {
 	mmu->interrupt_enable&= ~(1 << 1);
 }
 /* reset timer enable */
-inline void reset_timer_enable(mmu_t* mmu) {
+static inline void reset_timer_enable(mmu_t* mmu) {
 	mmu->interrupt_enable&= ~(1 << 2);
 }
 /* reset serial enable */
-inline void reset_serial_enable(mmu_t* mmu) {
+static inline void reset_serial_enable(mmu_t* mmu) {
 	mmu->interrupt_enable&= ~(1 << 3);
 }
 /* reset joypad enable */
-inline void reset_joypad_enable(mmu_t* mmu) {
+static inline void reset_joypad_enable(mmu_t* mmu) {
 	mmu->interrupt_enable&= ~(1 << 4);
 }
 /* set vblank */
-inline void set_vblank(mmu_t* mmu) {
+static inline void set_vblank(mmu_t* mmu) {
 	mmu->addr[0xFF0F]|= 1;
 }
 /* set lcdstat */
-inline void set_lcdstat(mmu_t* mmu) {
+static inline void set_lcdstat(mmu_t* mmu) {
 	mmu->addr[0xFF0F]|= (1 << 1);
 }
 /* set timer */
-inline void set_timer(mmu_t* mmu) {
+static inline void set_timer(mmu_t* mmu) {
 	mmu->addr[0xFF0F]|= (1 << 2);
 }
 /* set serial */
-inline void set_serial(mmu_t* mmu) {
+static inline void set_serial(mmu_t* mmu) {
 	mmu->addr[0xFF0F]|= (1 << 3);
 }
 /* set joypad */
-inline void set_joypad(mmu_t* mmu) {
+static inline void set_joypad(mmu_t* mmu) {
 	mmu->addr[0xFF0F]|= (1 << 4);
 }
 /* reset vblank */
-inline void reset_vblank(mmu_t* mmu) {
+static inline void reset_vblank(mmu_t* mmu) {
 	mmu->addr[0xFF0F] &= ~(1);
 }
 /* reset lcdstat */
-void reset_lcdstat(mmu_t* mmu) {
+static inline void reset_lcdstat(mmu_t* mmu) {
 	mmu->addr[0xFF0F] &= ~(1 << 1);
 }
 /* reset timer */
-void reset_timer(mmu_t* mmu) {
+static inline void reset_timer(mmu_t* mmu) {
 	mmu->addr[0xFF0F] &= ~(1 << 2);
 }
 /* reset serial */
-void reset_serial(mmu_t* mmu) {
+static inline void reset_serial(mmu_t* mmu) {
 	mmu->addr[0xFF0F]&= ~(1 << 3);
 }
 /* reset joypad */
-void reset_joypad(mmu_t* mmu) {
+static inline void reset_joypad(mmu_t* mmu) {
 	mmu->addr[0xFF0F]&= ~(2 << 4);
 }
 

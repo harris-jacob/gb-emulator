@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "mmu.h"
 #include <stdlib.h>
 
 
@@ -40,11 +41,16 @@ void cpu_reset(cpu_t* cpu) {
     cpu->reg->sp = 0xfffe;
     cpu->reg->pc = 0x100;
 
-    // Reset interrupts
-    mmu_disable_all_interrupts(cpu->mmu);
+    cpu->halted = false;
+    cpu->ime = false;
+    cpu->stopped = false;
 }
 
 void cpu_step(cpu_t* cpu) {
+    if(cpu->stopped){
+        return;
+    }
+
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
 
     // hadnle halt and interrupt
@@ -71,7 +77,18 @@ void unknown_opcode(cpu_t* cpu) {
     printf("PC at: 0x%x\n", cpu->reg->pc);
 }
 
-
+/*
+* if we come accross an interrupt we
+* - unhalt and reset the interrupt master enable (ime)
+* - reset the interrupt bit that was triggered
+* - jump to the correct address, based on the interrupt that was triggered
+*   here i is the bit number of the interrupt:
+*   Bit 0: V-Blank  Interrupt Request (INT 40h)  (1=Request)
+*   Bit 1: LCD STAT Interrupt Request (INT 48h)  (1=Request)
+*   Bit 2: Timer    Interrupt Request (INT 50h)  (1=Request)
+*   Bit 3: Serial   Interrupt Request (INT 58h)  (1=Request)
+*   Bit 4: Joypad   Interrupt Request (INT 60h)  (1=Request)
+*/
 static void interrupt_handle(cpu_t* cpu, uint8_t i) {
    // if just halt we can unhalt
    if(!cpu->ime && cpu->halted) {
@@ -111,7 +128,7 @@ static void interrupt_handle(cpu_t* cpu, uint8_t i) {
    }
 }
 
-/* handle interrupts */
+/* check if any interrupts are enabled and if any have been registered. If so we need to handle them*/
 void handle_interrupts(cpu_t* cpu) {
     uint8_t interrupt = mmu_read_addr8(cpu->mmu, 0xFF0F);
     uint8_t enabled = mmu_read_addr8(cpu->mmu, 0xFFFF);

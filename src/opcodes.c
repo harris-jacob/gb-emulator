@@ -102,7 +102,7 @@ static void OP_0F(cpu_t* cpu, uint8_t val) {
 
 /* OP10 - STOP d8 */
 static void OP_10(cpu_t* cpu, uint8_t val) {
-
+    cpu->stopped = false;
 }
 
 /* OP11 - LD DE d16 */
@@ -1398,7 +1398,7 @@ static void OP_CA(cpu_t* cpu, uint16_t addr) {
 
 /* OPCB PREFIX CB */
 static void OP_CB(cpu_t* cpu, uint8_t instruction) {
-    extended_ops[instruction].execute();
+    extended_ops[instruction].execute(cpu);
 
     cpu->clock_cycle += extended_ops[instruction].ticks;
 }

@@ -17,6 +17,8 @@ typedef struct cpu_t_ {
     bool ime;
     /* is GB halted */
     bool halted;
+    /* is CPU stopped */
+    bool stopped;
 
 } cpu_t;
 
@@ -62,7 +64,7 @@ struct extended_op_t_ {
     /* Name of the operation */
     char* name;
     /* Func to execute */
-    void (*execute)(void);
+    void (*execute)(cpu_t*);
     /* number of cpu ticks */
     uint8_t ticks;
 } extern const extended_ops[256];
