@@ -41,14 +41,7 @@ static void OP_06(cpu_t* cpu, uint8_t val) {
 
 /* OP07 - RLCA */
 static void OP_07(cpu_t* cpu, uint8_t val) {
-   cpu->reg->a = rotate_l(cpu->reg->a, 1);
-   reset_zero(cpu->reg);
-   reset_subtract(cpu->reg);
-   reset_halfcarry(cpu->reg);
-
-   if(cpu->reg->a > 0x7f) {
-       set_carry(cpu->reg);
-   }
+   cpu->reg->a = rl(cpu->reg, cpu->reg->a);
 }
 
 /* OP08 - LD (a16), SP  */
@@ -90,14 +83,7 @@ static void OP_0E(cpu_t* cpu, uint8_t val) {
 
 /* OP0F - RRCA */
 static void OP_0F(cpu_t* cpu, uint8_t val) {
-   cpu->reg->a = rotate_r(cpu->reg->a, 1);
-   reset_zero(cpu->reg);
-   reset_subtract(cpu->reg);
-   reset_halfcarry(cpu->reg);
-
-   if(cpu->reg->a > 0x7f) {
-       set_carry(cpu->reg);
-   }
+   cpu->reg->a = rr(cpu->reg, cpu->reg->a);
 }
 
 /* OP10 - STOP d8 */

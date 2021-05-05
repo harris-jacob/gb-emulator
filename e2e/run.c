@@ -6,7 +6,7 @@
 int main(int argc, char *argv[]) {
     //"./build/e2e/06-ld r,r.gb"
     mmu_t* mmu = mmu_create();
-    rom_t* rom = load_rom( "./build/e2e/06-ld r,r.gb",mmu);
+    rom_t* rom = load_rom( "./gb-test-roms/cpu_instrs/individual/06-ld r,r.gb",mmu);
     cpu_t* cpu = cpu_create(mmu);
     cpu->debug = true;
 
@@ -15,7 +15,6 @@ int main(int argc, char *argv[]) {
 
 
     for(; ;) {
-        
         // step cpu
         cpu_step(cpu);
 

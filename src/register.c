@@ -433,3 +433,22 @@ uint8_t bit(reg_t* reg, uint8_t a, uint8_t n) {
 	set_halfcarry(reg);
 	reset_subtract(reg);
 }
+
+uint8_t srl(reg_t* reg, uint8_t a) {
+	if(a & 1) {
+		set_carry(reg);
+	} else {
+		reset_carry(reg);
+	}
+
+	a = a >> 1;
+
+	if(a == 0) {
+		set_zero(reg);
+	} else {
+		reset_zero(reg);
+	}
+
+	reset_halfcarry(reg);
+	reset_subtract(reg);
+}

@@ -194,9 +194,5 @@ void cpu_handle_op(cpu_t* cpu, uint8_t op) {
         break;
     }
 
-    if(cpu->reg->pc == 0) {
-        printf("hello");
-    }
-
     cpu->clock_cycle+= ops[op].ticks;
 }
