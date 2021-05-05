@@ -1,5 +1,5 @@
-#ifndef LCD_H_
-#define LCD_H_
+#ifndef PPU_H_
+#define PPU_H_
 #include "stdbool.h"
 #include "mmu.h"
 
@@ -40,7 +40,7 @@ uint8_t bg_window_priority(lcd_t lcd);
  * Bit 4 - Mode 1 VBlank Interrupt      (1=Enable) (Read/Write)
  * Bit 3 - Mode 0 HBlank Interrupt      (1=Enable) (Read/Write)
  * Bit 2 - LYC=LY Flag      (0=Different, 1=Equal) (Read Only)
- * Bit 1-0 - Mode Flag       (Mode 0-3, see below) (Read Only)
+
  *        0: In HBlank
  *        1: In VBlank
  *        2: Searching OAM
@@ -49,8 +49,6 @@ uint8_t bg_window_priority(lcd_t lcd);
 void set_lcd_status(lcd_t lcd);
 
 void draw(lcd_t lcd);
-
-
 
 
 #endif

@@ -1,13 +1,19 @@
-FROM ubuntu:18.04
+FROM nvidia/cuda:10.2-cudnn7-devel-ubuntu18.04
 
 # Global settings
 ENV CMAKE_VERSION=3.17.2
+
+
+
 
 # Pre-requsities and development tools.
 RUN apt-get update \
     && apt-get install -y software-properties-common \
     unzip wget git \
-    build-essential gdb clang clang-format clang-tidy
+    build-essential gdb clang clang-format clang-tidy \
+    libsdl2-dev 
+
+RUN apt-get install -y mesa-utils
 
 # Install CMake binary
 RUN mkdir -p ~/temp \
@@ -23,10 +29,10 @@ RUN mkdir -p ~/temp \
     && ./emsdk install latest \
     && ./emsdk activate latest \
     && echo "source \"/home/${USERNAME}/emsdk/emsdk_env.sh\"" >> /home/${USERNAME}/.bashrc \
-    && cd ~ \
+    && cd ~ 
 
 
-    ENV NVIDIA_DRIVER_CAPABILITIES \
+ENV NVIDIA_DRIVER_CAPABILITIES \
     ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics,compat32
 
 # Install docker
