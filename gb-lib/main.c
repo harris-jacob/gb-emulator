@@ -1,45 +1,48 @@
 #include <SDL2/SDL.h>
 #include <stdio.h>
+#include <SDL.h>
+ 
+int main(int argc, char ** argv) {
+    int quit = 0;
+    SDL_Event event;
+ 
+    SDL_Init(SDL_INIT_VIDEO);
+ 
+    SDL_Window * window = SDL_CreateWindow("SDL2 Displaying Image",
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 200, 200, SDL_WINDOW_SHOWN);
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
+    SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
 
-int main(int argc, char* args[]) {
-  SDL_Window* window = NULL;
-  SDL_Renderer* renderer = NULL;
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    fprintf(stderr, "could not initialize sdl2: %s\n", SDL_GetError());
-    return 1;
-  }
-  window = SDL_CreateWindow(
-			    "tile_map",
-			    SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-			    SCREEN_WIDTH, SCREEN_HEIGHT,
-			    SDL_WINDOW_SHOWN
-			    );
-  if (window == NULL) {
-    fprintf(stderr, "could not create window: %s\n", SDL_GetError());
-    return 1;
-  }
+    int HEIGHT = 144;
+    int WIDTH = 160;
 
-  SDL_CreateWindowAndRenderer(160, 144, SDL_WINDOW_RESIZABLE, &window, &renderer);
+    for (int i = 0; i < HEIGHT; i++) {
+      for(int j = 0; j <WIDTH; j++) {
+        uint8_t r = i;
+        uint8_t g = j;
+        uint8_t b = 25;
 
-
-  for (int i=0; i<= 160; i++) {
-    for(int j=0; j<= 144; j++) {
-      SDL_RenderDrawPoint(renderer, i, j);
-      if(i%10 == 0) {
-        SDL_SetRenderDrawColor(renderer, 255 - i, 255 - i, 255 - i, 1);
+        SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+        SDL_RenderDrawPoint(renderer, j, i);
       }
-      SDL_UpdateWindowSurface(window);
     }
-  }
 
-  SDL_Delay(10000);
-  SDL_DestroyWindow(window);
-  SDL_DestroyRenderer(renderer);
+    SDL_RenderPresent(renderer);
 
-  SDL_Quit();
-
-  return 0;
+    // run loop 
+    while (!quit)
+    {
+        SDL_WaitEvent(&event);
+ 
+        switch (event.type)
+        {
+        case SDL_QUIT:
+            quit = 1;
+            break;
+        }
+    }
+ 
+    SDL_Quit();
+ 
+    return 0;
 }
