@@ -17,6 +17,9 @@
         "new": "cpp",
         "sstream": "cpp",
         "utility": "cpp",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "emu.h": "c",
+        "array": "c",
+        "initializer_list": "c"
     }
 }

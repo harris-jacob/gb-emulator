@@ -53,9 +53,9 @@ void cpu_step(cpu_t* cpu) {
 
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
 
-    // hadnle halt and interrupt
+    // handle halt and interrupt
     if(cpu->halted || cpu->ime) {
-        
+       handle_interrupts(cpu);
     }
 
     if(opcode ==0xC7) {
@@ -154,10 +154,6 @@ void cpu_handle_op(cpu_t* cpu, uint8_t op) {
         printf("executing op number: %x  op name: %s \n", op, ops[op].name);
         printf("register values:  af=0x%x;  bc=0x%x;  de=0x%x;  hl=0x%x\n", 
             cpu->reg->af, cpu->reg->bc, cpu->reg->de, cpu->reg->hl);
-    }
-
-    if(cpu->reg->pc > 0x217) {
-        printf("helo");
     }
 
     // Handle opcode

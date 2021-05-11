@@ -56,3 +56,9 @@ CMakeFiles/
 
 # test roms
 roms/
+
+#log files
+mem_out.txt
+
+# gbemu for debugging
+gbemu

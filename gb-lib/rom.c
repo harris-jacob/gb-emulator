@@ -58,7 +58,11 @@ rom_t* load_rom(const char* filepath, mmu_t* mmu) {
 		exit(EXIT_FAILURE);
 	}
 
-	fread(rom->memory->rom, 32000, 1, fp);
+	// read header
+	load_rom_header(fp, rom);
+
+	size_t write_size = fread(rom->memory->addr, sizeof(uint8_t), 32000, fp);
+	printf("Rom data - memory read: %lu Bs\n", write_size);
 	
 	return rom;
 }
@@ -68,9 +72,8 @@ void load_rom_header(FILE* f, rom_t* rom) {
 
 	char header[0x180]; 
 	
-	// read the first 32kbs of the rom into memory
+	// read the 385 bytes that contines the header info
 	size_t write_size = fread(header, 0x17f, 1, f);
-	printf("memory read: %lu kBs\n", write_size);
 
 	// ROM name is here in memory and is 16bytes long 
 	for(int i=0; i<=16; i++) { 

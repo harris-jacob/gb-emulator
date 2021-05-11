@@ -64,6 +64,9 @@ uint16_t mmu_read_addr16(mmu_t* mmu, uint16_t addr);
 /* write 16bit value */
 void mmu_write_addr16(mmu_t* mmu, uint16_t addr, uint16_t data);
 
+/* Dump the contents of memory into a file */
+void mmu_mem_dump(mmu_t* mmu);
+
 /* set vblank enable */
 static inline void set_vblank_enable(mmu_t* mmu) {
 	mmu->interrupt_enable |= 1;
