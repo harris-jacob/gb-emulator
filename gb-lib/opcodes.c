@@ -158,6 +158,7 @@ static void OP_19(cpu_t* cpu) {
 static void OP_1A(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->de);
     cpu->reg->a = val;
+    cpu->debug = true;
 }
 
 /* OP1B - DEC DE */
@@ -186,11 +187,13 @@ static void OP_1F(cpu_t* cpu) {
 }
 
 /* OP20 - JR NZ r8 */
-static void OP_20(cpu_t* cpu, signed char val) {
+static void OP_20(cpu_t* cpu, unsigned char val) {
+    signed char signed_val = (signed char) val;
+
     if(!get_zero(cpu->reg)) {
-     
-     short result = cpu->reg->pc + (short)val;
-     cpu->reg->pc = result;
+     cpu->reg->pc += (signed char)val;
+     // extra cycles
+     cpu->clock_cycle+=4;
     }
 }
 
@@ -264,9 +267,13 @@ static void OP_27(cpu_t* cpu) {
 
 /* OP28 - JR Z, r8 */
 static void OP_28(cpu_t* cpu, uint8_t val) {
+
+    signed char signed_val = (signed char)val;
+
    if(get_zero(cpu->reg)) {
-     short result = cpu->reg->pc + (short)val;
-     cpu->reg->pc = result;
+     cpu->reg->pc += signed_val;
+     // extra cycles
+     cpu->clock_cycle+=4;
    } 
 }
 
@@ -311,8 +318,9 @@ static void OP_2F(cpu_t* cpu) {
 /* OP30 - JR NC r8 */ 
 static void OP_30(cpu_t* cpu, uint8_t val) {
     if(!get_carry(cpu->reg)) {
-        short result = cpu->reg->pc + (short)val;
-        cpu->reg->pc = result;
+        cpu->reg->pc += (signed char)val;
+        // extra cylces
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -363,6 +371,9 @@ static void OP_38(cpu_t* cpu, uint8_t val) {
     if(get_carry(cpu->reg)) {
         short result = cpu->reg->pc + (short)val;
         cpu->reg->pc = result;
+
+        // extra cycles
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -1241,81 +1252,51 @@ static void OP_B7(cpu_t* cpu) {
 
 /* OPB8 CP B */
 static void OP_B8(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->b) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->b);
 }
 
 /* OPB9 CP C */
 static void OP_B9(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->c) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->c);
 }
 
 /* OPBA CP D */
 static void OP_BA(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->d) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->d);
 }
 
 /* OPBB CP E */
 static void OP_BB(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->e) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->e);
 }
 
 /* OPBC CP H */
 static void OP_BC(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->h) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->h);
 }
 
 /* OPBD CP L */
 static void OP_BD(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->l) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->l);
 }
 
 /* OPBE CP (HL) */
 static void OP_BE(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    if(cpu->reg->a == val) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, val);
 }
 
 /* OPBF CP A */
 static void OP_BF(cpu_t* cpu) {
-    if(cpu->reg->a == cpu->reg->a) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, cpu->reg->a);
 }
 
 /* OPC0 RET NZ */
 static void OP_C0(cpu_t* cpu) {
     if(get_zero(cpu->reg) != 0 ) {
         cpu->reg->pc = stack_pop(cpu);
+        // extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1328,6 +1309,8 @@ static void OP_C1(cpu_t* cpu) {
 static void OP_C2(cpu_t* cpu, uint16_t val) {
     if(!get_zero(cpu->reg)) {
         cpu->reg->pc = val; 
+        // extra cycles
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -1342,6 +1325,8 @@ static void OP_C4(cpu_t* cpu, uint16_t addr) {
     if(!get_zero(cpu->reg)) {
         stack_push(cpu, cpu->reg->pc);
         cpu->reg->pc = addr;
+        //extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1366,6 +1351,8 @@ static void OP_C7(cpu_t* cpu) {
 static void OP_C8(cpu_t* cpu) {
    if(get_zero(cpu->reg)) {
        cpu->reg->pc = stack_pop(cpu);
+       // extra cycles
+       cpu->clock_cycle+=12;
    } 
 }
 
@@ -1378,6 +1365,8 @@ static void OP_C9(cpu_t* cpu) {
 static void OP_CA(cpu_t* cpu, uint16_t addr) {
     if(get_zero(cpu->reg)) {
         cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -1394,6 +1383,8 @@ static void OP_CC(cpu_t* cpu, uint16_t addr) {
     if(get_zero(cpu->reg)) {
         stack_push(cpu, cpu->reg->pc);
         cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1418,6 +1409,8 @@ static void OP_CF(cpu_t* cpu) {
 static void OP_D0(cpu_t* cpu) {
     if(!get_carry(cpu->reg)) {
         cpu->reg->pc = stack_pop(cpu);
+        // extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1430,6 +1423,8 @@ static void OP_D1(cpu_t* cpu) {
 static void OP_D2(cpu_t* cpu, uint16_t addr) {
     if(!get_carry(cpu->reg)) {
         cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -1437,6 +1432,8 @@ static void OP_D2(cpu_t* cpu, uint16_t addr) {
 static void OP_D4(cpu_t* cpu, uint16_t addr) {
     stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = addr;
+    // extra cycles
+    cpu->clock_cycle+=12;
 }
 
 /* OPD5 PUSH DE */
@@ -1459,6 +1456,8 @@ static void OP_D7(cpu_t* cpu) {
 static void OP_D8(cpu_t* cpu) {
     if(get_carry(cpu->reg)) {
         cpu->reg->pc = stack_pop(cpu);
+        // extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1472,6 +1471,8 @@ static void OP_D9(cpu_t* cpu) {
 static void OP_DA(cpu_t* cpu, uint16_t addr ) {
     if(get_carry(cpu->reg)) {
         cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=4;
     }
 }
 
@@ -1480,6 +1481,8 @@ static void OP_DC(cpu_t* cpu, uint16_t addr) {
     if(get_carry(cpu->reg)) {
         stack_push(cpu, cpu->reg->pc);
         cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=12;
     }
 }
 
@@ -1496,8 +1499,7 @@ static void OP_DF(cpu_t* cpu) {
 
 /* OPE0 LDH(a8) A */
 static void OP_E0(cpu_t* cpu, uint8_t addr) {
-    uint16_t val_u16 = addr;
-    mmu_write_addr8(cpu->mmu, 0xFF + val_u16, cpu->reg->a);
+    mmu_write_addr8(cpu->mmu, 0xFF00 + addr, cpu->reg->a);
 }
 
 /* OPE1 POP HL */
@@ -1505,7 +1507,7 @@ static void OP_E1(cpu_t* cpu) {
     cpu->reg->pc = stack_pop(cpu);
 }
 
-/* OP E2LD (C), A */
+/* OPE2 LD (C), A */
 static void OP_E2(cpu_t* cpu) {
     uint16_t addr = 0xFF00 + cpu->reg->c;
     mmu_write_addr8(cpu->mmu, addr, cpu->reg->a);
@@ -1573,8 +1575,7 @@ static void OP_EF(cpu_t* cpu) {
 }
 /* OPF0 LDH A (a8) */
 static void OP_F0(cpu_t* cpu, uint8_t addr) {
-    uint16_t val_u16 = addr + 0xFF00;
-    cpu->reg->a = mmu_read_addr8(cpu->mmu, 0xFF + val_u16);
+    cpu->reg->a = mmu_read_addr8(cpu->mmu, 0xFF00 + addr);
 }
 /* OPF1 POP AF */
 static void OP_F1(cpu_t* cpu) {
@@ -1612,21 +1613,19 @@ static void OP_F7(cpu_t* cpu) {
     cpu->reg->pc = 0x30;
 }
 /* OPF8 LD HL SP+r8 */
-static void OP_F8(cpu_t* cpu, signed char addr) {
+static void OP_F8(cpu_t* cpu, uint8_t addr) {
     // reset some flags
     reset_zero(cpu->reg);
     reset_subtract(cpu->reg);
 
-    int signed_val = (int)(cpu->reg->sp) + addr;
-    uint16_t val = (uint16_t)(signed_val);
-    if(signed_val > 0xFFFF) {
+    int val = cpu->reg->sp + (signed char)addr;
+    if(val & 0xFFFF) {
         set_carry(cpu->reg);
     } else {
         reset_carry(cpu->reg);
     }
 
-    // Unsure about this?
-    if(should_add_halfcarry16(cpu->reg->sp, val)) {
+    if(((cpu->reg->sp & 0x0f) + (addr & 0x0f)) > 0x0f) {
         set_halfcarry(cpu->reg);
     } else {
         reset_halfcarry(cpu->reg);
@@ -1651,11 +1650,7 @@ static void OP_FB(cpu_t* cpu) {
 
 /* OPFE CP d8 */
 static void OP_FE(cpu_t* cpu, uint8_t val) {
-    if(cpu->reg->a == val) {
-        set_zero(cpu->reg);
-    } else {
-        reset_zero(cpu->reg);
-    }
+    cp(cpu->reg, val);
 }
 
 /* OPFF RST 38H */

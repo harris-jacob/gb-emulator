@@ -46,10 +46,14 @@ void cpu_reset(cpu_t* cpu) {
     cpu->stopped = false;
 }
 
-void cpu_step(cpu_t* cpu) {
+/* execute the next instruction, update the cpu clock and return the number of cycles added */
+uint32_t cpu_step(cpu_t* cpu) {
+    uint32_t old_clock = cpu->clock_cycle;
+
     if(cpu->stopped){
-        return;
+        return 0;
     }
+
 
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
 
@@ -58,7 +62,7 @@ void cpu_step(cpu_t* cpu) {
        handle_interrupts(cpu);
     }
 
-    if(opcode ==0xC7) {
+    if(opcode == 0xC7) {
         printf("hello");
     }
     
@@ -67,6 +71,8 @@ void cpu_step(cpu_t* cpu) {
         printf("SP at 0x%x\n", cpu->reg->sp);
     }
     cpu_handle_op(cpu, opcode);
+
+    return cpu->clock_cycle - old_clock;
 }
 
 void unknown_opcode(cpu_t* cpu) {
@@ -132,7 +138,7 @@ static void interrupt_handle(cpu_t* cpu, uint8_t i) {
 void handle_interrupts(cpu_t* cpu) {
     uint8_t interrupt = mmu_read_addr8(cpu->mmu, 0xFF0F);
     uint8_t enabled = mmu_read_addr8(cpu->mmu, 0xFFFF);
-    
+
     if(!interrupt) return;
     // check interrupt and interrupt enable set
     for(int i=0; i<4; i++) {
@@ -142,13 +148,15 @@ void handle_interrupts(cpu_t* cpu) {
         if(int_bit && enabled_bit) {
             interrupt_handle(cpu, i);
         }
-
     }
 }
 
-
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
-
+    if(cpu->reg->pc == 0x235 +1) {
+        printf("hit"); 
+        uint8_t val = cpu->mmu->addr[0xff44];
+        mmu_mem_dump(cpu->mmu);
+    }
     // Print for debug
     if(cpu->debug && op) {
         printf("executing op number: %x  op name: %s \n", op, ops[op].name);

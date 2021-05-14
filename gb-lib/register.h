@@ -174,4 +174,7 @@ uint8_t bit(reg_t* reg, uint8_t a, uint8_t n);
 /* shift right logical */
 uint8_t srl(reg_t* reg, uint8_t a);
 
+/* cp */
+void cp(reg_t* reg, uint8_t val);
+
 #endif

@@ -10,7 +10,7 @@ typedef struct cpu_t_ {
     /* Memory Unit */
     mmu_t* mmu;
     /* Current Clock cycle */
-    uint16_t clock_cycle;
+    uint32_t clock_cycle;
     /* display debug logs */
     bool debug;
     /* IME: Interrupt Master Enable Flag */
@@ -38,13 +38,30 @@ uint16_t stack_pop(cpu_t* cpu);
 void cpu_reset(cpu_t* cpu);
 
 /* Single step of the CPU */
-void cpu_step(cpu_t* cpu);
+uint32_t cpu_step(cpu_t* cpu);
 
 /* Handle Opcode */
 void cpu_handle_op(cpu_t* cpu, uint8_t opcode);
 
 /* Handle unknown opcode */
 void unknown_opcode(cpu_t* cpu);
+
+/* check if any interrupts are enabled and if any have been registered. If so we need to handle them*/
+void handle_interrupts(cpu_t* cpu);
+
+/*
+* if we come accross an interrupt we
+* - unhalt and reset the interrupt master enable (ime)
+* - reset the interrupt bit that was triggered
+* - jump to the correct address, based on the interrupt that was triggered
+*   here i is the bit number of the interrupt:
+*   Bit 0: V-Blank  Interrupt Request (INT 40h)  (1=Request)
+*   Bit 1: LCD STAT Interrupt Request (INT 48h)  (1=Request)
+*   Bit 2: Timer    Interrupt Request (INT 50h)  (1=Request)
+*   Bit 3: Serial   Interrupt Request (INT 58h)  (1=Request)
+*   Bit 4: Joypad   Interrupt Request (INT 60h)  (1=Request)
+*/
+static void interrupt_handle(cpu_t* cpu, uint8_t i);
 
 
 /* Operation container stolen from https://github.com/CTurt/Cinoop/blob/master/include/cpu.h */

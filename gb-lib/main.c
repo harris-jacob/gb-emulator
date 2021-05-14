@@ -28,9 +28,9 @@ void render(SDL_Renderer* renderer, uint8_t* tileset) {
         SDL_SetRenderDrawColor(renderer, val, val, val, 255);
         SDL_RenderDrawPoint(renderer, j, i);
         }
-
-        SDL_RenderPresent(renderer);
     }
+    SDL_RenderPresent(renderer);
+    SDL_Delay(1000 / 60);
 }
  
 int main(int argc, char ** argv) {
@@ -50,11 +50,17 @@ int main(int argc, char ** argv) {
     tileset = fetch_tileset(emu->mmu);
     render(renderer, tileset);
 
-    for(int i=0; i<= 8; i++) {
-        printf("0x%x\n", emu->mmu->addr[i]);
+    // render loop
+    for(; ;) {
+        uint32_t clock_delta = cpu_step(emu->cpu);
+        ppu_clock_step(emu->cpu->mmu, clock_delta);
     }
 
+    tileset = fetch_tileset(emu->mmu);
     mmu_mem_dump(emu->mmu);
+    for(; ;) {
+        render(renderer, tileset);
+    }
 
     return 0;
 }

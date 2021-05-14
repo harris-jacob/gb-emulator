@@ -13,7 +13,6 @@ void reg_destroy(reg_t** registers) {
 	*registers = NULL;
 }
 
-
 void set_carry(reg_t* reg) {
 	SET_BIT(reg->f, 4);
 }
@@ -251,6 +250,10 @@ uint8_t alu_dec8(reg_t* reg, uint8_t a) {
 
 	a--;
 
+	if(a == 1) { 
+		printf("done!");
+	 }
+
 	if(a == 0 ) {
 		set_zero(reg);
 	} else {
@@ -449,4 +452,25 @@ uint8_t srl(reg_t* reg, uint8_t a) {
 
 	reset_halfcarry(reg);
 	reset_subtract(reg);
+}
+
+void cp(reg_t* reg, uint8_t val) {
+	set_subtract(reg);
+    if(val > reg->a) {
+        set_carry(reg);
+    } else {
+        reset_carry(reg);
+    }
+
+    if((val & 0x0f) > (reg->a & 0x0f)) {
+        set_halfcarry(reg);
+    } else {
+        set_halfcarry(reg);
+    }
+
+    if(reg->a == val) {
+        set_zero(reg);
+    } else {
+        reset_zero(reg);
+    }
 }

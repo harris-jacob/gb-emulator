@@ -29,6 +29,42 @@ void mmu_write_addr16(mmu_t* mmu, uint16_t addr, uint16_t data) {
 	*pos = data;
 }
 
+void mmu_init(mmu_t* mmu) {
+	mmu->addr[0xff05] = 0;
+	mmu->addr[0xff06] = 0;
+	mmu->addr[0xff07] = 0;
+	mmu->addr[0xff10] = 0x80;
+	mmu->addr[0xff11] = 0xbf;
+	mmu->addr[0xff12] = 0xF3;
+	mmu->addr[0xff14] = 0xbf;
+	mmu->addr[0xff16] = 0x3f;
+	mmu->addr[0xff17] = 0;
+	mmu->addr[0xff19] = 0xbf;
+	mmu->addr[0xff1a] = 0x7f;
+	mmu->addr[0xff1b] = 0xff;
+	mmu->addr[0xff1c] = 0x9f;
+	mmu->addr[0xff1e] = 0xbf;
+	mmu->addr[0xff20] = 0xff;
+	mmu->addr[0xff21] = 0;
+	mmu->addr[0xff22] = 0;
+	mmu->addr[0xff23] = 0xbf;
+	mmu->addr[0xff24] = 0x77;
+	mmu->addr[0xff25] = 0xF3;
+	mmu->addr[0xff26] = 0xF1; // ??
+	mmu->addr[0xff40] = 0x91;
+	mmu->addr[0xff42] = 0;
+	mmu->addr[0xff43] = 0;
+	mmu->addr[0xff45] = 0;
+	mmu->addr[0xff47] = 0xfc;
+	mmu->addr[0xff48] = 0xff;
+	mmu->addr[0xff49] = 0xff;
+	mmu->addr[0xff4a] = 0;
+	mmu->addr[0xff4b] = 0;
+	mmu->addr[0xffff] = 0;
+
+	
+}
+
 void mmu_mem_dump(mmu_t* mmu) {
 	FILE *fptr;
 

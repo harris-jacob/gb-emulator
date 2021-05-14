@@ -49,6 +49,9 @@ typedef struct _mmu_t
 /* create a 16bit set of accessible memory */ 
 mmu_t* mmu_create();
 
+/* initialize memory values as if boot rom had run */
+void mmu_init(mmu_t* mmu);
+
 /* destroy set of memory */
 void mmu_destroy(mmu_t** mmu);
 
