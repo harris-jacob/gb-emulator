@@ -7,7 +7,9 @@ ENV CMAKE_VERSION=3.17.2
 RUN apt-get update \
     && apt-get install -y software-properties-common \
     unzip wget git \
-    build-essential gdb clang clang-format clang-tidy
+    build-essential gdb clang clang-format clang-tidy \
+    libopenmpi-dev zlib1g-dev libsm6 libxext6 libxrender-dev \
+    libsdl2-dev
 
 # Install CMake binary
 RUN mkdir -p ~/temp \

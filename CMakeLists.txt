@@ -15,7 +15,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(TARGET_GROUP test CACHE STRING "What Should I Build?")
 
 # Modules that exist in both our release and our unit tests, are added now
-  add_subdirectory(src) 
+add_subdirectory(gb-lib)
 
 if(TARGET_GROUP STREQUAL production)
 # If we had any files that ONLY were compiled into our release, for example startup code,
@@ -26,6 +26,10 @@ elseif(TARGET_GROUP STREQUAL test)
   set(UNITY_EXTENSION_FIXTURE ON CACHE BOOL "" FORCE)
   add_subdirectory(Unity) 
   add_subdirectory(test) 
+  add_subdirectory(e2e)
+
+  # configure main
+
 else() 
   message(FATAL_ERROR "I don't know the TARGET_GROUP you gave me!")
 endif()

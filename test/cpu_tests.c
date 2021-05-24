@@ -9,7 +9,8 @@ TEST_GROUP(cpu);
 
 // Runs before each test
 TEST_SETUP(cpu) {
-    cpu = cpu_create();
+    mmu_t* mmu = mmu_create();
+    cpu = cpu_create(mmu);
 }
 
 // Runs after each test
