@@ -146,7 +146,6 @@ static void OP_17(cpu_t* cpu) {
 static void OP_18(cpu_t* cpu, uint8_t val) {
      short result = cpu->reg->pc + (short)val;
      cpu->reg->pc = result;
-     printf("pc has moved to: %x \n", cpu->reg->pc);
 }
 
 /* OP19 - ADD HL, DE */
@@ -158,7 +157,6 @@ static void OP_19(cpu_t* cpu) {
 static void OP_1A(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->de);
     cpu->reg->a = val;
-    cpu->debug = true;
 }
 
 /* OP1B - DEC DE */
@@ -207,9 +205,9 @@ static void OP_22(cpu_t* cpu) {
     mmu_write_addr8(cpu->mmu, cpu->reg->hl++, cpu->reg->a);
 }
 
-/* OP23 - INC DE */
+/* OP23 - INC HL*/
 static void OP_23(cpu_t* cpu) {
-    cpu->reg->de++;
+    cpu->reg->hl++;
 }
 
 /* OP24 - INC H */
@@ -908,6 +906,8 @@ static void OP_A0(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -922,6 +922,8 @@ static void OP_A1(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -936,6 +938,8 @@ static void OP_A2(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -950,6 +954,8 @@ static void OP_A3(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -964,6 +970,8 @@ static void OP_A4(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -978,6 +986,8 @@ static void OP_A5(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+    reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -992,8 +1002,9 @@ static void OP_A6(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
-
     set_halfcarry(cpu->reg);
     reset_carry(cpu->reg);
     reset_subtract(cpu->reg);
@@ -1006,6 +1017,8 @@ static void OP_A7(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     set_halfcarry(cpu->reg);
@@ -1020,6 +1033,8 @@ static void OP_A8(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1033,6 +1048,8 @@ static void OP_A9(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1048,6 +1065,8 @@ static void OP_AA(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1062,6 +1081,8 @@ static void OP_AB(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1076,6 +1097,8 @@ static void OP_AC(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1091,6 +1114,8 @@ static void OP_AD(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1106,6 +1131,8 @@ static void OP_AE(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1121,6 +1148,8 @@ static void OP_AF(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1136,6 +1165,8 @@ static void OP_B0(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1152,6 +1183,8 @@ static void OP_B1(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1167,6 +1200,8 @@ static void OP_B2(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1182,6 +1217,8 @@ static void OP_B3(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1197,6 +1234,8 @@ static void OP_B4(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1212,6 +1251,8 @@ static void OP_B5(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1227,6 +1268,8 @@ static void OP_B6(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else  {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1242,6 +1285,8 @@ static void OP_B7(cpu_t* cpu) {
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
     }
 
     reset_halfcarry(cpu->reg);
@@ -1430,10 +1475,13 @@ static void OP_D2(cpu_t* cpu, uint16_t addr) {
 
 /* OPD4 CALL NC a16 */
 static void OP_D4(cpu_t* cpu, uint16_t addr) {
-    stack_push(cpu, cpu->reg->pc);
-    cpu->reg->pc = addr;
-    // extra cycles
-    cpu->clock_cycle+=12;
+
+    if(!get_carry(cpu->reg)) {
+        stack_push(cpu, cpu->reg->pc);
+        cpu->reg->pc = addr;
+        // extra cycles
+        cpu->clock_cycle+=12;
+    }
 }
 
 /* OPD5 PUSH DE */
@@ -1504,7 +1552,7 @@ static void OP_E0(cpu_t* cpu, uint8_t addr) {
 
 /* OPE1 POP HL */
 static void OP_E1(cpu_t* cpu) {
-    cpu->reg->pc = stack_pop(cpu);
+    cpu->reg->hl = stack_pop(cpu);
 }
 
 /* OPE2 LD (C), A */
@@ -1518,15 +1566,26 @@ static void OP_E5(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->hl);
 }
 
-/* OPE6 ADD A d8*/
+/* OPE6 ADD AND d8*/
 static void OP_E6(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, val);
+    cpu->reg->a = cpu->reg->a & val;
+
+    if(cpu->reg->a == 0) {
+        set_zero(cpu->reg);
+    } else {
+        reset_zero(cpu->reg);
+    }
+
+    set_halfcarry(cpu->reg);
+    reset_carry(cpu->reg);
+    reset_subtract(cpu->reg);
+
 }
 
 /* OPE7 RST 20H */
 static void OP_E7(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->pc);
-    cpu->reg->sp = 0x20;
+    cpu->reg->pc = 0x20;
 }
 
 /* OPE8 ADD SP r8 */
@@ -1579,7 +1638,7 @@ static void OP_F0(cpu_t* cpu, uint8_t addr) {
 }
 /* OPF1 POP AF */
 static void OP_F1(cpu_t* cpu) {
-    cpu->reg->pc = stack_pop(cpu);
+    cpu->reg->af = stack_pop(cpu);
 }
 /* OPF2 LD A (C) */
 static void OP_F2(cpu_t* cpu) {
@@ -1869,11 +1928,11 @@ const struct op_t_ ops[256] = {
     { "CALL a16", 2, OP_CD, 24 },
     { "ADC A d8", 1, OP_CE, 8 },
     { "RST 08H", 0, OP_CF, 16 },
-    { "RET NC", 0, OP_D0, 20 },
+    { "RET NC", 0, OP_D0, 8 },
     { "POP DE", 0, OP_D1, 12 },
     { "JP NC a16", 2, OP_D2, 12 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
-    { "CALL NZ a16", 2, OP_D4, 12 },
+    { "CALL NC a16", 2, OP_D4, 12 },
     { "PUSH DE", 0, OP_D5, 16 },
     { "SUB d8", 0, OP_D6, 8 },
     { "RST 10H", 0, OP_D7, 16},
@@ -1906,15 +1965,15 @@ const struct op_t_ ops[256] = {
     { "LD A (C)", 0, OP_F2, 8 },
     { "DI", 0, OP_F3, 4 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
-    { "PUSH AF", 0, OP_F5, 4 },
-    { "OR d8", 1, OP_F6, 4 },
-    { "RST 30H", 0, OP_F7, 4 },
-    { "LD HL SP+r8", 1, OP_F8, 4 },
-    { "LD SP HL", 0, OP_F9, 4 },
-    { "LD A (a16)", 2, OP_FA, 4 },
+    { "PUSH AF", 0, OP_F5, 16 },
+    { "OR d8", 1, OP_F6, 8 },
+    { "RST 30H", 0, OP_F7, 16 },
+    { "LD HL SP+r8", 1, OP_F8, 12 },
+    { "LD SP HL", 0, OP_F9, 8 },
+    { "LD A (a16)", 2, OP_FA, 16 },
     { "EI", 0, OP_FB, 4 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
     { "UNDEFINED", 0, unknown_opcode, 0 },
-    { "CP d8", 1, OP_FE, 4 },
-    { "RST 38H", 0, OP_FF, 4 }
+    { "CP d8", 1, OP_FE, 8 },
+    { "RST 38H", 0, OP_FF, 16 }
 }; 

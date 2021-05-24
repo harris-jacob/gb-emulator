@@ -46,19 +46,16 @@ int main(int argc, char ** argv) {
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_RenderSetScale(renderer, 4, 4);
 
-    // runtime loop
-    tileset = fetch_tileset(emu->mmu);
-    render(renderer, tileset);
-
     // render loop
-    for(; ;) {
+    for(int i=0; i<= 10000000; i++) {
         uint32_t clock_delta = cpu_step(emu->cpu);
         ppu_clock_step(emu->cpu->mmu, clock_delta);
     }
 
-    tileset = fetch_tileset(emu->mmu);
+
     mmu_mem_dump(emu->mmu);
     for(; ;) {
+        tileset = fetch_tileset(emu->mmu);
         render(renderer, tileset);
     }
 

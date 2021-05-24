@@ -7,7 +7,7 @@
 #define SCREEN_HEIGHT 144
 
 // TODO move to ppu_t
-uint16_t ppu_clock;
+uint32_t ppu_clock;
 
 uint8_t* fetch_tileset(mmu_t* mmu) {
     // pointer to the start of tileset 1
@@ -97,24 +97,27 @@ void set_ppu_mode(mmu_t* mmu, uint32_t mode) {
     mmu_write_addr8(mmu, 0xff41, new);
 }
 
-uint8_t lines;
 
 // attribution: http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
-void ppu_clock_step(mmu_t* mmu, uint32_t instruction_time) {
+void ppu_clock_step(mmu_t* mmu, uint32_t clock) {
     
     uint8_t mode = get_ppu_mode(mmu);
-    ppu_clock += instruction_time;
+    
+    static uint32_t lastTicks = 0;
+
+    ppu_clock += clock - lastTicks;
+
+    lastTicks = clock;
 
     switch (mode)
     {
     // hblank
     case 0:
         if(ppu_clock >= 204) {
-            ppu_clock = 0;
+            ppu_clock-=204;
             
             // update ly val
             mmu->addr[0xff44]++;
-            lines++;
 
             // enter vblank
             if(mmu->addr[0xff44] == 143) {
@@ -128,7 +131,7 @@ void ppu_clock_step(mmu_t* mmu, uint32_t instruction_time) {
     // OAM read mode, scanline active
     case 2:
         if(ppu_clock >= 80) {
-            ppu_clock = 0;
+            ppu_clock-= 80;
             set_ppu_mode(mmu, 3);
         }
         break;
@@ -138,7 +141,7 @@ void ppu_clock_step(mmu_t* mmu, uint32_t instruction_time) {
         if(ppu_clock >= 172) {
             // enter hblank
             set_ppu_mode(mmu, 0);
-            ppu_clock = 0;
+            ppu_clock-=172;
 
             // write scanline
         }
@@ -147,8 +150,7 @@ void ppu_clock_step(mmu_t* mmu, uint32_t instruction_time) {
     // vblank
     case 1:
         if(ppu_clock >= 456) {
-            ppu_clock = 0;
-            lines++;
+            ppu_clock-=456;
             mmu->addr[0xff44]++;
 
             if(mmu->addr[0xff44] > 153) {

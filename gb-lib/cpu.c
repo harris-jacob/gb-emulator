@@ -45,10 +45,13 @@ void cpu_reset(cpu_t* cpu) {
     cpu->ime = false;
     cpu->stopped = false;
 }
-
+uint16_t last_pc;
+uint16_t last_op;
+uint16_t old_sp;
 /* execute the next instruction, update the cpu clock and return the number of cycles added */
 uint32_t cpu_step(cpu_t* cpu) {
     uint32_t old_clock = cpu->clock_cycle;
+    old_sp = cpu->reg->sp;
 
     if(cpu->stopped){
         return 0;
@@ -57,13 +60,12 @@ uint32_t cpu_step(cpu_t* cpu) {
 
     uint8_t opcode = mmu_read_addr8(cpu->mmu, cpu->reg->pc++);
 
+    last_op = opcode;
+    last_pc = cpu->reg->pc;
+
     // handle halt and interrupt
     if(cpu->halted || cpu->ime) {
        handle_interrupts(cpu);
-    }
-
-    if(opcode == 0xC7) {
-        printf("hello");
     }
     
     if(cpu->debug && opcode) {
@@ -152,16 +154,13 @@ void handle_interrupts(cpu_t* cpu) {
 }
 
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
-    if(cpu->reg->pc == 0x235 +1) {
-        printf("hit"); 
-        uint8_t val = cpu->mmu->addr[0xff44];
-        mmu_mem_dump(cpu->mmu);
-    }
+
     // Print for debug
     if(cpu->debug && op) {
         printf("executing op number: %x  op name: %s \n", op, ops[op].name);
-        printf("register values:  af=0x%x;  bc=0x%x;  de=0x%x;  hl=0x%x\n", 
-            cpu->reg->af, cpu->reg->bc, cpu->reg->de, cpu->reg->hl);
+        printf("register values:  a=0x%x; b=0x%x;  c=0x%x;  d=0x%x;  e=0x%x;  f=0x%x;  h=0x%x;  l=0x%x;\n", 
+            cpu->reg->a, cpu->reg->b, cpu->reg->c, cpu->reg->d, cpu->reg->e, cpu->reg->f, 
+            cpu->reg->h, cpu->reg->l);
     }
 
     // Handle opcode

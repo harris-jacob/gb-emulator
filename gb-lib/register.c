@@ -250,10 +250,6 @@ uint8_t alu_dec8(reg_t* reg, uint8_t a) {
 
 	a--;
 
-	if(a == 1) { 
-		printf("done!");
-	 }
-
 	if(a == 0 ) {
 		set_zero(reg);
 	} else {

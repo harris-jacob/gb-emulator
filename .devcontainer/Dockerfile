@@ -8,7 +8,7 @@ RUN apt-get update \
     && apt-get install -y software-properties-common \
     unzip wget git \
     build-essential gdb clang clang-format clang-tidy \
-    libsdl2-dev 
+    libsdl2-dev
 
 RUN apt-get install -y mesa-utils
 

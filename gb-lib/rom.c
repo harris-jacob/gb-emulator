@@ -61,7 +61,7 @@ rom_t* load_rom(const char* filepath, mmu_t* mmu) {
 	// read header
 	load_rom_header(fp, rom);
 
-	size_t write_size = fread(rom->memory->addr, sizeof(uint8_t), 32000, fp);
+	size_t write_size = fread(rom->memory->addr, sizeof(uint8_t), 32*1024, fp);
 	printf("Rom data - memory read: %lu Bs\n", write_size);
 	
 	return rom;
