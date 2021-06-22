@@ -20,6 +20,7 @@
         "cpu.h": "c",
         "emu.h": "c",
         "array": "c",
-        "initializer_list": "c"
+        "initializer_list": "c",
+        "unistd.h": "c"
     }
 }

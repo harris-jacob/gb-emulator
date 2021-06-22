@@ -6,9 +6,6 @@
 #define SCREEN_WIDTH 160
 #define SCREEN_HEIGHT 144
 
-// TODO move to ppu_t
-uint32_t ppu_clock;
-
 uint8_t* fetch_tileset(mmu_t* mmu) {
     // pointer to the start of tileset 1
     uint8_t* tile_set = (mmu->addr + 0x8000);
@@ -97,6 +94,8 @@ void set_ppu_mode(mmu_t* mmu, uint32_t mode) {
     mmu_write_addr8(mmu, 0xff41, new);
 }
 
+//TODO: bad global remove
+uint16_t ppu_clock = 0;
 
 // attribution: http://imrannazar.com/GameBoy-Emulation-in-JavaScript:-GPU-Timings
 void ppu_clock_step(mmu_t* mmu, uint32_t clock) {
@@ -153,14 +152,11 @@ void ppu_clock_step(mmu_t* mmu, uint32_t clock) {
             ppu_clock-=456;
             mmu->addr[0xff44]++;
 
-            if(mmu->addr[0xff44] > 153) {
+            if(mmu->addr[0xff44] >= 153) {
                 set_ppu_mode(mmu, 2);
                 mmu->addr[0xff44] = 0; 
             }
         }
-        break;
-    
-    default:
         break;
     }
 }

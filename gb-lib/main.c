@@ -49,11 +49,10 @@ int main(int argc, char ** argv) {
     // render loop
     for(int i=0; i<= 10000000; i++) {
         uint32_t clock_delta = cpu_step(emu->cpu);
-        ppu_clock_step(emu->cpu->mmu, clock_delta);
     }
 
-
     mmu_mem_dump(emu->mmu);
+
     for(; ;) {
         tileset = fetch_tileset(emu->mmu);
         render(renderer, tileset);
