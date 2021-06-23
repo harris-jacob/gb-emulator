@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
     //"./build/e2e/06-ld r,r.gb"
     mmu_t* mmu = mmu_create();
-    rom_t* rom = load_rom( "./gb-test-roms/cpu_instrs/individual/01-special.gb",mmu);
+    rom_t* rom = load_rom( "./gb-test-roms/cpu_instrs/individual/09-op r,r.gb",mmu);
     cpu_t* cpu = cpu_create(mmu);
     char out[100];
     uint8_t i=0;

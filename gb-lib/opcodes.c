@@ -82,8 +82,19 @@ static void OP_0E(cpu_t* cpu, uint8_t val) {
 }
 
 /* OP0F - RRCA */
-static void OP_0F(cpu_t* cpu, uint8_t val) {
-   cpu->reg->a = rr(cpu->reg, cpu->reg->a);
+static void OP_0F(cpu_t* cpu) {
+    uint8_t val = cpu->reg->a;
+    cpu->reg->a = (val>>1) | ((val&1)<<7);
+    
+    reset_halfcarry(cpu->reg);
+    reset_zero(cpu->reg);
+    reset_subtract(cpu->reg);
+
+    if(cpu->reg->a > 0x7f) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
 }
 
 /* OP10 - STOP d8 */
@@ -181,7 +192,23 @@ static void OP_1E(cpu_t* cpu, uint8_t val) {
 
 /* OP1F - RRA */
 static void OP_1F(cpu_t* cpu) {
-    cpu->reg->a =rr(cpu->reg, cpu->reg->a);
+    uint8_t val = cpu->reg->a;
+    uint8_t carry_bits = 0;
+    if (get_carry(cpu->reg)) {
+        carry_bits = 0x80;
+    }
+
+    cpu->reg->a = (val>>1) | carry_bits;
+
+    reset_halfcarry(cpu->reg);
+    reset_zero(cpu->reg);
+    reset_subtract(cpu->reg);
+    
+    if((1 & val) == 1) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
 }
 
 /* OP20 - JR NZ r8 */
@@ -1607,7 +1634,7 @@ static void OP_E8(cpu_t* cpu, char addr) {
 
 /* OPE9 JP (HL) */
 static void OP_E9(cpu_t* cpu) {
-    cpu->reg->pc = cpu->reg->hl;
+    cpu->reg->pc = cpu->reg->hl; 
 }
 /* OPEA LD (a16) A */
 static void OP_EA(cpu_t* cpu, uint16_t addr) {
