@@ -114,30 +114,32 @@ uint8_t alu_add8(reg_t* reg, uint8_t a, uint8_t b) {
 	return val;
 }
 
-void alu_adc8(reg_t* reg, uint8_t operand) {
+uint8_t alu_adc8(reg_t* reg, uint8_t a, uint8_t b) {
 	reset_subtract(reg);
 
-	int val = operand + get_carry(reg);
+	uint8_t val = a + b + get_carry(reg);
 	
-	if(val & 0xff00) {
+	if(should_add_carry8(b, 1)) {
 		set_carry(reg);
 	} else {
-		reset_carry(reg);
+		if(should_add_carry8(a, b+1)) {
+			set_carry(reg);
+		} else {
+			reset_carry(reg);
+		}
 	}
 
-	if(((operand & 0x0f) + (reg->a & 0x0f)) > 0x0f) {
+	if(should_add_halfcarry8(b, 1)) {
 		set_halfcarry(reg);
 	} else {
-		set_halfcarry(reg);
+		if(should_add_halfcarry8(a, b+1)) {
+			set_halfcarry(reg);
+		} else {
+			reset_halfcarry(reg);
+		}
 	}
 
-	if(operand == reg->a) {
-		set_zero(reg);
-	} else {
-		reset_zero(reg);
-	}
-
-	reg->a = (uint8_t)(val & 0xff); 
+	return val;
 }
 
 
@@ -297,13 +299,13 @@ uint8_t rlc(reg_t* reg, uint8_t a) {
 
 uint8_t rr(reg_t* reg, uint8_t a) {
 	// new carry
-	uint8_t carry = a & 1;
+	uint8_t carry = (a & 128) >> 7;
 
 	// shift
-	a = (a >> 1) | (get_carry(reg) << 7);
+	a = a<< 1 | get_carry(reg);
 	
 
-	if(carry == 1) {
+	if(carry) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
@@ -318,19 +320,18 @@ uint8_t rr(reg_t* reg, uint8_t a) {
 	// reset
 	reset_subtract(reg);
 	reset_halfcarry(reg);
-
-	return a;
 }
 
 
 uint8_t rl(reg_t* reg, uint8_t a) {
 	// new carry
-	uint8_t carry = a >> 7;
+	uint8_t carry = a & 1;
 
 	// shift
-	a = (a<<1)&0xFF | get_carry(reg);
+	a = a>>1 | (get_carry(reg) << 7);
+	
 
-	if(carry == 1) {
+	if(carry) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
@@ -345,8 +346,6 @@ uint8_t rl(reg_t* reg, uint8_t a) {
 	// reset
 	reset_subtract(reg);
 	reset_halfcarry(reg);
-
-	return a;
 }
 
 
@@ -410,8 +409,6 @@ uint8_t sra(reg_t* reg, uint8_t a) {
 	// reset
 	reset_zero(reg); 
 	reset_halfcarry(reg);
-
-	return a;
 }
 
 uint8_t set(uint8_t a, uint8_t n) {
@@ -422,7 +419,7 @@ uint8_t reset(uint8_t a, uint8_t n) {
 	return a &= ~(1 << 7);
 }
 
-void bit(reg_t* reg, uint8_t a, uint8_t n) {
+uint8_t bit(reg_t* reg, uint8_t a, uint8_t n) {
 	if((a>>n)&1) {
 		set_zero(reg);
 	} else {
@@ -451,8 +448,6 @@ uint8_t srl(reg_t* reg, uint8_t a) {
 
 	reset_halfcarry(reg);
 	reset_subtract(reg);
-
-	return a;
 }
 
 void cp(reg_t* reg, uint8_t val) {
