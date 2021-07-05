@@ -82,84 +82,84 @@ static void OP_3E(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, srl(cpu-
 static void OP_3F(cpu_t* cpu) { cpu->reg->a = srl(cpu->reg, cpu->reg->a); };
 
 // BIT 0 OPS
-static void OP_40(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 0); };
-static void OP_41(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 0); };
-static void OP_42(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 0); };
-static void OP_43(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 0); };
-static void OP_44(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->h, 0); };
-static void OP_45(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 0); }; 
-static void OP_46(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 0));};
-static void OP_47(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 0); };
+static void OP_40(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 0); };
+static void OP_41(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 0); };
+static void OP_42(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 0); };
+static void OP_43(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 0); };
+static void OP_44(cpu_t* cpu) { bit(cpu->reg, cpu->reg->h, 0); };
+static void OP_45(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 0); }; 
+static void OP_46(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 0);};
+static void OP_47(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 0); };
 
 // BIT 1 OPS
-static void OP_48(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 1); };
-static void OP_49(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 1); };
-static void OP_4A(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 1); };
-static void OP_4B(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 1); };
-static void OP_4C(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 1); };
-static void OP_4D(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 1); }; 
-static void OP_4E(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 1));};
-static void OP_4F(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 1); };
+static void OP_48(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 1); };
+static void OP_49(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 1); };
+static void OP_4A(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 1); };
+static void OP_4B(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 1); };
+static void OP_4C(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 1); };
+static void OP_4D(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 1); }; 
+static void OP_4E(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 1);};
+static void OP_4F(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 1); };
 
 // BIT 2 OPS
-static void OP_50(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 2); };
-static void OP_51(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 2); };
-static void OP_52(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 2); };
-static void OP_53(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 2); };
-static void OP_54(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 2); };
-static void OP_55(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 2); }; 
-static void OP_56(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 2));};
-static void OP_57(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 2); };
+static void OP_50(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 2); };
+static void OP_51(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 2); };
+static void OP_52(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 2); };
+static void OP_53(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 2); };
+static void OP_54(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 2); };
+static void OP_55(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 2); }; 
+static void OP_56(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 2);};
+static void OP_57(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 2); };
 
 // BIT 3 OPS
-static void OP_58(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 3); };
-static void OP_59(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 3); };
-static void OP_5A(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 3); };
-static void OP_5B(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 3); };
-static void OP_5C(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 3); };
-static void OP_5D(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 3); }; 
-static void OP_5E(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 3));};
-static void OP_5F(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 3); };
+static void OP_58(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 3); };
+static void OP_59(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 3); };
+static void OP_5A(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 3); };
+static void OP_5B(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 3); };
+static void OP_5C(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 3); };
+static void OP_5D(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 3); }; 
+static void OP_5E(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 3);};
+static void OP_5F(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 3); };
 
 // BIT 4 OPS
-static void OP_60(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 4); };
-static void OP_61(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 4); };
-static void OP_62(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 4); };
-static void OP_63(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 4); };
-static void OP_64(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 4); };
-static void OP_65(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 4); }; 
-static void OP_66(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 4));};
-static void OP_67(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 4); };
+static void OP_60(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 4); };
+static void OP_61(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 4); };
+static void OP_62(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 4); };
+static void OP_63(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 4); };
+static void OP_64(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 4); };
+static void OP_65(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 4); }; 
+static void OP_66(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 4);};
+static void OP_67(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 4); };
 
 // BIT 5 OPS
-static void OP_68(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 5); };
-static void OP_69(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 5); };
-static void OP_6A(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 5); };
-static void OP_6B(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 5); };
-static void OP_6C(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 5); };
-static void OP_6D(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 5); }; 
-static void OP_6E(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 5));};
-static void OP_6F(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 5); };
+static void OP_68(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 5); };
+static void OP_69(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 5); };
+static void OP_6A(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 5); };
+static void OP_6B(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 5); };
+static void OP_6C(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 5); };
+static void OP_6D(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 5); }; 
+static void OP_6E(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 5);};
+static void OP_6F(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 5); };
 
 // BIT 6 OPS
-static void OP_70(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 6); };
-static void OP_71(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 6); };
-static void OP_72(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 6); };
-static void OP_73(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 6); };
-static void OP_74(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 6); };
-static void OP_75(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 6); }; 
-static void OP_76(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 6));};
-static void OP_77(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 6); };
+static void OP_70(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 6); };
+static void OP_71(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 6); };
+static void OP_72(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 6); };
+static void OP_73(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 6); };
+static void OP_74(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 6); };
+static void OP_75(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 6); }; 
+static void OP_76(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 6);};
+static void OP_77(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 6); };
 
 // BIT 7 OPS
-static void OP_78(cpu_t* cpu) { cpu->reg->b = bit(cpu->reg, cpu->reg->b, 7); };
-static void OP_79(cpu_t* cpu) { cpu->reg->c = bit(cpu->reg, cpu->reg->c, 7); };
-static void OP_7A(cpu_t* cpu) { cpu->reg->d = bit(cpu->reg, cpu->reg->d, 7); };
-static void OP_7B(cpu_t* cpu) { cpu->reg->e = bit(cpu->reg, cpu->reg->e, 7); };
-static void OP_7C(cpu_t* cpu) { cpu->reg->h = bit(cpu->reg, cpu->reg->e, 7); };
-static void OP_7D(cpu_t* cpu) { cpu->reg->l = bit(cpu->reg, cpu->reg->l, 7); }; 
-static void OP_7E(cpu_t* cpu) { mmu_write_addr8(cpu->mmu, cpu->reg->hl, bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 7));};
-static void OP_7F(cpu_t* cpu) { cpu->reg->a = bit(cpu->reg, cpu->reg->a, 7); };
+static void OP_78(cpu_t* cpu) { bit(cpu->reg, cpu->reg->b, 7); };
+static void OP_79(cpu_t* cpu) { bit(cpu->reg, cpu->reg->c, 7); };
+static void OP_7A(cpu_t* cpu) { bit(cpu->reg, cpu->reg->d, 7); };
+static void OP_7B(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 7); };
+static void OP_7C(cpu_t* cpu) { bit(cpu->reg, cpu->reg->e, 7); };
+static void OP_7D(cpu_t* cpu) { bit(cpu->reg, cpu->reg->l, 7); }; 
+static void OP_7E(cpu_t* cpu) { bit(cpu->reg, mmu_read_addr8(cpu->mmu, cpu->reg->hl), 7);};
+static void OP_7F(cpu_t* cpu) { bit(cpu->reg, cpu->reg->a, 7); };
 
 // RES 0 OPS
 static void OP_80(cpu_t* cpu) { cpu->reg->b = reset(cpu->reg->b, 0); };

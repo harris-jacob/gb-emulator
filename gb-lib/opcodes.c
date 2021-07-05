@@ -82,8 +82,19 @@ static void OP_0E(cpu_t* cpu, uint8_t val) {
 }
 
 /* OP0F - RRCA */
-static void OP_0F(cpu_t* cpu, uint8_t val) {
-   cpu->reg->a = rr(cpu->reg, cpu->reg->a);
+static void OP_0F(cpu_t* cpu) {
+    uint8_t val = cpu->reg->a;
+    cpu->reg->a = (val>>1) | ((val&1)<<7);
+    
+    reset_halfcarry(cpu->reg);
+    reset_zero(cpu->reg);
+    reset_subtract(cpu->reg);
+
+    if(cpu->reg->a > 0x7f) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
 }
 
 /* OP10 - STOP d8 */
@@ -181,13 +192,27 @@ static void OP_1E(cpu_t* cpu, uint8_t val) {
 
 /* OP1F - RRA */
 static void OP_1F(cpu_t* cpu) {
-    cpu->reg->a =rr(cpu->reg, cpu->reg->a);
+    uint8_t val = cpu->reg->a;
+    uint8_t carry_bits = 0;
+    if (get_carry(cpu->reg)) {
+        carry_bits = 0x80;
+    }
+
+    cpu->reg->a = (val>>1) | carry_bits;
+
+    reset_halfcarry(cpu->reg);
+    reset_zero(cpu->reg);
+    reset_subtract(cpu->reg);
+    
+    if((1 & val) == 1) {
+        set_carry(cpu->reg);
+    } else {
+        reset_carry(cpu->reg);
+    }
 }
 
 /* OP20 - JR NZ r8 */
 static void OP_20(cpu_t* cpu, unsigned char val) {
-    signed char signed_val = (signed char) val;
-
     if(!get_zero(cpu->reg)) {
      cpu->reg->pc += (signed char)val;
      // extra cycles
@@ -367,7 +392,7 @@ static void OP_37(cpu_t* cpu, uint8_t val) {
 /* OP38 - JR C, r8 */
 static void OP_38(cpu_t* cpu, uint8_t val) {
     if(get_carry(cpu->reg)) {
-        short result = cpu->reg->pc + (short)val;
+        short result = cpu->reg->pc + (signed char)val;
         cpu->reg->pc = result;
 
         // extra cycles
@@ -780,42 +805,42 @@ static void OP_87(cpu_t* cpu) {
 
 /* OP88 ADC A, B */
 static void OP_88(cpu_t* cpu) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->b);
+    alu_adc8(cpu->reg, cpu->reg->b);
 }
 
 /* OP89 ADC A, C */
 static void OP_89(cpu_t* cpu) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->c);
+    alu_adc8(cpu->reg, cpu->reg->c);
 }
 
 /* OP8A ADC A, D */
 static void OP_8A(cpu_t* cpu) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->d);
+    alu_adc8(cpu->reg, cpu->reg->d);
 }
 
 /* OP8B ADC A, E */
 static void OP_8B(cpu_t* cpu) {
-   cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->e); 
+  alu_adc8(cpu->reg, cpu->reg->e); 
 }
 
 /* OP8C ADC A, E */
 static void OP_8C(cpu_t* cpu) {
-   cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->e); 
+   alu_adc8(cpu->reg, cpu->reg->e); 
 }
 
 /* OP8D ADC A, L */
 static void OP_8D(cpu_t* cpu) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->l);
+    alu_adc8(cpu->reg, cpu->reg->l);
 }
 
 /* OP8E ADC A, H */
 static void OP_8E(cpu_t* cpu) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, cpu->reg->h);
+    alu_adc8(cpu->reg, cpu->reg->h);
 }
 
 static void OP_8F(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, val);
+    alu_adc8(cpu->reg, val);
 }
 
 /* OP90 SUB B */
@@ -1281,7 +1306,7 @@ static void OP_B6(cpu_t* cpu) {
 /* OPB7 OR A  */
 static void OP_B7(cpu_t* cpu) {
 
-    cpu->reg->a = cpu->reg->a | cpu->reg->a;
+    cpu->reg->a |= cpu->reg->a;
 
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
@@ -1441,7 +1466,7 @@ static void OP_CD(cpu_t* cpu, uint16_t addr) {
 
 /* OPCE ADC A, d8 */
 static void OP_CE(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_adc8(cpu->reg, cpu->reg->a, val);
+    alu_adc8(cpu->reg, val);
 }
 
 /* OPCF RST 08H */
@@ -1609,7 +1634,7 @@ static void OP_E8(cpu_t* cpu, char addr) {
 
 /* OPE9 JP (HL) */
 static void OP_E9(cpu_t* cpu) {
-    cpu->reg->pc = mmu_read_addr16(cpu->mmu, cpu->reg->hl);
+    cpu->reg->pc = cpu->reg->hl; 
 }
 /* OPEA LD (a16) A */
 static void OP_EA(cpu_t* cpu, uint16_t addr) {
@@ -1632,13 +1657,15 @@ static void OP_EF(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = 0x28;
 }
+
 /* OPF0 LDH A (a8) */
 static void OP_F0(cpu_t* cpu, uint8_t addr) {
     cpu->reg->a = mmu_read_addr8(cpu->mmu, 0xFF00 + addr);
 }
 /* OPF1 POP AF */
 static void OP_F1(cpu_t* cpu) {
-    cpu->reg->af = stack_pop(cpu);
+    // The lower nibble of flag reg is unused
+    cpu->reg->af = stack_pop(cpu) & 0xFFF0;
 }
 /* OPF2 LD A (C) */
 static void OP_F2(cpu_t* cpu) {
@@ -1704,7 +1731,7 @@ static void OP_FA(cpu_t* cpu, uint16_t addr) {
 
 /* OPFB EI */
 static void OP_FB(cpu_t* cpu) {
-   cpu->ime = false;
+   cpu->ime = true;
 }
 
 /* OPFE CP d8 */
