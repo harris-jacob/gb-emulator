@@ -21,6 +21,9 @@
                 "emu.h": "c",
                 "array": "c",
                 "initializer_list": "c",
-                "unistd.h": "c"
+                "unistd.h": "c",
+                "cwchar": "c",
+                "limits": "c",
+                "functional": "c"
         }
 }
