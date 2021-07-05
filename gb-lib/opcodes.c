@@ -1657,6 +1657,7 @@ static void OP_EF(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->pc);
     cpu->reg->pc = 0x28;
 }
+
 /* OPF0 LDH A (a8) */
 static void OP_F0(cpu_t* cpu, uint8_t addr) {
     cpu->reg->a = mmu_read_addr8(cpu->mmu, 0xFF00 + addr);
@@ -1665,7 +1666,6 @@ static void OP_F0(cpu_t* cpu, uint8_t addr) {
 static void OP_F1(cpu_t* cpu) {
     // The lower nibble of flag reg is unused
     cpu->reg->af = stack_pop(cpu) & 0xFFF0;
-
 }
 /* OPF2 LD A (C) */
 static void OP_F2(cpu_t* cpu) {
@@ -1731,7 +1731,7 @@ static void OP_FA(cpu_t* cpu, uint16_t addr) {
 
 /* OPFB EI */
 static void OP_FB(cpu_t* cpu) {
-   cpu->ime = false;
+   cpu->ime = true;
 }
 
 /* OPFE CP d8 */

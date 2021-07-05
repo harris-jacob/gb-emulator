@@ -100,7 +100,7 @@ void unknown_opcode(cpu_t* cpu) {
 static void interrupt_handle(cpu_t* cpu, uint8_t i) {
    // if just halt we can unhalt
    if(!cpu->ime && cpu->halted) {
-       cpu->halted;
+       cpu->halted = false;
        return;
    }
 
