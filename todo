@@ -1,0 +1,25 @@
+# Instructions to test:
+ - stack_pop
+ - stack_push
+
+
+# utils
+- flag setters/getters/resetters
+- should carry/half carry
+- alu add
+- subtract
+- inc
+- dec
+- adc
+- sbc
+- rr
+- rl
+- rlc
+- rrc
+- swap
+- sla
+- set
+- reset
+- bit
+- srl
+- cp

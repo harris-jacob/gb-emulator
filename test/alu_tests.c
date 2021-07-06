@@ -81,6 +81,36 @@ TEST(alu, inc_ShouldSetZero) {
     TEST_ASSERT_EQUAL_UINT8(0b10100000, reg->f);
 }
 
+
+TEST(alu, dec_ShouldDecReg) {
+    reg->f = 0b00000000;
+
+    uint8_t val = alu_dec8(reg, 10);
+
+    TEST_ASSERT_EQUAL_UINT8(9, val);
+    TEST_ASSERT_EQUAL_UINT8(0b01000000,reg->f);
+}
+
+TEST(alu, dec_ShouldSetHalfCarry) {
+    reg->f = 0b00000000;
+
+    uint8_t val = alu_dec8(reg, 16);
+
+    TEST_ASSERT_EQUAL_UINT8(15, val);
+    TEST_ASSERT_EQUAL_UINT8(0b01100000, reg->f);
+}
+
+TEST(alu, dec_ShouldSetZero) {
+    reg->f = 0b00000000;
+
+    uint8_t val = alu_dec8(reg, 1);
+
+    TEST_ASSERT_EQUAL_UINT8(0, val);
+    TEST_ASSERT_EQUAL_UINT8(0b11000000, reg->f);
+}
+
+
+
 TEST_GROUP_RUNNER(alu) {
 
     // ADD
@@ -93,4 +123,9 @@ TEST_GROUP_RUNNER(alu) {
     RUN_TEST_CASE(alu, inc_ShouldIncReg);
     RUN_TEST_CASE(alu, inc_ShouldSetHalfCarry);
     RUN_TEST_CASE(alu, inc_ShouldSetZero);
+
+    // DEC
+    RUN_TEST_CASE(alu, dec_ShouldDecReg);
+    RUN_TEST_CASE(alu, dec_ShouldSetHalfCarry);
+    RUN_TEST_CASE(alu, dec_ShouldSetZero);
 }
