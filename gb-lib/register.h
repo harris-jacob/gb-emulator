@@ -96,42 +96,42 @@ bool should_sub_halfcarry16(uint16_t prev, uint16_t curr);
 bool should_sub_carry16(uint16_t prev, uint16_t curr);
 /* 
  * Adds two 8 bit numbers, sets register flags if necessary, 
- * returns the outcome
+ * outcome put in A register
  */
-uint8_t alu_add8(reg_t* reg, uint8_t a, uint8_t b);
+void alu_add8(reg_t* reg, uint8_t a);
+/* 
+ * Subtract 2 8 bit numbers, sets register flags if necessary, 
+ * outcome put in A register
+ */
+void alu_subtract8(reg_t* reg, uint8_t a);
 /* 
  * Adds two 16 bit numbers, sets register flags if necessary, 
- * returns the outcome
- */
-uint8_t alu_subtract8(reg_t* reg, uint8_t a, uint8_t b);
-/* 
- * Adds two 8 bit numbers, sets register flags if necessary, 
- * returns the outcome
+ * 
  */
 uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b);
 /*
 * Increment a uint8, set necessary flags
-* returns outcome
+* return outcome
 */
 uint8_t alu_inc8(reg_t* reg, uint8_t a);
 
 /*
 * Decrement a uint8, set necesarry flags
-* returns outcome
+* return outcome
 */
 uint8_t alu_dec8(reg_t* reg, uint8_t a);
 
 /*
 * 8 bit addition which also adds the carry flag to the output
-* handles flags output written to alu register.
+* handles flags output written to A register.
 */
 void alu_adc8(reg_t* reg, uint8_t operand);
 
 /*
 * 8 bit subtraction which also adds the carry flag to the output
-* handles flags returns outcome.
+* handles flags puts output in A.
 */
-uint8_t alu_sbc8(reg_t* reg, uint8_t a, uint8_t b);
+void alu_sbc8(reg_t* reg, uint8_t a);
 
 /*
 * Rotate right - rotate through carry

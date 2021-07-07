@@ -20,27 +20,56 @@ TEST_TEAR_DOWN(alu) {
     }
 }
 
+TEST(alu, alu_add8_ShouldAdd) {
+    reg->f = 0b01000000;
+    reg->a = 5;
+    alu_add8(reg, 5);
+
+    TEST_ASSERT_EQUAL_UINT8(10, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b00000000, reg->f);
+    
+}
+
 TEST(alu, alu_add8_ShouldSetHalfCarry) {
     reg->f = 0b10000000;
-    uint8_t val = alu_add8(reg, 11, 5);
+    reg->a = 11;
+    alu_add8(reg, 5);
 
-    TEST_ASSERT_EQUAL_UINT8(16, val);
+    TEST_ASSERT_EQUAL_UINT8(16, reg->a);
     TEST_ASSERT_EQUAL_UINT8(0b00100000, reg->f);
     
 }
 
 TEST(alu, alu_add8_ShouldSetCarry) {
     reg->f = 0b11000000;
-    uint8_t val = alu_add8(reg, 0xff, 128);
+    reg->a = 0xff;
+    alu_add8(reg, 128);
 
-    TEST_ASSERT_EQUAL_UINT8(127, val);
+    TEST_ASSERT_EQUAL_UINT8(127, reg->a);
     TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
     
 }
 
+TEST(alu, alu_add8_ShouldSetZero) {
+    reg->f = 0b00000000;
+    reg->a = 0;
+    alu_add8(reg, 0);
+
+    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b10000000, reg->f);
+}
+
+TEST(alu, alu_add16_ShouldAdd) {
+    reg->f = 0b00000000;
+    uint16_t val = alu_add16(reg, 120, 100);
+
+    TEST_ASSERT_EQUAL_UINT16(val, 220);
+    TEST_ASSERT_EQUAL_UINT8(0b00000000, reg->f);
+}
+
 TEST(alu, alu_add16_ShouldSetHalfCarry) {
     reg->f = 0b00000000;
-    uint16_t val = alu_add16(reg, 0xff, 10);
+    uint16_t val = alu_add16(reg, 255, 10);
 
     TEST_ASSERT_EQUAL_UINT16(265, val);
     TEST_ASSERT_EQUAL_UINT8(0b00100000, reg->f);
@@ -53,6 +82,53 @@ TEST(alu, alu_add16_ShouldSetCarry) {
     TEST_ASSERT_EQUAL_UINT16(16384, val);
     TEST_ASSERT_EQUAL_UINT16(16, reg->f);
 }
+
+TEST(alu, alu_add16_ShouldNotSetZero) {
+    reg->f = 0b00000000;
+    uint16_t val = alu_add16(reg, 0, 0);
+
+    TEST_ASSERT_EQUAL_UINT16(0, val);
+    TEST_ASSERT_EQUAL_UINT8(0b000000000, reg->f);
+}
+
+TEST(alu, alu_sub8_ShouldSubtract) {
+    reg->f = 0b00000000;
+    reg->a = 8;
+    alu_subtract8(reg, 2);
+
+    TEST_ASSERT_EQUAL_UINT16(6, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b01000000, reg->f);
+}
+
+TEST(alu, alu_sub8_ShouldSetHalfCarry) {
+    reg->f = 0b00000000;
+    reg->a = 16;
+
+    alu_subtract8(reg, 2);
+
+    TEST_ASSERT_EQUAL_UINT8(14, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b01100000, reg->f);
+}
+
+TEST(alu, alu_sub8_ShouldSetCarry) {
+    reg->f = 0b00000000;
+    reg->a = 128;
+    alu_subtract8(reg, 64);
+
+    TEST_ASSERT_EQUAL_UINT8(64, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b01010000, reg->f);
+}
+
+TEST(alu, alu_sub8_ShouldSetZero) {
+    reg->f = 0b00000000;
+    reg->a = 10;
+    alu_subtract8(reg, 10);
+    
+    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(0b11000000, reg->f);
+}
+
+
 
 TEST(alu, inc_ShouldIncReg) {
     reg->f = 0b01000000;
@@ -110,14 +186,25 @@ TEST(alu, dec_ShouldSetZero) {
 }
 
 
-
 TEST_GROUP_RUNNER(alu) {
 
-    // ADD
+    // ADD 8
+    RUN_TEST_CASE(alu, alu_add8_ShouldAdd);
     RUN_TEST_CASE(alu, alu_add8_ShouldSetHalfCarry);
     RUN_TEST_CASE(alu, alu_add8_ShouldSetCarry);
+    RUN_TEST_CASE(alu, alu_add8_ShouldSetZero);
+
+    // ADD 16
+    RUN_TEST_CASE(alu, alu_add16_ShouldAdd);
     RUN_TEST_CASE(alu, alu_add16_ShouldSetHalfCarry);
     RUN_TEST_CASE(alu, alu_add16_ShouldSetCarry);
+    RUN_TEST_CASE(alu, alu_add16_ShouldNotSetZero);
+
+    // Sub
+    RUN_TEST_CASE(alu, alu_sub8_ShouldSubtract);
+    RUN_TEST_CASE(alu, alu_sub8_ShouldSetHalfCarry);
+    RUN_TEST_CASE(alu, alu_sub8_ShouldSetCarry);
+    RUN_TEST_CASE(alu, alu_sub8_ShouldSetZero);
 
     // INC
     RUN_TEST_CASE(alu, inc_ShouldIncReg);

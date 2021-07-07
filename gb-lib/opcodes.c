@@ -764,43 +764,43 @@ static void OP_7F(cpu_t* cpu) {
 
 /* OP80 ADD A,B */
 static void OP_80(cpu_t* cpu) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->b);
+    alu_add8(cpu->reg, cpu->reg->b);
 }
 
 /* OP81 ADD A, C */ 
 static void OP_81(cpu_t* cpu) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->c);
+    alu_add8(cpu->reg, cpu->reg->c);
 }
 
 /* OP82 ADD A, D */
 static void OP_82(cpu_t* cpu) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->d);
+    alu_add8(cpu->reg, cpu->reg->d);
 }
 
 /* OP83 ADD A, E */
 static void OP_83(cpu_t* cpu) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->e);
+    alu_add8(cpu->reg, cpu->reg->e);
 }
 
 /* OP84 ADD A, H */
 static void OP_84(cpu_t* cpu) {
-    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->h);
+    alu_add8(cpu->reg, cpu->reg->h);
 }
 
 /* OP85 ADD A, L */
 static void OP_85(cpu_t* cpu) {
-    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->l);
+    alu_add8(cpu->reg, cpu->reg->l);
 }
 
 /* OP86 ADD A, (HL) */
 static void OP_86(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl); 
-    cpu->reg->h = alu_add8(cpu->reg, cpu->reg->a, val);
+    alu_add8(cpu->reg, val);
 }
 
 /* OP87 ADD A, A */
 static void OP_87(cpu_t* cpu) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, cpu->reg->a);
+    alu_add8(cpu->reg, cpu->reg->a);
 }
 
 /* OP88 ADC A, B */
@@ -845,84 +845,84 @@ static void OP_8F(cpu_t* cpu) {
 
 /* OP90 SUB B */
 static void OP_90(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->b);
+    alu_subtract8(cpu->reg, cpu->reg->b);
 }
 
 /* OP91 SUB C */
 static void OP_91(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->c);
+    alu_subtract8(cpu->reg, cpu->reg->c);
 }
 
 /* OP92 SUB D */
 static void OP_92(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->d);
+    alu_subtract8(cpu->reg, cpu->reg->d);
 }
 
 /* OP93 SUB E */
 static void OP_93(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->e);
+    alu_subtract8(cpu->reg, cpu->reg->e);
 }
 
 /* OP94 SUB H */
 static void OP_94(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->h);
+    alu_subtract8(cpu->reg, cpu->reg->h);
 }
 
 /* OP95 SUB H */
 static void OP_95(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->l);
+    alu_subtract8(cpu->reg, cpu->reg->l);
 }
 
 /* OP95 SUB (HL) */
 static void OP_96(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, val);
+    alu_subtract8(cpu->reg, val);
 }
 
 /* OP96 SUB A */
 static void OP_97(cpu_t* cpu) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, cpu->reg->a);
+    alu_subtract8(cpu->reg, cpu->reg->a);
 }
 
 /* OP98 SBC A, B */
 static void OP_98(cpu_t* cpu) {
-    cpu->reg->a - alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->b);
+    alu_sbc8(cpu->reg, cpu->reg->b);
 }
 
 /* OP99 SBC A, C */
 static void OP_99(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->c);
+    alu_sbc8(cpu->reg, cpu->reg->c);
 }
 
 /* OP9A SBC A, D */ 
 static void OP_9A(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->d);
+    alu_sbc8(cpu->reg, cpu->reg->d);
 }
 
 /* OP9B SBC A, E */
 static void OP_9B(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->e);
+    alu_sbc8(cpu->reg, cpu->reg->e);
 }
 
 /* OP9C SBC A, H */
 static void OP_9C(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a , cpu->reg->h);
+    alu_sbc8(cpu->reg, cpu->reg->h);
 }
 
 /* OP9D SBC A, L */
 static void OP_9D(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->l);
+    alu_sbc8(cpu->reg, cpu->reg->l);
 }
 
 /* OP9E SBC A, (HL) */
 static void OP_9E(cpu_t* cpu) {
     uint8_t val = mmu_read_addr8(cpu->mmu, cpu->reg->hl);
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, val);
+    alu_sbc8(cpu->reg, val);
 }
 
 /* OP9F SBC A, A */
 static void OP_9F(cpu_t* cpu) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, cpu->reg->a);
+    alu_sbc8(cpu->reg, cpu->reg->a);
 }
 
 /* OPA0 AND B */
@@ -1408,7 +1408,7 @@ static void OP_C5(cpu_t* cpu) {
 
 /* OPC6 ADD A, d8*/
 static void OP_C6(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_add8(cpu->reg, cpu->reg->a, val);
+    alu_add8(cpu->reg, val);
 }
 
 /* OPC7 RST 00H */
@@ -1516,7 +1516,7 @@ static void OP_D5(cpu_t* cpu) {
 
 /* OPD6 SUB d8 */
 static void OP_D6(cpu_t* cpu, uint16_t val) {
-    cpu->reg->a = alu_subtract8(cpu->reg, cpu->reg->a, val);
+    alu_subtract8(cpu->reg, val);
 }
 
 /* OPD7 RST 10H */
@@ -1561,7 +1561,7 @@ static void OP_DC(cpu_t* cpu, uint16_t addr) {
 
 /* OPDE SBC A d8 */
 static void OP_DE(cpu_t* cpu, uint8_t val) {
-    cpu->reg->a = alu_sbc8(cpu->reg, cpu->reg->a, val);
+    alu_sbc8(cpu->reg, val);
 }
 
 /* OPDF RST 18H */

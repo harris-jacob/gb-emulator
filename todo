@@ -6,10 +6,10 @@
 # utils
 - flag setters/getters/resetters
 - should carry/half carry
-- alu add
-- subtract
-- inc
-- dec
+- alu add x
+- subtract x
+- inc x
+- dec x
 - adc
 - sbc
 - rr
@@ -23,3 +23,5 @@
 - bit
 - srl
 - cp
+
+# TODO - fix should carry funcs
