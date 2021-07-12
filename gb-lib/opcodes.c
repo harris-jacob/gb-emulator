@@ -1642,7 +1642,7 @@ static void OP_EA(cpu_t* cpu, uint16_t addr) {
 }
 /* OPEE XOR d8 */
 static void OP_EE(cpu_t* cpu, uint8_t val) {
-    
+
     cpu->reg->a = cpu->reg->a ^ val;
     if(cpu->reg->a == 0) {
         set_zero(cpu->reg);
@@ -1652,6 +1652,7 @@ static void OP_EE(cpu_t* cpu, uint8_t val) {
     reset_carry(cpu->reg);
     reset_subtract(cpu->reg);
 }
+
 /* OPEF RST 28H */
 static void OP_EF(cpu_t* cpu) {
     stack_push(cpu, cpu->reg->pc);

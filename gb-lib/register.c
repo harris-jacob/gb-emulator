@@ -62,28 +62,30 @@ uint8_t get_subtract(reg_t* reg) {
 	return GET_BIT(reg->f, 6);
 }
 
-bool should_add_halfcarry8(uint8_t a, uint8_t b) {	
-	return ((a & 0xf) + (b & 0xf)) & 0x10 == 0x10;
+bool should_add_halfcarry8(uint8_t a, uint8_t b) {
+	return (((a & 0xf) + (b & 0xf)) & 0x10);
 }
 
 bool should_add_halfcarry16(uint16_t a, uint16_t b) {
-	return ((a & 0xff) + (b & 0xff)) & 0x100 == 0x100;
+	return  (((a & 0xff) + (b & 0xff)) & 0x100);
 }
 
 bool should_add_carry8(uint8_t a, uint8_t b) {
-	return ((a&0xff) + (b&0xff))&0x100 == 0x100;
+	uint16_t out = a + b;
+	return out > 0xff;
 }
 
 bool should_add_carry16(uint16_t a, uint16_t b) {
-	return ((a&0xffff) + (b&0xfff))&0x100 == 0x100;
+	uint32_t out = a + b;
+	return out > 0xffff;
 }
 
 bool should_sub_halfcarry8(uint8_t a, uint8_t b) {
-	return (b & 0xf) > (a & 0xf);	
+	return (((a & 0xf) - (b & 0xf)) & 0x10) == 0x10;
 }
 
 bool should_sub_carry8(uint8_t a, uint8_t b) {
-	return (b & 0xff) > (a & 0xff);
+		return b > a;
 }
 
 void alu_add8(reg_t* reg, uint8_t a) {
@@ -109,7 +111,6 @@ void alu_add8(reg_t* reg, uint8_t a) {
 	} else {
 		reset_zero(reg);
 	} 
-
 }
 
 void alu_adc8(reg_t* reg, uint8_t operand) {
@@ -117,13 +118,13 @@ void alu_adc8(reg_t* reg, uint8_t operand) {
 
 	int val = operand + get_carry(reg);
 	
-	if(val & 0xff00) {
+	if(should_add_halfcarry8(reg->a, val)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(((operand & 0x0f) + (reg->a & 0x0f)) > 0x0f) {
+	if(should_add_carry8(reg->a, val)) {
 		set_halfcarry(reg);
 	} else {
 		set_halfcarry(reg);
@@ -135,9 +136,8 @@ void alu_adc8(reg_t* reg, uint8_t operand) {
 		reset_zero(reg);
 	}
 
-	reg->a = (uint8_t)(val & 0xff);
+	reg->a += (uint8_t)(val & 0xff);
 }
-
 
 void alu_sbc8(reg_t* reg, uint8_t a) {
 	set_subtract(reg);
@@ -163,7 +163,7 @@ void alu_sbc8(reg_t* reg, uint8_t a) {
 			reset_halfcarry(reg);
 		}
 	}
-	reg->a = (uint8_t)(val & 0xff);
+	reg->a += val;
 }
 
 uint16_t alu_add16(reg_t* reg, uint16_t a, uint16_t b) {

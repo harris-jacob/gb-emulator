@@ -112,10 +112,10 @@ TEST(alu, alu_sub8_ShouldSetHalfCarry) {
 
 TEST(alu, alu_sub8_ShouldSetCarry) {
     reg->f = 0b00000000;
-    reg->a = 128;
-    alu_subtract8(reg, 64);
+    reg->a = 0b00100000;
+    alu_subtract8(reg, 0b11000000);
 
-    TEST_ASSERT_EQUAL_UINT8(64, reg->a);
+    TEST_ASSERT_EQUAL_UINT8(96, reg->a);
     TEST_ASSERT_EQUAL_UINT8(0b01010000, reg->f);
 }
 
@@ -127,8 +127,6 @@ TEST(alu, alu_sub8_ShouldSetZero) {
     TEST_ASSERT_EQUAL_UINT8(0, reg->a);
     TEST_ASSERT_EQUAL_UINT8(0b11000000, reg->f);
 }
-
-
 
 TEST(alu, inc_ShouldIncReg) {
     reg->f = 0b01000000;
@@ -185,6 +183,16 @@ TEST(alu, dec_ShouldSetZero) {
     TEST_ASSERT_EQUAL_UINT8(0b11000000, reg->f);
 }
 
+TEST(alu, adc_ShouldEqualAddIfNoCarrySet) {
+    reg->f = 0b00000000;
+    reg->a = 5;
+
+    alu_adc8(reg, 5);
+    
+    TEST_ASSERT_EQUAL(10, reg->a);
+    TEST_ASSERT_EQUAL(0, reg->f);
+}
+
 
 TEST_GROUP_RUNNER(alu) {
 
@@ -215,4 +223,7 @@ TEST_GROUP_RUNNER(alu) {
     RUN_TEST_CASE(alu, dec_ShouldDecReg);
     RUN_TEST_CASE(alu, dec_ShouldSetHalfCarry);
     RUN_TEST_CASE(alu, dec_ShouldSetZero);
+
+    // ADC
+    RUN_TEST_CASE(alu, adc_ShouldEqualAddIfNoCarrySet);
 }
