@@ -193,6 +193,45 @@ TEST(alu, adc_ShouldEqualAddIfNoCarrySet) {
     TEST_ASSERT_EQUAL(0, reg->f);
 }
 
+TEST(alu, adc_ShouldAddCarryIfSet) {
+    reg->f = 0b00010000;
+    reg->a = 5;
+
+    alu_adc8(reg, 4);
+    
+    TEST_ASSERT_EQUAL(10, reg->a);
+    TEST_ASSERT_EQUAL(0, reg->f);
+}
+
+TEST(alu, adc_ShouldSetHalfCarry) {
+    reg->f = 0b00010000;
+    reg->a = 5;
+
+    alu_adc8(reg, 10);
+    
+    TEST_ASSERT_EQUAL(16, reg->a);
+    TEST_ASSERT_EQUAL(32, reg->f);
+}
+
+TEST(alu, adc_ShouldSetCarry) {
+    reg->f = 0b00000000;
+    reg->a = 255;
+
+    alu_adc8(reg, 64);
+    
+    TEST_ASSERT_EQUAL(63, reg->a);
+    TEST_ASSERT_EQUAL(16, reg->f);
+}
+
+TEST(alu, adc_ShouldSetZero) {
+    reg->f = 0b00010000;
+    reg->a = 255;
+
+    alu_adc8(reg, 0);
+    
+    TEST_ASSERT_EQUAL(0, reg->a);
+    TEST_ASSERT_EQUAL(176, reg->f);
+}
 
 TEST_GROUP_RUNNER(alu) {
 
@@ -226,4 +265,10 @@ TEST_GROUP_RUNNER(alu) {
 
     // ADC
     RUN_TEST_CASE(alu, adc_ShouldEqualAddIfNoCarrySet);
+    RUN_TEST_CASE(alu, adc_ShouldAddCarryIfSet);
+    RUN_TEST_CASE(alu, adc_ShouldSetHalfCarry);
+    RUN_TEST_CASE(alu, adc_ShouldSetCarry);
+    RUN_TEST_CASE(alu, adc_ShouldSetZero);
+
+    // SBC
 }

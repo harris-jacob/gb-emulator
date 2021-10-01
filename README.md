@@ -25,8 +25,8 @@ Once you've done this, you can follow these steps:
 - [x] Unity setup
 - [x] MMU implementation
 - [x] Register implementation
-- [ ] All ALU/BIN operations
-- [ ] CPU implmentation
+- [x] All ALU/BIN operations
+- [x] CPU implmentation
 - [ ] PPU implementation
 - [ ] UI 
 - [ ] Web build?

@@ -119,24 +119,24 @@ void alu_adc8(reg_t* reg, uint8_t operand) {
 	int val = operand + get_carry(reg);
 	
 	if(should_add_halfcarry8(reg->a, val)) {
+		set_halfcarry(reg);
+	} else {
+		reset_halfcarry(reg);
+	}
+
+	if(should_add_carry8(reg->a, val)) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	if(should_add_carry8(reg->a, val)) {
-		set_halfcarry(reg);
-	} else {
-		set_halfcarry(reg);
-	}
+	reg->a += (uint8_t)(val & 0xff);
 
-	if(operand == reg->a) {
+	if(reg->a == 0) {
 		set_zero(reg);
 	} else {
 		reset_zero(reg);
 	}
-
-	reg->a += (uint8_t)(val & 0xff);
 }
 
 void alu_sbc8(reg_t* reg, uint8_t a) {
