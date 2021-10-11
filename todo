@@ -10,9 +10,9 @@
 - subtract x
 - inc x
 - dec x
-- adc
-- sbc
-- rr
+- adc x
+- sbc x
+- rr 
 - rl
 - rlc
 - rrc

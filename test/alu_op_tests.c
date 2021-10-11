@@ -233,6 +233,57 @@ TEST(alu, adc_ShouldSetZero) {
     TEST_ASSERT_EQUAL(176, reg->f);
 }
 
+TEST(alu, sbc_ShouldEqualSubIfNoCarrySet) {
+    reg->f = 0b00000000;
+    reg->a = 10;
+
+    alu_sbc8(reg, 5);
+    
+    TEST_ASSERT_EQUAL(5, reg->a);
+    // SUB set
+    TEST_ASSERT_EQUAL(64, reg->f);
+}
+
+TEST(alu, sbc_ShouldSubCarryIfSet) {
+    reg->f = 0b00010000;
+    reg->a = 6;
+
+    alu_sbc8(reg, 4);
+    
+    TEST_ASSERT_EQUAL(1, reg->a);
+    TEST_ASSERT_EQUAL(64, reg->f);
+}
+
+TEST(alu, sbc_ShouldSetHalfCarry) {
+    reg->f = 0b00010000;
+    reg->a = 48;
+
+    alu_sbc8(reg, 7);
+    
+    TEST_ASSERT_EQUAL(40, reg->a);
+    TEST_ASSERT_EQUAL(96, reg->f);
+}
+
+TEST(alu, sbc_ShouldSetCarry) {
+    reg->f = 0b00000000;
+    reg->a = 128;
+
+    alu_sbc8(reg, 192);
+    
+    TEST_ASSERT_EQUAL(192, reg->a);
+    TEST_ASSERT_EQUAL(80, reg->f);
+}
+
+TEST(alu, sbc_ShouldSetZero) {
+    reg->f = 0b00010000;
+    reg->a = 5;
+
+    alu_sbc8(reg, 4);
+    
+    TEST_ASSERT_EQUAL(0, reg->a);
+    TEST_ASSERT_EQUAL(192, reg->f);
+}
+
 TEST_GROUP_RUNNER(alu) {
 
     // ADD 8
@@ -271,4 +322,9 @@ TEST_GROUP_RUNNER(alu) {
     RUN_TEST_CASE(alu, adc_ShouldSetZero);
 
     // SBC
+    RUN_TEST_CASE(alu, sbc_ShouldEqualSubIfNoCarrySet);
+    RUN_TEST_CASE(alu, sbc_ShouldSubCarryIfSet);
+    RUN_TEST_CASE(alu, sbc_ShouldSetHalfCarry);
+    RUN_TEST_CASE(alu, sbc_ShouldSetCarry);
+    RUN_TEST_CASE(alu, sbc_ShouldSetZero);
 }
