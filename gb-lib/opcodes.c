@@ -135,22 +135,9 @@ static void OP_16(cpu_t* cpu, uint8_t val) {
 
 /* OP17 - RLA */
 static void OP_17(cpu_t* cpu) {
-    
+    cpu->reg->a = rl(cpu->reg, cpu->reg->a);
+    // RLA always resets zero
     reset_zero(cpu->reg);
-    reset_halfcarry(cpu->reg);
-    reset_subtract(cpu->reg);
-    uint8_t prev_car = get_carry(cpu->reg);
-    if(cpu->reg->a & 1 == 1) {
-       set_carry(cpu->reg);
-    } else {
-       reset_carry(cpu->reg);
-    }
-
-    if(prev_car == 0) {
-       cpu->reg->a = cpu->reg->a >> 1;
-    } else {
-        cpu->reg->a = (cpu->reg->a >> 1) | 128;
-    }
 }
 
 /* OP18 - JR r8 */
@@ -192,23 +179,9 @@ static void OP_1E(cpu_t* cpu, uint8_t val) {
 
 /* OP1F - RRA */
 static void OP_1F(cpu_t* cpu) {
-    uint8_t val = cpu->reg->a;
-    uint8_t carry_bits = 0;
-    if (get_carry(cpu->reg)) {
-        carry_bits = 0x80;
-    }
-
-    cpu->reg->a = (val>>1) | carry_bits;
-
-    reset_halfcarry(cpu->reg);
+    cpu->reg->a = rr(cpu->reg, cpu->reg->a);
+    // RRA always resets zero
     reset_zero(cpu->reg);
-    reset_subtract(cpu->reg);
-    
-    if((1 & val) == 1) {
-        set_carry(cpu->reg);
-    } else {
-        reset_carry(cpu->reg);
-    }
 }
 
 /* OP20 - JR NZ r8 */

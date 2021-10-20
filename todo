@@ -12,16 +12,17 @@
 - dec x
 - adc x
 - sbc x
-- rr 
-- rl
-- rlc
-- rrc
+- rr  x
+- r   x
+- rlc x
+- rrc x
 - swap
-- sla
+- sla x
+- sra x
 - set
 - reset
 - bit
-- srl
+- srl x
 - cp
 
 # TODO - fix should carry funcs

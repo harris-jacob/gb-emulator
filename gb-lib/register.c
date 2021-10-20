@@ -254,26 +254,13 @@ uint8_t alu_dec8(reg_t* reg, uint8_t a) {
 }
 
 uint8_t rrc(reg_t* reg, uint8_t a) {
-	a = ( a >> 1 ) | (a << 7);
-	
-
-	if(a == 0) {
-		set_zero(reg);
-	} else {
-		reset_carry(reg);
-	}
-
-	if(a & 0x80) {
+	if(a & 1 ) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
-	return a;
-}
-
-uint8_t rlc(reg_t* reg, uint8_t a) {
-	a = ( a << 1 ) | (a >> 7);
+	a = ( a >> 1 ) | (a << 7);
 
 	if(a == 0) {
 		set_zero(reg);
@@ -281,12 +268,31 @@ uint8_t rlc(reg_t* reg, uint8_t a) {
 		reset_zero(reg);
 	}
 
+	reset_halfcarry(reg);
+	reset_subtract(reg);	
+
+	return a;
+}
+
+uint8_t rlc(reg_t* reg, uint8_t a) {
+
 	if(a & 0x80) {
 		set_carry(reg);
 	} else {
 		reset_carry(reg);
 	}
 
+	a = ( a << 1 ) | (a >> 7);
+	
+	if(a == 0) {
+		set_zero(reg);
+	} else {
+		reset_zero(reg);
+	}
+
+	reset_halfcarry(reg);
+	reset_subtract(reg);
+	
 	return a;
 }
 
@@ -324,7 +330,7 @@ uint8_t rl(reg_t* reg, uint8_t a) {
 	uint8_t carry = (a & 128) >> 7;
 
 	// shift
-	a = a<<1 | get_carry(reg) ;
+	a = a<<1 | get_carry(reg);
 	
 
 	if(carry) {
@@ -375,9 +381,9 @@ uint8_t sla(reg_t* reg, uint8_t a) {
 	}
 
 	if(a == 0) {
-		set_carry(reg);
+		set_zero(reg);
 	} else {
-		reset_carry(reg);
+		reset_zero(reg);
 	}
 
 	// reset
@@ -398,15 +404,17 @@ uint8_t sra(reg_t* reg, uint8_t a) {
 		reset_carry(reg);
 	}
 
-	if(carry == 0) {
-		set_carry(reg);
+	if(a == 0) {
+		set_zero(reg);
 	} else {
-		reset_carry(reg);
+		reset_zero(reg);
 	}
 
 	// reset
-	reset_zero(reg); 
+	reset_subtract(reg); 
 	reset_halfcarry(reg);
+
+	return a;
 }
 
 uint8_t set(uint8_t a, uint8_t n) {
@@ -446,6 +454,8 @@ uint8_t srl(reg_t* reg, uint8_t a) {
 
 	reset_halfcarry(reg);
 	reset_subtract(reg);
+
+	return a;
 }
 
 void cp(reg_t* reg, uint8_t val) {
