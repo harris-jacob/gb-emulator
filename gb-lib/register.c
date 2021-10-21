@@ -354,12 +354,12 @@ uint8_t rl(reg_t* reg, uint8_t a) {
 
 
 uint8_t swap(reg_t* reg, uint8_t a) {
-	a = ((a & 0x0f) << 4 || (a & 0xf0) >> 4);
+	a = ((a & 0x0f) << 4 | (a & 0xf0) >> 4);
 
 	if(a == 0) {
 		set_zero(reg);
 	} else {
-		reset_carry(reg);
+		reset_zero(reg);
 	}
 
 	// reset flags
@@ -422,11 +422,17 @@ uint8_t set(uint8_t a, uint8_t n) {
 }
 
 uint8_t reset(uint8_t a, uint8_t n) {
-	return a &= ~(1 << 7);
+	return a &= ~(1 << n);
 }
 
 void bit(reg_t* reg, uint8_t a, uint8_t n) {
 	if((a>>n)&1) {
+		set_carry(reg);
+	} else {
+		reset_carry(reg);
+	}
+
+	if(a == 0) {
 		set_zero(reg);
 	} else {
 		reset_zero(reg);
@@ -466,10 +472,10 @@ void cp(reg_t* reg, uint8_t val) {
         reset_carry(reg);
     }
 
-    if((val & 0x0f) > (reg->a & 0x0f)) {
+    if((reg->a & 0x0f) < (val & 0x0f)) {
         set_halfcarry(reg);
     } else {
-        set_halfcarry(reg);
+        reset_halfcarry(reg);
     }
 
     if(reg->a == val) {

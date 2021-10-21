@@ -2,6 +2,7 @@
 #include "register.h"
 #include "unity_fixture.h"
 
+
 reg_t* reg;
 
 // Register group
@@ -19,169 +20,88 @@ TEST_TEAR_DOWN(bit) {
     }
 }
 
-TEST(bit, bit_rr_ShouldRotateBitsThroughCarry) {
-    reg->f = 0b10010000;
-    reg->a = 0b11001010;
-    reg->a = rr(reg, reg->a);
+TEST(bit, bit_SwapShouldSwapNibbles) {
 
-    TEST_ASSERT_EQUAL_UINT8(0b11100101, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0, reg->f);
-}
-
-TEST(bit, bit_rr_ShouldSetZeroAndCarry) {
-    reg->f = 0b00000000;
-    reg->a = 0b00000001;
-    reg->a = rr(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(144, reg->f);
-}
-
-TEST(bit, bit_rl_ShouldRotateBitsThroughCarry) {
-    reg->f = 0b10010000;
-    reg->a = 0b01001010;
-    reg->a = rl(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0b10010101, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0, reg->f);
-}
-
-TEST(bit, bit_rl_ShouldSetZeroAndCarry) {
-    reg->f = 0b00000000;
-    reg->a = 0b10000000;
-    reg->a = rl(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(144, reg->f);
-}
-
-TEST(bit, bit_rrc_ShouldRotateBitsAndCopyToCarry) {
-    reg->f = 0b10000000;
-    reg->a = 0b01001011;
-    reg->a = rrc(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0b10100101, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
+    uint8_t a = 0b10110000;
+    uint8_t val1 = swap(reg, a); 
+    uint8_t b = 0b01101010;
+    uint8_t val2 = swap(reg, b); 
+    
+    TEST_ASSERT_EQUAL_UINT8(0b00001011, val1);
+    TEST_ASSERT_EQUAL_UINT8(0b10100110, val2);
 }
 
 
-TEST(bit, bit_rrc_ShouldSetZero) {
-    reg->f = 0b01100000;
-    reg->a = 0b00000000;
-    reg->a = rrc(reg, reg->a);
+TEST(bit, bit_SwapShouldHandleFlags) {
 
+    reg->a = 0;
+    reg->f = 0b01110000;
+
+    uint8_t val2 = swap(reg, reg->a); 
+    
     TEST_ASSERT_EQUAL_UINT8(0, reg->a);
     TEST_ASSERT_EQUAL_UINT8(0b10000000, reg->f);
 }
 
-TEST(bit, bit_rlc_ShouldRotateBitsAndCopyToCarry) {
-    reg->f = 0b00000000;
-    reg->a = 0b10001011;
-    reg->a = rlc(reg, reg->a);
+TEST(bit, bit_SetShouldSetBits) {
 
-    TEST_ASSERT_EQUAL_UINT8(0b00010111, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
+    uint8_t a = 0b00000000;
+    uint8_t val1 = set(a, 2); 
+    uint8_t val2 = set(val1, 6); 
+    uint8_t val3 = set(val2, 7);
+    
+    TEST_ASSERT_EQUAL_UINT8(0b00000100, val1);
+    TEST_ASSERT_EQUAL_UINT8(0b01000100, val2);
+    TEST_ASSERT_EQUAL_UINT8(0b11000100, val3);
 }
 
-TEST(bit, bit_rlc_ShouldSetZero) {
-    reg->f = 0b01100000;
-    reg->a = 0b00000000;
-    reg->a = rlc(reg, reg->a);
+TEST(bit, bit_ResetShouldResetBits) {
 
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b10000000, reg->f);
+    uint8_t a = 0b00110001;
+    uint8_t val1 = reset(a, 0); 
+    uint8_t val2 = reset(val1, 4); 
+    uint8_t val3 = reset(val2, 5);
+    
+    TEST_ASSERT_EQUAL_UINT8(0b00110000, val1);
+    TEST_ASSERT_EQUAL_UINT8(0b00100000, val2);
+    TEST_ASSERT_EQUAL_UINT8(0b00000000, val3);
 }
 
-TEST(bit, bit_rra_ShouldRotateBitsAndCopyToCarry) {
-    reg->f = 0b00000000;
-    reg->a = 0b10001011;
-    reg->a = rlc(reg, reg->a);
+TEST(bit, bit_BitShouldPopulateCarry) {
 
-    TEST_ASSERT_EQUAL_UINT8(0b00010111, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
+    reg->a = 0b01000100;
+    reg->f = 0;
+    bit(reg, reg->a, 2);
+
+    TEST_ASSERT_EQUAL_UINT8(0b00110000, reg->f);
+    TEST_ASSERT_EQUAL_UINT8(0b01000100, reg->a);
+    // Reset
+    bit(reg, reg->a, 4);
+
+    TEST_ASSERT_EQUAL_UINT8(0b00100000, reg->f);
+
 }
 
-TEST(bit, bit_sra_ShouldArithmeticShiftRight) {
-    reg->f = 0b00000000;
-    reg->a = 0b10110001;
-    reg->a = sra(reg, reg->a);
+TEST(bit, bit_BitShouldSetFlags) {
+    reg->a = 0;
+    reg->f = 0b01110000;
+    bit(reg, reg->a, 2);
 
-    TEST_ASSERT_EQUAL_UINT8(0b11011000, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
-}
-
-TEST(bit, bit_sra_ShouldSetZero) {
-    reg->f = 0b01100000;
-    reg->a = 0b00000001;
-    reg->a = sra(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b10010000, reg->f);
-}
-
-TEST(bit, bit_sla_ShouldArithmeticShiftLeft) {
-    reg->f = 0b00000000;
-    reg->a = 0b10110001;
-    reg->a = sla(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0b01100010, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
-}
-
-TEST(bit, bit_sla_ShouldSetZero) {
-    reg->f = 0b01100000;
-    reg->a = 0b10000000;
-    reg->a = sla(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b10010000, reg->f);
-}
-
-TEST(bit, bit_srl_ShouldLogicalShiftRight) {
-    reg->f = 0b00000000;
-    reg->a = 0b10110001;
-    reg->a = srl(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0b01011000, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b00010000, reg->f);
-}
-
-TEST(bit, bit_srl_ShouldSetZero) {
-    reg->f = 0b01100000;
-    reg->a = 0b00000001;
-    reg->a = srl(reg, reg->a);
-
-    TEST_ASSERT_EQUAL_UINT8(0, reg->a);
-    TEST_ASSERT_EQUAL_UINT8(0b10010000, reg->f);
+    TEST_ASSERT_EQUAL_UINT8(0b10100000, reg->f);
 }
 
 TEST_GROUP_RUNNER(bit) {
+    // SWAP
+    RUN_TEST_CASE(bit, bit_SwapShouldSwapNibbles);
+    RUN_TEST_CASE(bit, bit_SwapShouldHandleFlags);
 
-    // RR
-    RUN_TEST_CASE(bit, bit_rr_ShouldRotateBitsThroughCarry);
-    RUN_TEST_CASE(bit, bit_rr_ShouldSetZeroAndCarry);
+    // SET
+    RUN_TEST_CASE(bit, bit_SetShouldSetBits);
+    
+    // RESET 
+    RUN_TEST_CASE(bit, bit_ResetShouldResetBits);
 
-    // LR
-    RUN_TEST_CASE(bit, bit_rl_ShouldRotateBitsThroughCarry);
-    RUN_TEST_CASE(bit, bit_rl_ShouldSetZeroAndCarry);
-
-    // RRC
-    RUN_TEST_CASE(bit, bit_rrc_ShouldRotateBitsAndCopyToCarry);
-    RUN_TEST_CASE(bit, bit_rrc_ShouldSetZero);
-
-    // RLC
-    RUN_TEST_CASE(bit, bit_rlc_ShouldRotateBitsAndCopyToCarry);
-    RUN_TEST_CASE(bit, bit_rlc_ShouldSetZero);
-
-    // SRA
-    RUN_TEST_CASE(bit, bit_sra_ShouldArithmeticShiftRight);
-    RUN_TEST_CASE(bit, bit_sra_ShouldSetZero);
-
-    // SLA
-    RUN_TEST_CASE(bit, bit_sla_ShouldArithmeticShiftLeft);
-    RUN_TEST_CASE(bit, bit_sla_ShouldSetZero);
-
-    // SRL
-    RUN_TEST_CASE(bit, bit_srl_ShouldLogicalShiftRight);
-    RUN_TEST_CASE(bit, bit_srl_ShouldSetZero);
+    // BIT
+    RUN_TEST_CASE(bit, bit_BitShouldPopulateCarry);
+    RUN_TEST_CASE(bit, bit_BitShouldSetFlags);
 }

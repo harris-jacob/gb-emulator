@@ -5,6 +5,7 @@ add_executable(test
   register_tests.c 
   alu_op_tests.c  
   bit_op_tests.c
+  rotation_op_tests.c
   cpu_tests.c)
 
 target_include_directories(test PUBLIC
