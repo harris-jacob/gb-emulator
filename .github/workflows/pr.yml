@@ -15,4 +15,4 @@ jobs:
         uses: textbook/git-checkout-submodule-action@master
 
       - name: Run Tests
-        run: docker-compose up --project-directory docker test
+        run: docker-compose -f ./docker/docker-compose.yml up test
