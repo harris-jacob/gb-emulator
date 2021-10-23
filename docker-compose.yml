@@ -4,4 +4,4 @@ services:
     build:
       context: .
       target: gbemulator-test
-    command: "/gb-emu/build/bin/test"
+    command: "/gb-emu/emulator/build/bin/test"
