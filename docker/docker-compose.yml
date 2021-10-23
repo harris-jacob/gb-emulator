@@ -2,6 +2,6 @@ version: "3.9"
 services:
   test:
     build:
-      context: .
+      context: ..
       target: gbemulator-test
     command: "/gb-emu/emulator/build/bin/test"
