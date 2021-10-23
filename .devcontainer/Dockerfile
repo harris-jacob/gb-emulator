@@ -48,8 +48,17 @@ RUN apt-get update \
     && apt-get update \
     && apt-get -y install docker-ce docker-ce-cli containerd.io
 
-# act to test actions: https://github.com/nektos/act
-RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
+# Install node & yarn
+RUN mkdir -p ~/temp && cd ~/temp \
+    && sudo curl -sL https://deb.nodesource.com/setup_14.x | sudo bash - \
+    && sudo apt-get install -y nodejs \
+    && sudo curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - \
+    && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
+    && sudo apt-get update && sudo apt-get install -y yarn \
+    && cd ~ \
+
+    # act to test actions: https://github.com/nektos/act
+    RUN curl https://raw.githubusercontent.com/nektos/act/master/install.sh | bash
 
 # Clean up
 RUN rm -r ~/temp \ 
