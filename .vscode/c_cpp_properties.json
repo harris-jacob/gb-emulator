@@ -11,7 +11,7 @@
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-clang-x64",
             "configurationProvider": "ms-vscode.cmake-tools",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/emulator/build/compile_commands.json"
         }
     ],
     "version": 4
