@@ -12,7 +12,3 @@ add_library(emulator
 )
 
 target_include_directories(emulator PUBLIC .)
-
-
-#target_include_directories(main PUBLIC . ${SDL2_INCLUDE_DIRS})
-#target_link_libraries(main PUBLIC emulator ${SDL2_LIBRARIES})

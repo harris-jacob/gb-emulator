@@ -33,7 +33,7 @@ FROM gbemulator-dev as gbemulator-test
 
 # Configure and build dev target
 RUN cd gb-emu/ \
-    && chmod +x /gb-emu/scripts/build-emu-tests.sh \
+    && chmod -R +x /gb-emu/scripts/build-emu-tests.sh \
     && /gb-emu/scripts/build-emu-tests.sh \
     && chmod +x /gb-emu/emulator/build/bin/test
 

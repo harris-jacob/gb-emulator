@@ -11,10 +11,6 @@ file(GLOB INPUT ../roms/*.gb)
 
 file(COPY ${INPUT} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-target_include_directories(main PRIVATE
-  ${emulator_SOURCE_DIR}
-)
-
-target_link_libraries(main PUBLIC 
+target_link_libraries(main PRIVATE
 emulator
 )
