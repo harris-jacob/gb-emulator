@@ -1,3 +1,9 @@
 [submodule "emulator/toolchains"]
 	path = emulator/toolchains
 	url = https://github.com/mosra/toolchains.git
+[submodule "emulator/gb-test-roms"]
+	path = emulator/gb-test-roms
+	url = https://github.com/retrio/gb-test-roms.git
+[submodule "emulator/Unity"]
+	path = emulator/Unity
+	url = https://github.com/ThrowTheSwitch/Unity.git
