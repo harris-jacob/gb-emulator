@@ -1,5 +1,5 @@
 
-add_executable(e2e
+add_executable(main
    run.c 
 )
 
@@ -11,10 +11,10 @@ file(GLOB INPUT ../roms/*.gb)
 
 file(COPY ${INPUT} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-target_include_directories(e2e PRIVATE
+target_include_directories(main PRIVATE
   ${emulator_SOURCE_DIR}
 )
 
-target_link_libraries(e2e PUBLIC 
+target_link_libraries(main PUBLIC 
 emulator
 )
