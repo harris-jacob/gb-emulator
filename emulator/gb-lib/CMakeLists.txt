@@ -1,6 +1,6 @@
 #find_package(SDL2 REQUIRED)
 
-add_library(emulator
+add_library(gb-lib
    # emu.c
     mmu.c
     cpu.c
@@ -11,4 +11,4 @@ add_library(emulator
     ppu.c
 )
 
-target_include_directories(emulator PUBLIC .)
+target_include_directories(gb-lib PUBLIC .)

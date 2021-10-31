@@ -1,5 +1,5 @@
 
-add_executable(main
+add_executable(emulator
    run.c 
 )
 
@@ -11,6 +11,8 @@ file(GLOB INPUT ../roms/*.gb)
 
 file(COPY ${INPUT} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(main PRIVATE
-emulator
+add_compile_options("-s MODULARIZE -s EXPORTED_RUNTIME_METHOD=ccall ")
+
+target_link_libraries(emulator PRIVATE
+gb-lib
 )
