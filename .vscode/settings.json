@@ -25,5 +25,6 @@
                 "cwchar": "c",
                 "limits": "c",
                 "functional": "c"
-        }
+        },
+        "cmake.sourceDirectory": "${workspaceFolder}/emulator"
 }

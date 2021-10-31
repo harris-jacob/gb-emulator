@@ -12,7 +12,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s MIN_WEBGL_VERSION=2 -s")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -s =2 -s")
+
+message(STATUS ${CMAKE_EXE_LINKER_FLAGS})
 
 
 # Modules that exist in both our release and our unit tests, are added now

@@ -6,18 +6,19 @@ export interface EmulatorFactory {
 }
 
 const Emulator: FunctionalComponent = () => {
-    // useEffect(() => {
-    //     console.log("Emulator Loading...");
-    //     const factory: () => Promise<EmulatorFactory> = require('./emulator');
+    useEffect(() => {
+        console.log("Emulator Loading...");
+        const load = async () => {
+            const factory: any = require('./emulator');
 
-    //     factory().then((emulator: EmulatorFactory) => {
-    //         console.log("Module Loaded");
-    //         console.log(emulator._peek_reg());
-    //     }).catch(() => console.log("Caught"))
-    // }, [])
+            factory().then(() => console.log("Hello"))
+        }
+        load();
+
+    }, [])
 
     return (
-    <div>Hello Emulator</div>
+        <div>Hello Emulator</div>
     )
 }
 
