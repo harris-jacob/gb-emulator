@@ -20,13 +20,15 @@ find ./gb-lib/ -name "*.a" -exec cp '{}' ./ \;
 
 # # run emcc to handle linking and generate js/wasm
 emcc run.c.o libgb-lib.a -o bin/emulator.js -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=ccall \
--s ENVIRONMENT=web
+-s ENVIRONMENT=web \
+--preload-file roms/02-interrupts.gb
 
 cd ../..
 
 # copy built files to binding point
  mkdir -p ./ui/src/static
  find ./emulator/build/bin/ -name "*.wasm" -exec cp '{}' ./ui/src/static/ \;
+ find ./emulator/build/bin/ -name "*.data" -exec cp '{}' ./ui/src/static/ \;
  mkdir -p ui/src/emulator
  find ./emulator/build/bin/ -name "emulator.js" -exec cp '{}' ./ui/src/emulator/ \;
  find ./ui/src/emulator -name "emulator.js" -exec sed -i '1i/* eslint-disable */' '{}' \;
