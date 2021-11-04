@@ -7,8 +7,8 @@ const isDefined = <T>(thing: T | undefined): thing is T => {
  * @param thing thing which may be undefined
  * @throws if thing is undefined
  */
-export function assertDefined<T>(thing: T | undefined): asserts thing is T {
+export function assertDefined<T>(thing: T | undefined, message="thing is undefined"): asserts thing is T {
     if(!isDefined(thing)) {
-        throw new Error("thing is undefined")
+        throw new Error(message)
     }
 }

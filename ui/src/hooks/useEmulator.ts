@@ -1,37 +1,52 @@
-import { EmulatorManager } from "../emulator/emulator-manager"
-import { useEffect, useState } from "preact/hooks";
+import { useContext, useMemo, useReducer, useRef } from "preact/hooks";
+import { EmulatorProvider, getEmulatorContext } from "../components/EmulatorContext";
+import { RegisterView } from "../emulator/registers";
+import { assertDefined } from "../utils/assert";
 
-interface UseEmulatorReturn {
-    /** is the emulator still initializing? */ 
+type RomMemory = readonly number[];
+
+export interface UseEmulatorReturn {
+    /** are we still loading the emulator */
     loading: boolean;
-    /** Has the emulator errored */
-    error?: Error
-    /** Emulator Instance */ 
-    emulator?: EmulatorManager;
+    /** process the next cpu instruction and update the emulator */
+    step: () => void;
+    /** view of the current registers */
+    registers?: RegisterView;
+    /** read only ref to rom memory segment */
+    rom?: RomMemory;
+
 }
 
+
+/** use the emulator instance  */
 export const useEmulator = (): UseEmulatorReturn => {
-    const [emulator, setEmulator] = useState<EmulatorManager>()
-    const [ loading, setLoading ] = useState(false);
-    const [ error, setError ] = useState<Error>();
+    const context = useContext(getEmulatorContext());
+    const {loading, emulator} = context;
 
-    useEffect(() => {
-        const emulatorInstance = new EmulatorManager();
-        const init = async () => {
-            setLoading(true);
-            await emulatorInstance.init();
-            setLoading(false);
-            setEmulator(emulatorInstance);
+    const [ _, forceUpdate ] = useReducer<number, void>(x => x + 1, 0);
+
+    const registers = useMemo<RegisterView | undefined>(() => {
+
+        if(emulator) {
+            return emulator.createRegisterView();
         }
+    }, [loading, emulator]);
 
-        try {
-            init();
-        } catch (e) {
-            setError(e as Error)
+    const rom = useMemo<RomMemory | undefined>(() => {
+        if(emulator) {
+            return emulator.getRomMemory();
         }
+    }, [loading, emulator])
 
-    }, [])
+
+    const step = () => {
+        assertDefined(context.emulator, "emulator instance is not defined: wait for load and make sure to use the EmulatorContext");
+        context.emulator.step()
+        // our update function must force render so we are showing the latest data
+        // we can't do this during a render, so we queue until after
+        setTimeout(() => forceUpdate(), 0);
+    }
 
 
-    return {loading, error, emulator};
+    return { loading: context.loading, registers, step, rom}
 }

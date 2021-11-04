@@ -29,3 +29,8 @@ void step() {
     uint32_t clock_delta = cpu_step(cpu);
     ppu_clock_step(cpu->mmu, cpu->clock_cycle);
 }
+
+EMSCRIPTEN_KEEPALIVE
+uint8_t* get_rom() {
+    return cpu->mmu->rom[0];
+}

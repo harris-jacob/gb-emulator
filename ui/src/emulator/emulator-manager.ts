@@ -28,5 +28,15 @@ export class EmulatorManager {
        }
        return this.registerView;
    }
+
+   /** Get the memory segment for the currently loaded rom bank */
+   public getRomMemory(): readonly number[] {
+        assertDefined(this.emulator);
+        const start = this.emulator._get_rom();
+        // Size of rom bank memory
+        const end = start + 32768;
+
+        return this.emulator.HEAPU8.slice(start, end);
+    }
 }
 

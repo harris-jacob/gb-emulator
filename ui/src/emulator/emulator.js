@@ -121,6 +121,12 @@ Module['ready'] = new Promise(function(resolve, reject) {
       }
     
 
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_rom')) {
+        Object.defineProperty(Module['ready'], '_get_rom', { configurable: true, get: function() { abort('You are getting _get_rom on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_rom', { configurable: true, set: function() { abort('You are setting _get_rom on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
       if (!Object.getOwnPropertyDescriptor(Module['ready'], 'onRuntimeInitialized')) {
         Object.defineProperty(Module['ready'], 'onRuntimeInitialized', { configurable: true, get: function() { abort('You are getting onRuntimeInitialized on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
         Object.defineProperty(Module['ready'], 'onRuntimeInitialized', { configurable: true, set: function() { abort('You are setting onRuntimeInitialized on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
@@ -298,7 +304,7 @@ Module['ready'] = new Promise(function(resolve, reject) {
     }
   
    }
-   loadPackage({"files": [{"filename": "/roms/02-interrupts.gb", "start": 0, "end": 32768}], "remote_package_size": 32768, "package_uuid": "3aa01bd7-ec79-4fad-b8a0-511c7f9aefd0"});
+   loadPackage({"files": [{"filename": "/roms/02-interrupts.gb", "start": 0, "end": 32768}], "remote_package_size": 32768, "package_uuid": "f4446309-4893-4813-ae5e-8a2261ea40eb"});
   
   })();
   
@@ -4841,6 +4847,9 @@ var _get_reg = Module["_get_reg"] = createExportWrapper("get_reg");
 
 /** @type {function(...*):?} */
 var _step = Module["_step"] = createExportWrapper("step");
+
+/** @type {function(...*):?} */
+var _get_rom = Module["_get_rom"] = createExportWrapper("get_rom");
 
 /** @type {function(...*):?} */
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
