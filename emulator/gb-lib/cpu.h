@@ -40,6 +40,15 @@ void cpu_reset(cpu_t* cpu);
 /* Single step of the CPU */
 uint32_t cpu_step(cpu_t* cpu);
 
+/* Return name of an opcode */
+char* get_op_name(uint8_t op);
+
+/* Return the operand of an opcode */
+uint16_t get_op_operand(cpu_t* cpu, uint8_t op);
+
+/* get the opcode the PC is currently at */
+uint16_t get_current_opcode(cpu_t* cpu);
+
 /* Handle Opcode */
 void cpu_handle_op(cpu_t* cpu, uint8_t opcode);
 
@@ -66,6 +75,14 @@ void op_debug_log(cpu_t* cpu, uint8_t op);
 */
 static void interrupt_handle(cpu_t* cpu, uint8_t i);
 
+typedef struct op_details_t_ {
+    /* name of eht operations */
+    char* name;
+    /* operand size */
+    uint8_t operand_size;
+    /* operand */
+    uint16_t operand;
+} op_details;
 
 /* Operation container stolen from https://github.com/CTurt/Cinoop/blob/master/include/cpu.h */
 struct op_t_ {
