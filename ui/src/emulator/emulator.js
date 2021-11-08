@@ -127,6 +127,48 @@ Module['ready'] = new Promise(function(resolve, reject) {
       }
     
 
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_next_op_name')) {
+        Object.defineProperty(Module['ready'], '_get_next_op_name', { configurable: true, get: function() { abort('You are getting _get_next_op_name on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_next_op_name', { configurable: true, set: function() { abort('You are setting _get_next_op_name on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_next_opcode')) {
+        Object.defineProperty(Module['ready'], '_get_next_opcode', { configurable: true, get: function() { abort('You are getting _get_next_opcode on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_next_opcode', { configurable: true, set: function() { abort('You are setting _get_next_opcode on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_next_op_operand')) {
+        Object.defineProperty(Module['ready'], '_get_next_op_operand', { configurable: true, get: function() { abort('You are getting _get_next_op_operand on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_next_op_operand', { configurable: true, set: function() { abort('You are setting _get_next_op_operand on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_operand_by_pc')) {
+        Object.defineProperty(Module['ready'], '_get_operand_by_pc', { configurable: true, get: function() { abort('You are getting _get_operand_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_operand_by_pc', { configurable: true, set: function() { abort('You are setting _get_operand_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_opcode_by_pc')) {
+        Object.defineProperty(Module['ready'], '_get_opcode_by_pc', { configurable: true, get: function() { abort('You are getting _get_opcode_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_opcode_by_pc', { configurable: true, set: function() { abort('You are setting _get_opcode_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_op_name_by_pc')) {
+        Object.defineProperty(Module['ready'], '_get_op_name_by_pc', { configurable: true, get: function() { abort('You are getting _get_op_name_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_op_name_by_pc', { configurable: true, set: function() { abort('You are setting _get_op_name_by_pc on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
+      if (!Object.getOwnPropertyDescriptor(Module['ready'], '_get_opcode_operand_size')) {
+        Object.defineProperty(Module['ready'], '_get_opcode_operand_size', { configurable: true, get: function() { abort('You are getting _get_opcode_operand_size on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+        Object.defineProperty(Module['ready'], '_get_opcode_operand_size', { configurable: true, set: function() { abort('You are setting _get_opcode_operand_size on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
+      }
+    
+
       if (!Object.getOwnPropertyDescriptor(Module['ready'], 'onRuntimeInitialized')) {
         Object.defineProperty(Module['ready'], 'onRuntimeInitialized', { configurable: true, get: function() { abort('You are getting onRuntimeInitialized on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
         Object.defineProperty(Module['ready'], 'onRuntimeInitialized', { configurable: true, set: function() { abort('You are setting onRuntimeInitialized on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js') } });
@@ -304,7 +346,7 @@ Module['ready'] = new Promise(function(resolve, reject) {
     }
   
    }
-   loadPackage({"files": [{"filename": "/roms/02-interrupts.gb", "start": 0, "end": 32768}], "remote_package_size": 32768, "package_uuid": "f4446309-4893-4813-ae5e-8a2261ea40eb"});
+   loadPackage({"files": [{"filename": "/roms/02-interrupts.gb", "start": 0, "end": 32768}], "remote_package_size": 32768, "package_uuid": "e7738bf1-08e1-4725-9a3e-c9b5b9f1fc15"});
   
   })();
   
@@ -4852,6 +4894,27 @@ var _step = Module["_step"] = createExportWrapper("step");
 var _get_rom = Module["_get_rom"] = createExportWrapper("get_rom");
 
 /** @type {function(...*):?} */
+var _get_next_op_name = Module["_get_next_op_name"] = createExportWrapper("get_next_op_name");
+
+/** @type {function(...*):?} */
+var _get_next_opcode = Module["_get_next_opcode"] = createExportWrapper("get_next_opcode");
+
+/** @type {function(...*):?} */
+var _get_next_op_operand = Module["_get_next_op_operand"] = createExportWrapper("get_next_op_operand");
+
+/** @type {function(...*):?} */
+var _get_operand_by_pc = Module["_get_operand_by_pc"] = createExportWrapper("get_operand_by_pc");
+
+/** @type {function(...*):?} */
+var _get_opcode_by_pc = Module["_get_opcode_by_pc"] = createExportWrapper("get_opcode_by_pc");
+
+/** @type {function(...*):?} */
+var _get_op_name_by_pc = Module["_get_op_name_by_pc"] = createExportWrapper("get_op_name_by_pc");
+
+/** @type {function(...*):?} */
+var _get_opcode_operand_size = Module["_get_opcode_operand_size"] = createExportWrapper("get_opcode_operand_size");
+
+/** @type {function(...*):?} */
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 /** @type {function(...*):?} */
@@ -4904,7 +4967,7 @@ if (!Object.getOwnPropertyDescriptor(Module, "setValue")) Module["setValue"] = f
 if (!Object.getOwnPropertyDescriptor(Module, "getValue")) Module["getValue"] = function() { abort("'getValue' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
 if (!Object.getOwnPropertyDescriptor(Module, "allocate")) Module["allocate"] = function() { abort("'allocate' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
 if (!Object.getOwnPropertyDescriptor(Module, "UTF8ArrayToString")) Module["UTF8ArrayToString"] = function() { abort("'UTF8ArrayToString' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
-if (!Object.getOwnPropertyDescriptor(Module, "UTF8ToString")) Module["UTF8ToString"] = function() { abort("'UTF8ToString' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
+Module["UTF8ToString"] = UTF8ToString;
 if (!Object.getOwnPropertyDescriptor(Module, "stringToUTF8Array")) Module["stringToUTF8Array"] = function() { abort("'stringToUTF8Array' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
 if (!Object.getOwnPropertyDescriptor(Module, "stringToUTF8")) Module["stringToUTF8"] = function() { abort("'stringToUTF8' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };
 if (!Object.getOwnPropertyDescriptor(Module, "lengthBytesUTF8")) Module["lengthBytesUTF8"] = function() { abort("'lengthBytesUTF8' was not exported. add it to EXPORTED_RUNTIME_METHODS (see the FAQ)") };

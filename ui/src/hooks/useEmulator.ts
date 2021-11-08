@@ -1,7 +1,9 @@
-import { useContext, useMemo, useReducer, useRef } from "preact/hooks";
-import { EmulatorProvider, getEmulatorContext } from "../components/EmulatorContext";
+import { useContext, useMemo, useReducer } from "preact/hooks";
+import { getEmulatorContext } from "../components/EmulatorContext";
 import { RegisterView } from "../emulator/registers";
+import { Instruction } from "../emulator/types";
 import { assertDefined } from "../utils/assert";
+import { Table } from "../utils/types";
 
 type RomMemory = readonly number[];
 
@@ -12,9 +14,10 @@ export interface UseEmulatorReturn {
     step: () => void;
     /** view of the current registers */
     registers?: RegisterView;
-    /** read only ref to rom memory segment */
-    rom?: RomMemory;
-
+    /** Details of the next opcode in the rom */
+    nextInstruction?: Instruction
+    /** List of opcodes */
+    instructionList?: Table<Instruction>
 }
 
 
@@ -38,6 +41,12 @@ export const useEmulator = (): UseEmulatorReturn => {
         }
     }, [loading, emulator])
 
+    const instructionList = useMemo<Table<Instruction> | undefined>(() => {
+        if(emulator) {
+            return emulator.createInstructionList()
+        }
+    }, [loading, emulator])
+
 
     const step = () => {
         assertDefined(context.emulator, "emulator instance is not defined: wait for load and make sure to use the EmulatorContext");
@@ -48,5 +57,13 @@ export const useEmulator = (): UseEmulatorReturn => {
     }
 
 
-    return { loading: context.loading, registers, step, rom}
+
+    // save new instruction
+    let nextInstruction: Instruction | undefined;
+
+    if(emulator) {
+        nextInstruction = emulator.getNextInstruction();
+    }
+
+    return { loading: context.loading, registers, step, instructionList,  nextInstruction }
 }

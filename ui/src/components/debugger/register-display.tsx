@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { RegisterView } from "../../emulator/registers";
 import theme from "../../theme";
 import Card from "../generic/card";
-import H6 from "../generic/H6";
+import H6 from "../generic/h6";
 
 
 const Table = styled.div`

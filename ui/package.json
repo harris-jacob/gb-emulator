@@ -24,11 +24,13 @@
     "preact": "^10.3.1",
     "preact-render-to-string": "^5.1.4",
     "preact-router": "^3.2.1",
+    "react-virtualized": "^9.22.3",
     "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@types/enzyme": "^3.10.5",
     "@types/jest": "^26.0.8",
+    "@types/react-virtualized": "^9.21.14",
     "@types/styled-components": "^5.1.15",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",

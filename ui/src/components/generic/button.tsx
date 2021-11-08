@@ -5,12 +5,13 @@ const Button = styled.button`
   background: transparent;
   border-radius: ${theme.borderRadius};
   padding: ${theme.spacing(1)};
-  border: none;
-  background: ${theme.palette.primary};
+  margin-top: ${theme.spacing(2)};
+  border: 1px solid ${theme.palette.secondary};
+  background: none;
   text-transform: uppercase;
   ${theme.typography.h6}
   &:hover {
-    background: ${theme.palette.primary};
+    background: ${theme.palette.attention};
   }
   &:active {
     background: ${theme.palette.attention};
