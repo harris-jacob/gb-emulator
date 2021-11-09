@@ -3,7 +3,6 @@ import { getEmulatorContext } from "../components/EmulatorContext";
 import { RegisterView } from "../emulator/registers";
 import { Instruction } from "../emulator/types";
 import { assertDefined } from "../utils/assert";
-import { Table } from "../utils/types";
 
 type RomMemory = readonly number[];
 
@@ -17,7 +16,7 @@ export interface UseEmulatorReturn {
     /** Details of the next opcode in the rom */
     nextInstruction?: Instruction
     /** List of opcodes */
-    instructionList?: Table<Instruction>
+    instructionList?: Instruction[]
 }
 
 
@@ -31,17 +30,11 @@ export const useEmulator = (): UseEmulatorReturn => {
     const registers = useMemo<RegisterView | undefined>(() => {
 
         if(emulator) {
-            return emulator.createRegisterView();
+            return emulator.getRegisterView();
         }
     }, [loading, emulator]);
 
-    const rom = useMemo<RomMemory | undefined>(() => {
-        if(emulator) {
-            return emulator.getRomMemory();
-        }
-    }, [loading, emulator])
-
-    const instructionList = useMemo<Table<Instruction> | undefined>(() => {
+    const instructionList = useMemo<Instruction[] | undefined>(() => {
         if(emulator) {
             return emulator.createInstructionList()
         }
@@ -55,7 +48,6 @@ export const useEmulator = (): UseEmulatorReturn => {
         // we can't do this during a render, so we queue until after
         setTimeout(() => forceUpdate(), 0);
     }
-
 
 
     // save new instruction

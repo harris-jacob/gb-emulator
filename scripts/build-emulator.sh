@@ -19,7 +19,7 @@ find ./src/ -name "*.c.o" -exec cp '{}' ./ \;
 find ./gb-lib/ -name "*.a" -exec cp '{}' ./ \;
 
 # # run emcc to handle linking and generate js/wasm
-emcc run.c.o libgb-lib.a -o bin/emulator.js -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=ccall \
+emcc run.c.o libgb-lib.a -o bin/emulator.js -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall','UTF8ToString'] \
 -s ENVIRONMENT=web \
 --preload-file roms/02-interrupts.gb
 

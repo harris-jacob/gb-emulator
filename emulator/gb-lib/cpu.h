@@ -44,10 +44,10 @@ uint32_t cpu_step(cpu_t* cpu);
 char* get_op_name(uint8_t op);
 
 /* Return the operand of an opcode */
-uint16_t get_op_operand(cpu_t* cpu, uint8_t op);
+uint16_t get_op_operand(cpu_t* cpu, uint16_t pc);
 
 /* get the opcode the PC is currently at */
-uint16_t get_current_opcode(cpu_t* cpu);
+uint8_t peek_next_opcode(cpu_t* cpu);
 
 /* Handle Opcode */
 void cpu_handle_op(cpu_t* cpu, uint8_t opcode);
@@ -105,6 +105,5 @@ struct extended_op_t_ {
     /* number of cpu ticks */
     uint8_t ticks;
 } extern const extended_ops[256];
-
 
 #endif

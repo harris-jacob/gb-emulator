@@ -19,6 +19,7 @@ export interface Instruction {
     opcode: number;
     name: string;
     operand: number;
+    address: number;
 }
 
 export type EmulatorFactory = () => Promise<EmulatorAPI>;

@@ -1,9 +1,19 @@
 import { FunctionalComponent, h } from 'preact';
+import styled from 'styled-components';
 import InstructionList from '../../components/debugger/instruction-list';
 import NextInstruction from '../../components/debugger/next-instruction';
 import RegisterDisplay from '../../components/debugger/register-display';
 import { EmulatorProvider } from '../../components/EmulatorContext';
 import { useEmulator } from '../../hooks/useEmulator';
+
+const Container: FunctionalComponent = styled.div`
+    display: flex;
+    > * {
+            &:last-child {
+            flex-grow: 1; 
+        }
+    }
+`
 
 const Page: FunctionalComponent = () => {
     return (
@@ -13,17 +23,17 @@ const Page: FunctionalComponent = () => {
     );
 };
 
-
 const RootComponent = () => {
     const { step, registers, loading, instructionList, nextInstruction } = useEmulator();
-    console.log(instructionList);
     return (
-        <div>
+        <Container>
             {loading && <div>Loading...</div>}
-            {registers && <RegisterDisplay register={registers} />}
-            {!loading && nextInstruction && <NextInstruction step={step} nextInstruction={nextInstruction} />}
-            {!loading && instructionList && <InstructionList instructions={instructionList} />}
-        </div>
+            <div>
+                {registers && <RegisterDisplay register={registers} />}
+                {!loading && nextInstruction && <NextInstruction step={step} nextInstruction={nextInstruction} />}
+            </div>
+            {!loading && instructionList && registers && <InstructionList pc={registers.pc()} instructions={instructionList} />}
+        </Container>
     )
 }
 
