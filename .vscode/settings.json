@@ -24,6 +24,8 @@
                 "unistd.h": "c",
                 "cwchar": "c",
                 "limits": "c",
-                "functional": "c"
-        }
+                "functional": "c",
+                "rom.h": "c"
+        },
+        "cmake.sourceDirectory": "${workspaceFolder}/emulator"
 }

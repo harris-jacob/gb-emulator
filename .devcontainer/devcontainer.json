@@ -9,7 +9,6 @@
     "extensions": [
         "ms-azuretools.vscode-docker",
         "twxs.cmake",
-        "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
         "xaver.clang-format",
         "robbowen.synthwave-vscode" // Very important
@@ -20,13 +19,16 @@
         "--cap-add=SYS_PTRACE",
         "--security-opt",
         "seccomp=unconfined", // ptrace-based debugger like C++, Go, and Rust
-        "-e",
-        "DISPLAY=unix:0.0",
-        "-v",
-        "/tmp/.X11-unix:/tmp/.X11-unix:rw", // X11 forwarding (mount X11 in container)
-        "--gpus",
-        "all" // Pass GPU support into container
+        // "-e",
+        // "DISPLAY=unix:0.0",
+        //  "-v",
+        // "/tmp/.X11-unix:/tmp/.X11-unix:rw", // X11 forwarding (mount X11 in container)
+        //  "--gpus",
+        // "all" // Pass GPU support into container
     ],
     // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
-    "remoteUser": "vscode"
+    "remoteUser": "vscode",
+    "forwardPorts": [
+        8080
+    ]
 }

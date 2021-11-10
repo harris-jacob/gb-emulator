@@ -155,6 +155,37 @@ void handle_interrupts(cpu_t* cpu) {
     }
 }
 
+
+/* Return name of an opcode */
+char* get_op_name(uint8_t op) {
+    return ops[op].name;
+}
+
+/* Return the operand of an opcode by its pc */
+uint16_t get_op_operand(cpu_t* cpu, uint16_t pc) {
+
+    uint8_t op = mmu_read_addr8(cpu->mmu, pc);
+    uint8_t operand_size = ops[op].operand_size;
+    uint16_t operand = 0;
+
+    switch(operand_size) {
+        case 1:
+            operand = mmu_read_addr8(cpu->mmu, cpu->reg->pc+1);
+            break;
+        case 2:
+            operand = mmu_read_addr16(cpu->mmu, cpu->reg->pc+1);
+            break;
+    }
+
+    return operand;
+}
+
+/* get the next opcode to be executed */
+uint8_t peek_next_opcode(cpu_t* cpu) {
+    return mmu_read_addr8(cpu->mmu, cpu->reg->pc+1);
+}
+
+/* Handle Opcode */
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
 
     // Handle opcode

@@ -16,6 +16,6 @@ target_include_directories(test PUBLIC
   .
 )
 
-target_link_libraries(test PUBLIC emulator unity)
+target_link_libraries(test PUBLIC gb-lib unity)
 
 add_test(test test)

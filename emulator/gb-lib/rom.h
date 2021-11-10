@@ -20,14 +20,10 @@ typedef struct rom_t_ {
 
 } rom_t;
 
-
 /* Create a rom instance */
 rom_t* rom_create(mmu_t* mmu);
 /* Destroy a rom instance */
 void rom_destroy(rom_t** rom);
-
-/* Map of rom types */
-const char* rom_type_map[29];
 
 /* Load a rom from disk */
 rom_t* load_rom(const char* filepath, mmu_t* mmu);
