@@ -2,7 +2,7 @@ const theme = {
   palette: {
     primary: '#3500d3',
     secondary: '#0c0032',
-    attention: '#240090',
+    attention: '#6e0090',
     background: {
       body: '#282828',
       base: '#240090',

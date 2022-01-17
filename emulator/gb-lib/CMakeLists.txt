@@ -1,7 +1,7 @@
 #find_package(SDL2 REQUIRED)
 
 add_library(gb-lib
-   # emu.c
+    emu.c
     mmu.c
     cpu.c
     rom.c

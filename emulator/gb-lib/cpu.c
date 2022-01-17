@@ -161,9 +161,12 @@ char* get_op_name(uint8_t op) {
     return ops[op].name;
 }
 
-/* Return the operand of an opcode */
-uint16_t get_op_operand(cpu_t* cpu, uint8_t op) {
+/* Return the operand of an opcode by its pc */
+uint16_t get_op_operand(cpu_t* cpu, uint16_t pc) {
+
+    uint8_t op = mmu_read_addr8(cpu->mmu, pc);
     uint8_t operand_size = ops[op].operand_size;
+    uint16_t operand = 0;
 
     switch(operand_size) {
         case 1: {
@@ -178,6 +181,8 @@ uint16_t get_op_operand(cpu_t* cpu, uint8_t op) {
             return 0;
             
     }
+
+    return operand;
 }
 
 /* get the opcode the PC is currently at */
@@ -186,7 +191,6 @@ uint16_t get_current_opcode(cpu_t* cpu) {
 }
 
 /* Handle Opcode */
-
 void cpu_handle_op(cpu_t* cpu, uint8_t op) {
 
     // Handle opcode
