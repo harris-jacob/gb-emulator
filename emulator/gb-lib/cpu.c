@@ -166,11 +166,13 @@ uint16_t get_op_operand(cpu_t* cpu, uint8_t op) {
     uint8_t operand_size = ops[op].operand_size;
 
     switch(operand_size) {
-        case 1:
-            uint8_t operand = mmu_read_addr8(cpu->mmu, cpu->reg->pc+1);
+        case 1: {
+            uint16_t operand = mmu_read_addr8(cpu->mmu, cpu->reg->pc+1);
             return operand;
-        case 2:
+        }
+        case 2: {
             return mmu_read_addr16(cpu->mmu, cpu->reg->pc+1);
+        }
 
         default:
             return 0;
@@ -180,7 +182,7 @@ uint16_t get_op_operand(cpu_t* cpu, uint8_t op) {
 
 /* get the opcode the PC is currently at */
 uint16_t get_current_opcode(cpu_t* cpu) {
-    return mmu_read_addr16()
+    return mmu_read_addr16(cpu->mmu, cpu->reg->pc);
 }
 
 /* Handle Opcode */
