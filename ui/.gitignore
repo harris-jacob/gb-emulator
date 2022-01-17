@@ -2,3 +2,4 @@ node_modules
 /build
 /*.log
 src/emulator/*.js
+src/static/emulator.*
