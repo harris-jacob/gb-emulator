@@ -185,9 +185,9 @@ uint16_t get_op_operand(cpu_t* cpu, uint16_t pc) {
     return operand;
 }
 
-/* get the opcode the PC is currently at */
-uint16_t get_current_opcode(cpu_t* cpu) {
-    return mmu_read_addr16(cpu->mmu, cpu->reg->pc);
+/** view next opcode without advancing pc */
+uint8_t peek_next_opcode(cpu_t* cpu) {
+    return mmu_read_addr8(cpu->mmu, cpu->reg->pc+1);
 }
 
 /* Handle Opcode */

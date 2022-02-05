@@ -1,0 +1,16 @@
+{
+    "private": true,
+    "workspaces": [
+        "ui"
+    ],
+    "dependencies": {
+        "wsrun": "^5.2.4"
+    },
+    "scripts": {
+        "postinstall": "yarn build-emulator",
+        "prepare": "wsrun --stages --exclude-missing prepare",
+        "dev": "yarn workspace ui dev",
+        "build-ui": "yarn workspace ui build",
+        "build-emulator": "./scripts/build-emulator.sh Debug"
+    }
+}

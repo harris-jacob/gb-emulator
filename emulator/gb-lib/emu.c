@@ -1,4 +1,5 @@
 #include "emu.h"
+#include "ppu.h"
 
 emu_t* emu_create(bool debug) {
     // create a memory unit
@@ -14,6 +15,7 @@ emu_t* emu_create(bool debug) {
     emu->cpu = cpu;
     emu->mmu = mmu;
     emu->rom = rom;
+    // flag used for logging
     emu->debug = debug;
     return emu;
 }

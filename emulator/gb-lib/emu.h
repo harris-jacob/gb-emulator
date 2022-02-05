@@ -22,7 +22,10 @@ typedef struct emu_t_ {
 } emu_t;
 
 /* create emulator instance, pass options here */
-emu_t* emu_create();
+emu_t* emu_create(bool debug);
+
+/** Single step of emulator - CPU and PPu */
+void emu_step(emu_t* emu);
 
 /** Load a rom */
 void emu_load_rom(emu_t* emu, const char* filepath); 
