@@ -16,6 +16,8 @@
     // Enable a few things.
     "runArgs": [
         "--privileged",
+        "--network",
+        "host",
         "--cap-add=SYS_PTRACE",
         "--security-opt",
         "seccomp=unconfined", // ptrace-based debugger like C++, Go, and Rust
@@ -26,9 +28,15 @@
         //  "--gpus",
         // "all" // Pass GPU support into container
     ],
+    "mounts": [
+        "source=root-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume",
+        "source=ui-node_modules,target=${containerWorkspaceFolder}/ui/node_modules,type=volume",
+        "source=ui-build,target=${containerWorkspaceFolder}/ui/build,type=volume"
+    ],
     // Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
     "remoteUser": "vscode",
+    "postCreateCommand": "./.devcontainer/post-create.sh",
     "forwardPorts": [
-        8080
-    ]
+        3000
+    ],
 }

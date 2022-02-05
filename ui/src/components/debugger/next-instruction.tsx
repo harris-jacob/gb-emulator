@@ -1,4 +1,4 @@
-import { Fragment, FunctionalComponent, h } from "preact";
+import React from "react";
 import { Instruction } from "../../emulator/types";
 import Button from "../generic/button";
 import Card from "../generic/card";
@@ -10,14 +10,14 @@ interface Props {
 }
 
 const instrucitonDisplay = (instruction: Instruction) => (
-    <Fragment>
+    <>
         {`opcode: ${instruction.opcode.toString(16)}`} <br />
         {`operation: ${instruction.name}`} <br />
         {`operand: ${instruction.operand}`} <br />
-    </Fragment>
+    </>
 )
 
-const NextInstruction: FunctionalComponent<Props> = (props: Props) => {
+const NextInstruction: React.FC<Props> = (props: Props) => {
     const { nextInstruction, step } = props;
 
 

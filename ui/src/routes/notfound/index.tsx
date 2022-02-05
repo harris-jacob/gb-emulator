@@ -1,13 +1,13 @@
-import { FunctionalComponent, h } from 'preact';
-import { Link } from 'preact-router/match';
-import style from './style.css';
+import React from 'react';
+import { Link } from 'react-router-dom';
+import './style.css';
 
-const Notfound: FunctionalComponent = () => {
+const Notfound: React.FC = () => {
     return (
-        <div class={style.notfound}>
+        <div className="notFound">
             <h1>Error 404</h1>
             <p>That page doesn&apos;t exist.</p>
-            <Link href="/">
+            <Link to="/">
                 <h4>Back to Home</h4>
             </Link>
         </div>

@@ -1,5 +1,5 @@
+import { useEffect, useState } from "react";
 import { EmulatorManager } from "../emulator/emulator-manager"
-import { useEffect, useState } from "preact/hooks";
 
 interface UseEmulatorReturn {
     /** is the emulator still initializing? */ 

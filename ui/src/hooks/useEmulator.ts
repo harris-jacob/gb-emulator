@@ -1,10 +1,8 @@
-import { useContext, useMemo, useReducer } from "preact/hooks";
+import { useContext, useMemo, useReducer } from "react";
 import { getEmulatorContext } from "../components/EmulatorContext";
 import { RegisterView } from "../emulator/registers";
 import { Instruction } from "../emulator/types";
 import { assertDefined } from "../utils/assert";
-
-type RomMemory = readonly number[];
 
 export interface UseEmulatorReturn {
     /** are we still loading the emulator */
@@ -25,7 +23,7 @@ export const useEmulator = (): UseEmulatorReturn => {
     const context = useContext(getEmulatorContext());
     const {loading, emulator} = context;
 
-    const [ _, forceUpdate ] = useReducer<number, void>(x => x + 1, 0);
+    const [ _, forceUpdate ] = useReducer<(x: number) => number>(x => x + 1, 0);
 
     const registers = useMemo<RegisterView | undefined>(() => {
 

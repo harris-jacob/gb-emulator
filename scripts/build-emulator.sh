@@ -27,8 +27,8 @@ cd ../..
 
 # copy built files to binding point
  mkdir -p ./ui/src/static
- find ./emulator/build/bin/ -name "*.wasm" -exec cp '{}' ./ui/src/static/ \;
- find ./emulator/build/bin/ -name "*.data" -exec cp '{}' ./ui/src/static/ \;
+ find ./emulator/build/bin/ -name "*.wasm" -exec cp '{}' ./ui/public/ \;
+ find ./emulator/build/bin/ -name "*.data" -exec cp '{}' ./ui/public/ \;
  mkdir -p ui/src/emulator
  find ./emulator/build/bin/ -name "emulator.js" -exec cp '{}' ./ui/src/emulator/ \;
  find ./ui/src/emulator -name "emulator.js" -exec sed -i '1i/* eslint-disable */' '{}' \;

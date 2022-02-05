@@ -1,7 +1,5 @@
-import { ComponentChildren, Context, createContext, FunctionalComponent } from "preact";
+import React, { Context, createContext } from "react";
 import { EmulatorManager } from "../emulator/emulator-manager";
-import { h } from "preact";
-import { useEffect, useState } from "preact/hooks";
 import { useInitializeEmulator } from "../hooks/useInitializeEmulator";
 
 // Any global options can live here
@@ -12,7 +10,7 @@ interface EmulatorContext {
 }
 
 interface Props {
-    children?: ComponentChildren;
+    children?: JSX.Element | JSX.Element[];
 }
 
 const Emulator = createContext<EmulatorContext>({
@@ -27,7 +25,7 @@ export const getEmulatorContext = (): Context<EmulatorContext> => {
 
 
 /** Provider which handles linking components to emulator context */
-export const EmulatorProvider: FunctionalComponent<Props> = ({ children }: Props) => {
+export const EmulatorProvider: React.FC<Props> = ({ children }: Props) => {
 
     const { emulator, loading, error } = useInitializeEmulator();
 

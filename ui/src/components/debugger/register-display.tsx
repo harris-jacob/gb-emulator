@@ -1,4 +1,4 @@
-import { h } from "preact";
+import React from "react";
 import styled from "styled-components";
 import { RegisterView } from "../../emulator/registers";
 import theme from "../../theme";

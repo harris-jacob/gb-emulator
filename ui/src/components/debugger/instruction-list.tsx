@@ -1,9 +1,9 @@
-import { FunctionalComponent, h } from "preact";
 import { AutoSizer, Column, Size, Table } from "react-virtualized";
 import { Instruction } from "../../emulator/types";
 import Card from "../generic/card";
 import 'react-virtualized/styles.css'
 import theme from "../../theme";
+import React from "react";
 
 interface Props {
     instructions: Instruction[];
@@ -14,13 +14,15 @@ interface Props {
 const pcToIndex = (pc: number) => pc - 0x100;
 
 
-const InstructionList: FunctionalComponent<Props> = (props: Props) => {
+const InstructionList: React.FC<Props> = (props: Props) => {
     const { instructions, pc } = props;
 
-    const rowStyler = ({ index }: { index: number }) => {
+    const rowStyler = ({ index }: { index: number }): React.CSSProperties => {
         if (index === pcToIndex(pc)) {
             return { backgroundColor: theme.palette.attention }
         }
+
+        return {}
     }
 
     return (
