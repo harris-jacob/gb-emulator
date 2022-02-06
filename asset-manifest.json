@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/static/css/main.18007b85.css",
-    "main.js": "/static/js/main.714953bf.js",
-    "index.html": "/index.html",
-    "main.18007b85.css.map": "/static/css/main.18007b85.css.map",
-    "main.714953bf.js.map": "/static/js/main.714953bf.js.map"
+    "main.css": "https://harris-jacob.github.io/gb-emulator/static/css/main.18007b85.css",
+    "main.js": "https://harris-jacob.github.io/gb-emulator/static/js/main.115cff7e.js",
+    "index.html": "https://harris-jacob.github.io/gb-emulator/index.html",
+    "main.18007b85.css.map": "https://harris-jacob.github.io/gb-emulator/static/css/main.18007b85.css.map",
+    "main.115cff7e.js.map": "https://harris-jacob.github.io/gb-emulator/static/js/main.115cff7e.js.map"
   },
   "entrypoints": [
     "static/css/main.18007b85.css",
-    "static/js/main.714953bf.js"
+    "static/js/main.115cff7e.js"
   ]
 }
