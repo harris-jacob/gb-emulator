@@ -11,6 +11,7 @@
         "prepare": "wsrun --stages --exclude-missing prepare",
         "dev": "yarn workspace ui dev",
         "build-ui": "yarn workspace ui build",
-        "build-emulator": "./scripts/build-emulator.sh Debug"
+        "build-emulator": "./scripts/build-emulator.sh Debug",
+        "test-emulator": "./scripts/build-emu-tests.sh && ./emulator/build/bin/test"
     }
 }

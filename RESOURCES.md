@@ -8,3 +8,5 @@ Partial list of all the resources that helped me with this project:
 - [pandocs](https://gbdev.io/pandocs): Cannonical gb dev docs. 
 - [interrupts](https://jamiedstewart.github.io/gba%20dev/2019/09/11/GBA-Dev-Hardware-Interrupts.html): Great guide to interrupts.
 - [gameboy 2BPP graphics](https://www.huderlem.com/demos/gameboy2bpp.html): Guide to the 2bpp graphics format (how tiles are stored in the tileset).
+- [gameboy.live](https://github.com/HFO4/gameboy.live): Go implementation of a gameboy with a telnet server for "remote play"
+- [cinoop](https://github.com/CTurt/Cinoop): C implementation of gameboy
