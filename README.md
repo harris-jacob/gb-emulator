@@ -1,7 +1,10 @@
 # gb-emulator
 A WIP gameboy emulator written in C and compiled to WASM for running in a browser.
 
-# Goal
+## Current state
+At the moment, only a cpu debugger exists (not that interesting but live [here](https://harris-jacob.github.io/gb-emulator/))
+
+## Goal
 The goal of this project was mainly to learn the inner workings of the gameboy and, more specifically, its CPU. 
 
 ## Structure
