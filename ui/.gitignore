@@ -3,3 +3,4 @@ node_modules
 /*.log
 src/emulator/*.js
 src/static/emulator.*
+.env

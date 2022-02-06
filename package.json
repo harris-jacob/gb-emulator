@@ -7,11 +7,14 @@
         "wsrun": "^5.2.4"
     },
     "scripts": {
-        "postinstall": "yarn build-emulator",
-        "prepare": "wsrun --stages --exclude-missing prepare",
+        "build-emulator": "./scripts/build-emulator.sh Debug",
+        "deploy": "gh-pages -d ui/build",
         "dev": "yarn workspace ui dev",
         "build-ui": "yarn workspace ui build",
-        "build-emulator": "./scripts/build-emulator.sh Debug",
+        "build-all": "yarn build-emulator && yarn build-ui",
+        "postinstall": "yarn build-emulator",
+        "predeploy": "yarn build-all",
+        "prepare": "wsrun --stages --exclude-missing prepare",
         "test-emulator": "./scripts/build-emu-tests.sh && ./emulator/build/bin/test"
     }
 }
