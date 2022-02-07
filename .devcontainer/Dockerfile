@@ -31,13 +31,6 @@ RUN mkdir -p ~/temp && cd ~/temp \
     && sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake \
     && cd ~ && cmake --version 
 
-# emscripten
-RUN cd ~ && git clone https://github.com/emscripten-core/emsdk.git && cd emsdk \
-    && ./emsdk install latest \
-    && ./emsdk activate latest \
-    && echo "source \"/home/${USERNAME}/emsdk/emsdk_env.sh\"" >> /home/${USERNAME}/.bashrc \
-    && cd ~ 
-
 # Install docker
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - \
     && sudo add-apt-repository \
@@ -56,3 +49,11 @@ RUN mkdir -p ~/temp && cd ~/temp \
     && echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list \
     && sudo apt-get update && sudo apt-get install -y yarn \
     && cd ~ 
+
+# emscripten
+RUN cd ~ && git clone https://github.com/emscripten-core/emsdk.git && cd emsdk \
+    && ./emsdk install latest \
+    && ./emsdk activate latest \
+    && echo "source \"/home/${USERNAME}/emsdk/emsdk_env.sh\"" >> /home/${USERNAME}/.bashrc \
+    && cd ~ 
+
