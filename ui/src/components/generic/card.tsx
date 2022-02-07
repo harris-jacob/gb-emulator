@@ -6,6 +6,6 @@ const Card = styled.div`
   border-radius: ${theme.borderRadius};
   padding: ${theme.spacing(3)};
   margin: ${theme.spacing(2)};
-`
+`;
 
 export default Card;

@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import theme from '../../theme';
+import styled from "styled-components";
+import theme from "../../theme";
 
 const H6 = styled.h6`
   ${theme.typography.h6};
