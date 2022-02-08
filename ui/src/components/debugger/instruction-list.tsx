@@ -34,6 +34,7 @@ const InstructionList: React.FC<Props> = (props: Props) => {
             rowHeight={30}
             headerHeight={20}
             rowGetter={({ index }: { index: number }) => instructions[index]}
+            onRowClick={(info) => console.log(info.rowData.opcode)}
             width={width}
             rowStyle={rowStyler}
             scrollToIndex={pcToIndex(pc)}

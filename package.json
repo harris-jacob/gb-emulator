@@ -1,20 +1,21 @@
 {
-    "private": true,
-    "workspaces": [
-        "ui"
-    ],
-    "dependencies": {
-        "wsrun": "^5.2.4"
-    },
-    "scripts": {
-        "build-emulator": "./scripts/build-emulator.sh Debug",
-        "deploy": "yarn workspace ui deploy",
-        "dev": "yarn workspace ui dev",
-        "build-ui": "yarn workspace ui build",
-        "build-all": "yarn build-emulator && yarn build-ui",
-        "postinstall": "yarn build-emulator",
-        "predeploy": "yarn build-all",
-        "prepare": "wsrun --stages --exclude-missing prepare",
-        "test-emulator": "./scripts/build-emu-tests.sh && ./emulator/build/bin/test"
-    }
+  "private": true,
+  "workspaces": [
+    "ui"
+  ],
+  "dependencies": {
+    "wsrun": "^5.2.4"
+  },
+  "scripts": {
+    "build-emulator": "./scripts/build-emulator.sh Debug",
+    "deploy": "yarn workspace ui deploy",
+    "dev": "yarn workspace ui dev",
+    "build-ui": "yarn workspace ui build",
+    "build-all": "yarn build-emulator && yarn build-ui",
+    "postinstall": "yarn build-emulator",
+    "predeploy": "yarn build-all",
+    "prepare": "wsrun --stages --exclude-missing prepare",
+    "test-emulator": "./scripts/build-emu-tests.sh && ./emulator/build/bin/test",
+    "format-ui": "yarn workspace ui format"
+  }
 }
