@@ -1,142 +1,138 @@
+mod timer;
+use crate::core::data::Interrupt;
+
 pub struct MMU {
-    addr: [u8; 0x10000],
+    rom: [u8; 0x8000],
+    vram: [u8; 0x2000],
+    iram: [u8; 0x2000],
+    wrams: [u8; 0x2000],
+    sprites: [u8; 0xA0],
+    empty: [u8; 0x60],
+    // TODO: this will be replaced by the individual registers
+    io: [u8; 0x80],
+    hram: [u8; 0x80],
+    ie: u8,
+    timer: timer::Timer,
 }
 
 impl MMU {
     pub fn new() -> MMU {
-        let mut mmu = MMU { addr: [0; 0x10000] };
+        let mut mmu = MMU {
+            rom: [0; 0x8000],
+            vram: [0; 0x2000],
+            iram: [0; 0x2000],
+            wrams: [0; 0x2000],
+            sprites: [0; 0xA0],
+            empty: [0; 0x60],
+            io: [0; 0x80],
+            hram: [0; 0x80],
+            ie: 0,
+            timer: timer::Timer::new(),
+        };
 
         // Pretend we loaded the boot rom values
-        mmu.addr[0xff05] = 0;
-        mmu.addr[0xff06] = 0;
-        mmu.addr[0xff07] = 0;
-        mmu.addr[0xff10] = 0x80;
-        mmu.addr[0xff11] = 0xbf;
-        mmu.addr[0xff14] = 0xbf;
-        mmu.addr[0xff16] = 0x3f;
-        mmu.addr[0xff19] = 0xbf;
-        mmu.addr[0xff1b] = 0xff;
-        mmu.addr[0xff1e] = 0xbf;
-        mmu.addr[0xff21] = 0;
-        mmu.addr[0xff22] = 0;
-        mmu.addr[0xff23] = 0xbf;
-        mmu.addr[0xff24] = 0x77;
-        mmu.addr[0xff25] = 0xF3;
-        mmu.addr[0xff26] = 0xF1; // ??
-        mmu.addr[0xff40] = 0x91;
-        mmu.addr[0xff42] = 0;
-        mmu.addr[0xff43] = 0;
-        mmu.addr[0xff45] = 0;
-        mmu.addr[0xff47] = 0xfc;
-        mmu.addr[0xff48] = 0xff;
-        mmu.addr[0xff49] = 0xff;
-        mmu.addr[0xff4a] = 0;
-        mmu.addr[0xff4b] = 0;
-        mmu.addr[0xffff] = 0;
+        mmu.write_u8(0xff05, 0);
+        mmu.write_u8(0xff06, 0);
+        mmu.write_u8(0xff07, 0);
+        mmu.write_u8(0xff10, 0x80);
+        mmu.write_u8(0xff11, 0xbf);
+        mmu.write_u8(0xff14, 0xbf);
+        mmu.write_u8(0xff16, 0x3f);
+        mmu.write_u8(0xff19, 0xbf);
+        mmu.write_u8(0xff1b, 0xff);
+        mmu.write_u8(0xff1e, 0xbf);
+        mmu.write_u8(0xff21, 0);
+        mmu.write_u8(0xff22, 0);
+        mmu.write_u8(0xff23, 0xbf);
+        mmu.write_u8(0xff24, 0x77);
+        mmu.write_u8(0xff25, 0xF3);
+        mmu.write_u8(0xff26, 0xF1);
+        mmu.write_u8(0xff40, 0x91);
+        mmu.write_u8(0xff42, 0);
+        mmu.write_u8(0xff43, 0);
+        mmu.write_u8(0xff45, 0);
+        mmu.write_u8(0xff47, 0xfc);
+        mmu.write_u8(0xff48, 0xff);
+        mmu.write_u8(0xff49, 0xff);
+        mmu.write_u8(0xff4a, 0);
+        mmu.write_u8(0xff4b, 0);
+        mmu.write_u8(0xffff, 0);
 
         mmu
     }
 
     pub fn read_u8(&self, addr: u16) -> u8 {
-        self.addr[addr as usize]
+        match addr {
+            0..0x8000 => self.rom[addr as usize],
+            0x8000..0xA000 => self.vram[(addr - 0x8000) as usize],
+            0xA000..0xC000 => self.iram[(addr - 0xA000) as usize],
+            0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize],
+            0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize],
+            0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize],
+            0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize],
+            0xFF00..0xFF80 => match addr {
+                0xFF04..0xFF08 => self.timer.read(addr),
+                // TODO: temp while we don't have an LCD
+                0xFF44 => 0x90,
+                _ => self.io[(addr - 0xFF00) as usize],
+            },
+            0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize],
+            0xFFFF => self.ie,
+        }
     }
 
     pub fn read_u16(&self, addr: u16) -> u16 {
-        let low = self.addr[addr as usize] as u16;
-        let high = self.addr[(addr + 1) as usize] as u16;
+        let low = self.read_u8(addr) as u16;
+        let high = self.read_u8(addr + 1) as u16;
 
         (high << 8) | low
     }
 
     pub fn write_u8(&mut self, addr: u16, value: u8) {
-        self.addr[addr as usize] = value;
+        match addr {
+            0..0x8000 => self.rom[addr as usize] = value,
+            0x8000..0xA000 => self.vram[(addr - 0x8000) as usize] = value,
+            0xA000..0xC000 => self.iram[(addr - 0xA000) as usize] = value,
+            0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize] = value,
+            0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize] = value,
+            0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize] = value,
+            0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize] = value,
+            // TODO: review
+            0xFF00..0xFF80 => match addr {
+                // 0xFF01 => print!("{}", value as char),
+                0xFF04..0xFF08 => self.timer.write(addr, value),
+                _ => self.io[(addr - 0xFF00) as usize] = value,
+            },
+            0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize] = value,
+            0xFFFF => self.ie = value,
+        }
     }
 
     pub fn write_u16(&mut self, addr: u16, value: u16) {
         let low = value as u8;
         let high = (value >> 8) as u8;
 
-        self.addr[addr as usize] = low;
-        self.addr[(addr + 1) as usize] = high;
+        self.write_u8(addr, low);
+        self.write_u8(addr + 1, high);
     }
 
-    pub fn set_vblank_enable(&mut self) {
-        self.addr[0xffff] |= 0x1;
-    }
-    pub fn set_lcd_enable(&mut self) {
-        self.addr[0xffff] |= 0x1 << 1;
-    }
-
-    pub fn set_timer_enable(&mut self) {
-        self.addr[0xffff] |= 0x1 << 2;
+    // TODO: upper bound
+    pub fn load_rom(&mut self, data: &[u8]) {
+        for (i, byte) in data.iter().enumerate() {
+            self.rom[i] = *byte;
+        }
     }
 
-    pub fn set_serial_enable(&mut self) {
-        self.addr[0xffff] |= 0x1 << 3;
+    pub fn step(&mut self, m_cycles: u8) {
+        self.timer.step(m_cycles);
     }
 
-    pub fn set_joypad_enable(&mut self) {
-        self.addr[0xffff] |= 0x1 << 4;
-    }
-
-    pub fn reset_vblank_enable(&mut self) {
-        self.addr[0xffff] &= !(0x1);
-    }
-
-    pub fn reset_lcd_enable(&mut self) {
-        self.addr[0xffff] &= !(0x1 << 1);
-    }
-
-    pub fn reset_timer_enable(&mut self) {
-        self.addr[0xffff] &= !(0x1 << 2);
-    }
-
-    pub fn reset_serial_enable(&mut self) {
-        self.addr[0xffff] &= !(0x1 << 3);
-    }
-
-    pub fn reset_joypad_enable(&mut self) {
-        self.addr[0xffff] &= !(0x1 << 4);
-    }
-
-    pub fn set_vblank(&mut self) {
-        self.addr[0xff0f] |= 0x1;
-    }
-
-    pub fn set_lcd(&mut self) {
-        self.addr[0xff0f] |= 0x1 << 1;
-    }
-
-    pub fn set_timer(&mut self) {
-        self.addr[0xff0f] |= 0x1 << 2;
-    }
-
-    pub fn set_serial(&mut self) {
-        self.addr[0xff0f] |= 0x1 << 3;
-    }
-
-    pub fn set_joypad(&mut self) {
-        self.addr[0xff0f] |= 0x1 << 4;
-    }
-
-    pub fn reset_vblank(&mut self) {
-        self.addr[0xff0f] &= !(0x1);
-    }
-
-    pub fn reset_lcd(&mut self) {
-        self.addr[0xff0f] &= !(0x1 << 1);
-    }
-
-    pub fn reset_timer(&mut self) {
-        self.addr[0xff0f] &= !(0x1 << 2);
-    }
-
-    pub fn reset_serial(&mut self) {
-        self.addr[0xff0f] &= !(0x1 << 3);
-    }
-
-    pub fn reset_joypad(&mut self) {
-        self.addr[0xff0f] &= !(0x1 << 4);
+    pub fn interrupts_requested(&self) -> Option<Interrupt> {
+        if self.timer.interrupt_request {
+            return Some(Interrupt::Timer);
+        } else {
+            return None;
+        }
     }
 }
 
@@ -145,19 +141,144 @@ mod tests {
     use super::*;
 
     #[test]
-    fn read_write_u8() {
+    fn read_rom_space() {
         let mut mmu = MMU::new();
 
-        mmu.write_u8(0x1234, 0x12);
-        assert_eq!(mmu.read_u8(0x1234), 0x12);
+        for i in 0..0x8000 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0..0x8000 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
     }
 
     #[test]
-    fn read_write_u16() {
+    fn read_vram_space() {
         let mut mmu = MMU::new();
 
-        mmu.write_u16(0x1234, 0x1234);
-        assert_eq!(mmu.read_u16(0x1234), 0x1234);
+        for i in 0x8000..0xA000 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0x8000..0xA000 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_iram_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xA000..0xC000 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xA000..0xC000 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_wram_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xC000..0xE000 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xC000..0xE000 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_wram_echo_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xE000..0xFE00 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xE000..0xFE00 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_sprite_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xFE00..0xFEA0 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xFE00..0xFEA0 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_empty_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xFEA0..0xFF00 {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xFEA0..0xFF00 {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_timer() {
+        let mut mmu = MMU::new();
+
+        mmu.write_u8(0xFF04, 0x10);
+        assert_eq!(mmu.read_u8(0xFF04), 0);
+
+        for i in 0xFF05..0xFF08 {
+            mmu.write_u8(i, 0x10);
+            assert_eq!(mmu.read_u8(i), 0x10);
+        }
+    }
+
+    #[test]
+    fn read_hram_space() {
+        let mut mmu = MMU::new();
+
+        for i in 0xFF80..0xFFFF {
+            mmu.write_u8(i, 0);
+            assert_eq!(mmu.read_u8(i), 0);
+        }
+
+        for i in 0xFF80..0xFFFF {
+            mmu.write_u16(i, 0xFFFF);
+            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        }
+    }
+
+    #[test]
+    fn read_ie() {
+        let mut mmu = MMU::new();
+
+        mmu.write_u8(0xFFFF, 0x10);
+        assert_eq!(mmu.read_u8(0xFFFF), 0x10);
     }
 
     #[test]
@@ -170,50 +291,28 @@ mod tests {
     }
 
     #[test]
-    fn interrupt_enable_flags() {
+    fn step_steps_timer() {
         let mut mmu = MMU::new();
+        mmu.write_u8(0xFF07, 0b0000_0111);
 
-        mmu.set_vblank_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0x1);
-        mmu.set_lcd_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0x3);
-        mmu.set_timer_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0x7);
-        mmu.set_serial_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0xf);
+        for _ in 0..=64 {
+            mmu.step(1);
+        }
 
-        // reset
-        mmu.reset_vblank_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0xe);
-        mmu.reset_lcd_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0xc);
-        mmu.reset_timer_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0x8);
-        mmu.reset_serial_enable();
-        assert_eq!(mmu.read_u8(0xffff), 0x0);
+        assert_eq!(mmu.read_u8(0xFF05), 1);
+        assert_eq!(mmu.read_u8(0xFF04), 1);
     }
 
     #[test]
-    fn interrupt_flags() {
+    fn timer_interrupt_request() {
         let mut mmu = MMU::new();
+        mmu.write_u8(0xFF07, 0b0000_0101);
+        mmu.write_u8(0xFF05, 0xFF);
 
-        mmu.set_vblank();
-        assert_eq!(mmu.read_u8(0xff0f), 0x1);
-        mmu.set_lcd();
-        assert_eq!(mmu.read_u8(0xff0f), 0x3);
-        mmu.set_timer();
-        assert_eq!(mmu.read_u8(0xff0f), 0x7);
-        mmu.set_serial();
-        assert_eq!(mmu.read_u8(0xff0f), 0xf);
+        for _ in 0..4 {
+            mmu.step(1);
+        }
 
-        // reset
-        mmu.reset_vblank();
-        assert_eq!(mmu.read_u8(0xff0f), 0xe);
-        mmu.reset_lcd();
-        assert_eq!(mmu.read_u8(0xff0f), 0xc);
-        mmu.reset_timer();
-        assert_eq!(mmu.read_u8(0xff0f), 0x8);
-        mmu.reset_serial();
-        assert_eq!(mmu.read_u8(0xff0f), 0x0);
+        assert_eq!(mmu.interrupts_requested(), Some(Interrupt::Timer));
     }
 }

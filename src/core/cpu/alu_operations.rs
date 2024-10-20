@@ -121,6 +121,42 @@ pub fn alu_and_value(registers: &mut Registers, value: u8) {
     registers.write_eight(EightBitRegister::A, result);
 }
 
+// TODO: test
+pub fn ld_hl_sp_r8(registers: &mut Registers, value: u8) {
+    let sp = registers.read_sixteen(SixteenBitRegister::SP);
+    let result = sp.wrapping_add(value as i8 as i16 as u16);
+
+    registers.write_sixteen(SixteenBitRegister::HL, result);
+    registers.set_zero_flag(false);
+    registers.set_subtract_flag(false);
+    registers.set_half_carry_flag((sp & 0xf) + (value as u16 & 0xf) > 0xf);
+    registers.set_carry_flag((sp & 0xff) + (value as u16 & 0xff) > 0xff);
+}
+
+// TODO: test
+pub fn alu_add_16(registers: &mut Registers, reg: SixteenBitRegister) {
+    let value = registers.read_sixteen(reg);
+    let hl = registers.read_sixteen(SixteenBitRegister::HL);
+    let result = hl.wrapping_add(value);
+
+    registers.write_sixteen(SixteenBitRegister::HL, result);
+    registers.set_subtract_flag(false);
+    registers.set_half_carry_flag((hl & 0xfff) + (value & 0xfff) > 0xfff);
+    registers.set_carry_flag(hl > 0xffff - value);
+}
+
+// TODO: test
+pub fn add_sp_r8(registers: &mut Registers, value: u8) {
+    let sp = registers.read_sixteen(SixteenBitRegister::SP);
+    let result = sp.wrapping_add(value as i8 as i16 as u16);
+
+    registers.write_sixteen(SixteenBitRegister::SP, result);
+    registers.set_zero_flag(false);
+    registers.set_subtract_flag(false);
+    registers.set_half_carry_flag((sp & 0xf) + (value as u16 & 0xf) > 0xf);
+    registers.set_carry_flag((sp & 0xff) + (value as u16 & 0xff) > 0xff);
+}
+
 /// Logical AND the value of a register with the A register.
 pub fn alu_and(registers: &mut Registers, reg: EightBitRegister) {
     let value = registers.read_eight(reg);
@@ -248,11 +284,31 @@ pub fn jr(registers: &mut Registers, value: u8) {
     }
 }
 
-
-
+// TODO: test and what the hell is this?
 pub fn daa(registers: &mut Registers) {
-    // TODO:
-    todo!();
+    let mut a = registers.read_eight(EightBitRegister::A);
+    let mut adjust = if registers.get_carry_flag() {
+        0x60
+    } else {
+        0x00
+    };
+    if registers.get_half_carry_flag() || (!registers.get_subtract_flag() && (a & 0x0f) > 0x09) {
+        adjust |= 0x06;
+    }
+    if registers.get_carry_flag() || (!registers.get_subtract_flag() && a > 0x99) {
+        adjust |= 0x60;
+    }
+
+    if registers.get_subtract_flag() {
+        a = a.wrapping_sub(adjust);
+    } else {
+        a = a.wrapping_add(adjust);
+    }
+
+    registers.set_zero_flag(a == 0);
+    registers.set_half_carry_flag(false);
+    registers.set_carry_flag(adjust >= 0x60);
+    registers.write_eight(EightBitRegister::A, a);
 }
 
 // Flip all bits in A.
@@ -411,7 +467,6 @@ mod tests {
         assert_eq!(registers.get_half_carry_flag(), false);
         assert_eq!(registers.get_carry_flag(), false);
     }
-
 
     #[test]
     fn cpl_flips_all_bits_and_sets_flags() {

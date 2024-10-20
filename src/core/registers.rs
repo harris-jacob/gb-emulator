@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct Registers {
     af: u16,
     bc: u16,
@@ -10,6 +11,7 @@ pub struct Registers {
 #[derive(Clone, Copy, Debug)]
 pub enum EightBitRegister {
     A,
+    F,
     B,
     C,
     D,
@@ -43,6 +45,7 @@ impl Registers {
     pub fn read_eight(&self, register: EightBitRegister) -> u8 {
         match register {
             EightBitRegister::A => (self.af >> 8) as u8,
+            EightBitRegister::F => self.af as u8,
             EightBitRegister::B => (self.bc >> 8) as u8,
             EightBitRegister::C => self.bc as u8,
             EightBitRegister::D => (self.de >> 8) as u8,
@@ -67,6 +70,7 @@ impl Registers {
         let value = value as u16;
         match register {
             EightBitRegister::A => self.af = (self.af & 0xff) | (value << 8),
+            EightBitRegister::F => self.af = (self.af & 0xff00) | value,
             EightBitRegister::B => self.bc = (self.bc & 0xff) | (value << 8),
             EightBitRegister::C => self.bc = (self.bc & 0xff00) | value,
             EightBitRegister::D => self.de = (self.de & 0xff) | (value << 8),
