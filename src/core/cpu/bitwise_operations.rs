@@ -1,144 +1,166 @@
 use super::*;
 
-pub fn srl_val(registers: &mut Registers, value: u8) -> u8 {
-    let carry = value & 0b0000_0001 == 0b0000_0001;
-
-    let result = value >> 1;
-    registers.set_carry_flag(carry);
-    registers.set_half_carry_flag(false);
-    registers.set_subtract_flag(false);
-    registers.set_zero_flag(result == 0);
-
+/// Swap the upper and lower nibbles of a byte value
+pub fn swap_value(reg: &mut Registers, value: u8) -> u8 {
+    let result = ((value & 0x0F) << 4) | ((value & 0xF0) >> 4);
+    reg.set_zero_flag(result == 0);
+    reg.set_subtract_flag(false);
+    reg.set_half_carry_flag(false);
+    reg.set_carry_flag(false);
     result
 }
 
-pub fn srl(registers: &mut Registers, reg: EightBitRegister) {
-    let value = registers.read_eight(reg);
-    let result = srl_val(registers, value);
-    registers.write_eight(reg, result);
+/// Swap the upper and lower nibbles of a register
+pub fn swap(reg: &mut Registers, register: EightBitRegister) {
+    let value = reg.read_eight(register);
+    let result = swap_value(reg, value);
+    reg.write_eight(register, result);
 }
 
-pub fn rr_val(registers: &mut Registers, value: u8) -> u8 {
-    let carry = value & 0b0000_0001 == 0b0000_0001;
-
-    let mut result = value >> 1;
-    if registers.get_carry_flag() {
-        result |= 0b1000_0000;
-    }
-
-    registers.set_carry_flag(carry);
-    registers.set_half_carry_flag(false);
-    registers.set_subtract_flag(false);
+/// Test bit (bit) of the value, set the zero flag if it is not set
+pub fn bit_val(registers: &mut Registers, value: u8, bit: u8) {
+    let result = value & (1 << bit);
     registers.set_zero_flag(result == 0);
-
-    result
+    registers.set_subtract_flag(false);
+    registers.set_half_carry_flag(true);
 }
 
-pub fn rr(registers: &mut Registers, reg: EightBitRegister) {
-    let value = registers.read_eight(reg);
-    let result = rr_val(registers, value);
-    registers.write_eight(reg, result);
+/// Test bit (bit) of the register, set the zero flag if it is not set
+pub fn bit(registers: &mut Registers, register: EightBitRegister, bit: u8) {
+    let value = registers.read_eight(register);
+    bit_val(registers, value, bit);
+}
+
+/// Reset bit (bit) of the value
+pub fn res_val(value: u8, bit: u8) -> u8 {
+    value & !(1 << bit)
+}
+
+/// Reset bit (bit) of the register
+pub fn res(registers: &mut Registers, register: EightBitRegister, bit: u8) {
+    let value = registers.read_eight(register);
+    let result = res_val(value, bit);
+    registers.write_eight(register, result);
+}
+
+/// Set bit (bit) of the value
+pub fn set_val(value: u8, bit: u8) -> u8 {
+    value | (1 << bit)
+}
+
+/// Set bit (bit) of the register
+pub fn set(registers: &mut Registers, register: EightBitRegister, bit: u8) {
+    let value = registers.read_eight(register);
+    let result = set_val(value, bit);
+    registers.write_eight(register, result);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
     #[test]
-    fn test_srl_val_basic() {
-        let mut registers = Registers::new();
-        let value = 0b1010_1010;
-        let result = srl_val(&mut registers, value);
-        assert_eq!(result, 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+    fn test_swap_value() {
+        let mut reg = Registers::new();
+        let value = 0b1010_0110;
+        let result = swap_value(&mut reg, value);
+        assert_eq!(result, 0b0110_1010);
+        assert_eq!(reg.get_zero_flag(), false);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), false);
+        assert_eq!(reg.get_carry_flag(), false);
     }
 
     #[test]
-    fn test_srl_val_zero() {
-        let mut registers = Registers::new();
-        let value = 0b0000_0001;
-        let result = srl_val(&mut registers, value);
+    fn test_swap_value_zero() {
+        let mut reg = Registers::new();
+        let value = 0b0000_0000;
+        let result = swap_value(&mut reg, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert_eq!(reg.get_zero_flag(), true);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), false);
+        assert_eq!(reg.get_carry_flag(), false);
     }
 
     #[test]
-    fn test_srl_val_carry() {
-        let mut registers = Registers::new();
-        let value = 0b0000_0001;
-        let result = srl_val(&mut registers, value);
-        assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+    fn test_swap() {
+        let mut reg = Registers::new();
+        reg.write_eight(EightBitRegister::B, 0b1110_0110);
+        swap(&mut reg, EightBitRegister::B);
+        assert_eq!(reg.read_eight(EightBitRegister::B), 0b0110_1110);
+        assert_eq!(reg.get_zero_flag(), false);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), false);
+        assert_eq!(reg.get_carry_flag(), false);
     }
 
     #[test]
-    fn test_srl_basic() {
-        let mut registers = Registers::new();
-        registers.write_eight(EightBitRegister::B, 0b1010_1010);
-        srl(&mut registers, EightBitRegister::B);
-        assert_eq!(registers.read_eight(EightBitRegister::B), 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
-    }
-
-    #[test]
-    fn test_rr_val_basic() {
-        let mut registers = Registers::new();
+    fn test_bit_val_unset() {
+        let mut reg = Registers::new();
         let value = 0b1010_1010;
-        let result = rr_val(&mut registers, value);
-        assert_eq!(result, 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        bit_val(&mut reg, value, 0);
+        assert_eq!(reg.get_zero_flag(), true);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), true);
     }
 
     #[test]
-    fn test_rr_val_carry() {
-        let mut registers = Registers::new();
+    fn test_bit_val_set() {
+        let mut reg = Registers::new();
         let value = 0b1010_1010;
-        registers.set_carry_flag(true);
-        let result = rr_val(&mut registers, value);
-        assert_eq!(result, 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        bit_val(&mut reg, value, 1);
+        assert_eq!(reg.get_zero_flag(), false);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), true);
     }
 
     #[test]
-    fn test_rr_val_zero() {
-        let mut registers = Registers::new();
-        let value = 0b0000_0001;
-        registers.set_carry_flag(false);
-        let result = rr_val(&mut registers, value);
-        assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+    fn test_bit() {
+        let mut reg = Registers::new();
+        reg.write_eight(EightBitRegister::B, 0b1010_1010);
+        bit(&mut reg, EightBitRegister::B, 0);
+        assert_eq!(reg.get_zero_flag(), true);
+        assert_eq!(reg.get_subtract_flag(), false);
+        assert_eq!(reg.get_half_carry_flag(), true);
     }
 
     #[test]
-    fn test_rr_basic() {
-        let mut registers = Registers::new();
-        registers.write_eight(EightBitRegister::B, 0b1010_1010);
-        rr(&mut registers, EightBitRegister::B);
-        assert_eq!(registers.read_eight(EightBitRegister::B), 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+    fn test_res_val_unset_bit() {
+        let result = res_val(0b1010_1010, 0);
+        assert_eq!(result, 0b1010_1010);
+    }
+
+    #[test]
+    fn test_res_val_set_bit() {
+        let result = res_val(0b1010_1010, 1);
+        assert_eq!(result, 0b1010_1000);
+    }
+
+    #[test]
+    fn test_res() {
+        let mut reg = Registers::new();
+        reg.write_eight(EightBitRegister::B, 0b1010_1010);
+        res(&mut reg, EightBitRegister::B, 1);
+        assert_eq!(reg.read_eight(EightBitRegister::B), 0b1010_1000);
+    }
+
+    #[test]
+    fn test_set_val_unset_bit() {
+        let result = set_val(0b1010_1010, 4);
+        assert_eq!(result, 0b1011_1010);
+    }
+
+    #[test]
+    fn test_set_val_set_bit() {
+        let result = set_val(0b1010_1010, 1);
+        assert_eq!(result, 0b1010_1010 | 0b0000_0010);
+    }
+
+    #[test]
+    fn test_set() {
+        let mut reg = Registers::new();
+        reg.write_eight(EightBitRegister::B, 0b1010_1010);
+        set(&mut reg, EightBitRegister::B, 1);
+        assert_eq!(reg.read_eight(EightBitRegister::B), 0b1010_1010 | 0b0000_0010);
     }
 }
