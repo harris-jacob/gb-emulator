@@ -1,9 +1,9 @@
 mod alu_operations;
 mod bitwise_operations;
-mod shift_operations;
 mod cb_instructions;
 mod interrupts;
 mod jp_operations;
+mod shift_operations;
 mod stack_operations;
 use alu_operations::*;
 use jp_operations::*;
@@ -21,21 +21,20 @@ pub struct CPU {
 }
 
 impl CPU {
-    pub fn new() -> Self {
+    pub fn new(cartridge: Box<dyn cartridge::Cartridge>) -> Self {
         CPU {
             clock: 0,
             halted: false,
-            mmu: MMU::new(),
+            mmu: MMU::new(cartridge),
             registers: Registers::new(),
             ime: false,
             stopped: false,
         }
     }
-    pub fn load_rom(&mut self, rom: ROM) {
-        rom.load(&mut self.mmu)
-    }
-
     pub fn step(&mut self) -> u8 {
+        if self.stopped {
+            panic!("CPU is stopped");
+        }
         if self.stopped || self.halted {
             return 0;
         }
@@ -153,12 +152,7 @@ impl CPU {
                 let value = self
                     .mmu
                     .read_u8(self.registers.read_sixteen(SixteenBitRegister::BC));
-                self.registers.write_eight(
-                    EightBitRegister::A,
-                    self.registers
-                        .read_eight(EightBitRegister::A)
-                        .wrapping_add(value),
-                );
+                self.registers.write_eight(EightBitRegister::A, value);
                 (2, 0)
             }
             // DEC BC
@@ -190,7 +184,7 @@ impl CPU {
             }
             // STOP n8
             0x10 => {
-                self.stopped = true;
+                // self.stopped = true;
                 (1, 1)
             }
             // LD DE, d16
@@ -453,12 +447,7 @@ impl CPU {
             0x3A => {
                 let addr = self.registers.read_sixteen(SixteenBitRegister::HL);
                 let value = self.mmu.read_u8(addr);
-                self.registers.write_eight(
-                    EightBitRegister::A,
-                    self.registers
-                        .read_eight(EightBitRegister::A)
-                        .wrapping_add(value),
-                );
+                self.registers.write_eight(EightBitRegister::A, value);
                 self.registers
                     .update_sixteen(SixteenBitRegister::HL, |hl| hl.wrapping_sub(1));
                 (2, 0)
