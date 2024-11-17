@@ -14,7 +14,7 @@ use crate::core::*;
 pub struct CPU {
     pub clock: u64,
     halted: bool,
-    mmu: MMU,
+    pub mmu: MMU,
     registers: Registers,
     ime: bool,
     stopped: bool,
