@@ -82,6 +82,7 @@ impl MMU {
     }
 
     pub fn read_u16(&self, addr: u16) -> u16 {
+        dbg!(addr);
         let low = self.read_u8(addr) as u16;
         let high = self.read_u8(addr + 1) as u16;
 
@@ -131,22 +132,34 @@ impl MMU {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::cartridge::NoMBC;
+    use crate::core::cartridge::MockCartridge;
 
     use super::*;
 
     #[test]
     fn read_rom_space() {
-        let mut mmu = mock_mmu();
+        let mut cartridge = MockCartridge::new();
+
+        cartridge
+            .expect_read_rom()
+            .times(0x8000 * 3 - 2)
+            .returning(|_| 0);
+
+        cartridge
+            .expect_write_rom()
+            .times(0x8000 * 3 - 2)
+            .returning(|_, _| ());
+
+        let mut mmu = MMU::new(Box::new(cartridge));
 
         for i in 0..0x8000 {
             mmu.write_u8(i, 0);
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0..0x8000 {
-            mmu.write_u16(i, 0xFFFF);
-            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        for i in 0..0x7FFF {
+            mmu.write_u16(i, 0);
+            assert_eq!(mmu.read_u16(i), 0);
         }
     }
 
@@ -159,7 +172,7 @@ mod tests {
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0x8000..0xA000 {
+        for i in 0x8000..0x9FFF {
             mmu.write_u16(i, 0xFFFF);
             assert_eq!(mmu.read_u16(i), 0xFFFF);
         }
@@ -167,16 +180,28 @@ mod tests {
 
     #[test]
     fn read_iram_space() {
-        let mut mmu = mock_mmu();
+        let mut cartridge = MockCartridge::new();
+
+        cartridge
+            .expect_read_ram()
+            .times(0x2000 * 3 - 2)
+            .returning(|_| 0);
+
+        cartridge
+            .expect_write_ram()
+            .times(0x2000 * 3 - 2)
+            .returning(|_, _| ());
+
+        let mut mmu = MMU::new(Box::new(cartridge));
 
         for i in 0xA000..0xC000 {
             mmu.write_u8(i, 0);
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0xA000..0xC000 {
-            mmu.write_u16(i, 0xFFFF);
-            assert_eq!(mmu.read_u16(i), 0xFFFF);
+        for i in 0xA000..0xBFFF {
+            mmu.write_u16(i, 0);
+            assert_eq!(mmu.read_u16(i), 0);
         }
     }
 
@@ -189,7 +214,7 @@ mod tests {
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0xC000..0xE000 {
+        for i in 0xC000..0xDFFF {
             mmu.write_u16(i, 0xFFFF);
             assert_eq!(mmu.read_u16(i), 0xFFFF);
         }
@@ -204,7 +229,7 @@ mod tests {
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0xE000..0xFE00 {
+        for i in 0xE000..0xFDFF {
             mmu.write_u16(i, 0xFFFF);
             assert_eq!(mmu.read_u16(i), 0xFFFF);
         }
@@ -219,7 +244,7 @@ mod tests {
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0xFE00..0xFEA0 {
+        for i in 0xFE00..0xFE9F {
             mmu.write_u16(i, 0xFFFF);
             assert_eq!(mmu.read_u16(i), 0xFFFF);
         }
@@ -234,7 +259,7 @@ mod tests {
             assert_eq!(mmu.read_u8(i), 0);
         }
 
-        for i in 0xFEA0..0xFF00 {
+        for i in 0xFEA0..0xFEFF {
             mmu.write_u16(i, 0xFFFF);
             assert_eq!(mmu.read_u16(i), 0xFFFF);
         }
@@ -312,8 +337,8 @@ mod tests {
     }
 
     pub fn mock_mmu() -> MMU {
-        let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
-        let mmu = MMU::new(cartridge);
+        let cartridge = MockCartridge::new();
+        let mmu = MMU::new(Box::new(cartridge));
 
         mmu
     }
