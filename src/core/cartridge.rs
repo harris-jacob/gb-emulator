@@ -1,12 +1,13 @@
-mod no_mbc;
-mod mbc1;
 mod header;
+mod mbc1;
+mod no_mbc;
 
 use header::CartridgeType;
-pub use no_mbc::NoMBC;
-pub use mbc1::MBC1;
 pub use header::Header;
+pub use mbc1::MBC1;
+pub use no_mbc::NoMBC;
 
+#[cfg_attr(test, mockall::automock)]
 pub trait Cartridge {
     /// Read a byte from the cartridge's RAM
     fn read_ram(&self, address: u16) -> u8;

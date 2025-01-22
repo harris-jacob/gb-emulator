@@ -22,15 +22,13 @@ fn main() {
 
     let mut cpu = core::CPU::new(cartridge);
 
-    let mut cycles = 0;
     // cpu.debug_output();
 
-    while cycles < 100000000 {
-        cycles += cpu.step() as u64;
+    while cpu.clock < 100000000 {
+        cpu.step();
         // if cycles != 0 {
         //     cpu.debug_output();
         // }
 
-        cycles += cpu.interrupt_step() as u64;
     }
 }
