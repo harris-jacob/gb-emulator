@@ -28,6 +28,7 @@ pub struct Sprite {
 }
 
 /// Which Palette number is the sprite using
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum PaletteNumber {
     /// Sprite palette 0
     OBP0,
@@ -45,6 +46,7 @@ pub enum PaletteNumber {
 /// Bit 4: Palette Number, If 0, use First sprite palette (0bp0), otherwise
 /// Bit 0-3: CGB-only
 /// use second sprite palette (0bp1).
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct SpriteFlags(u8);
 
 impl SpriteFlags {
@@ -65,7 +67,7 @@ impl SpriteFlags {
         self.0 & 0b00100000 == 0
     }
     pub fn palette_number(&self) -> PaletteNumber {
-        if self.0 & 0b0001000 == 0 {
+        if self.0 & 0b00010000 == 0 {
             PaletteNumber::OBP0
         } else {
             PaletteNumber::OBP1
@@ -115,30 +117,87 @@ impl OAM {
 #[cfg(test)]
 mod tests {
     use super::*;
+    mod oam {
+        use super::*;
 
-    #[test]
-    #[should_panic]
-    fn out_of_range_read_panics() {
-        let map = OAM::new();
+        #[test]
+        #[should_panic]
+        fn out_of_range_read_panics() {
+            let map = OAM::new();
 
-        map.read(161);
+            map.read(161);
+        }
+
+        #[test]
+        #[should_panic]
+        fn out_of_range_write_panics() {
+            let mut map = OAM::new();
+
+            map.write(161, 0);
+        }
+
+        #[test]
+        fn read_write() {
+            let mut map = OAM::new();
+            for i in 0u16..160 {
+                map.write(i, 1);
+
+                assert_eq!(map.read(i), 1);
+            }
+        }
+
+        #[test]
+        fn sprite_at_returns_correct_sprite() {
+            let mut map = OAM::new();
+            map.write(20 * 4, 0x10);
+            map.write(20 * 4 + 1, 0x20);
+            map.write(20 * 4 + 2, 0x30);
+            map.write(20 * 4 + 3, 0x40);
+
+            let sprite = map.sprite_at(20);
+
+            assert_eq!(sprite.x, 0x10);
+            assert_eq!(sprite.y, 0x20);
+            assert_eq!(sprite.tile_number, 0x30);
+            assert_eq!(sprite.flags, SpriteFlags::new(0x40));
+        }
     }
 
-    #[test]
-    #[should_panic]
-    fn out_of_range_write_panics() {
-        let mut map = OAM::new();
+    mod sprite_flags {
+        #[test]
+        fn bg_priority() {
+            let flags = super::super::SpriteFlags::new(0b00000000);
+            assert_eq!(flags.bg_priority(), true);
 
-        map.write(161, 0);
-    }
+            let flags = super::super::SpriteFlags::new(0b10000000);
+            assert_eq!(flags.bg_priority(), false);
+        }
 
-    #[test]
-    fn read_write() {
-        let mut map = OAM::new();
-        for i in 0u16..160 {
-            map.write(i, 1);
+        #[test]
+        fn y_flip() {
+            let flags = super::super::SpriteFlags::new(0b00000000);
+            assert_eq!(flags.y_flip(), true);
 
-            assert_eq!(map.read(i), 1);
+            let flags = super::super::SpriteFlags::new(0b01000000);
+            assert_eq!(flags.y_flip(), false);
+        }
+
+        #[test]
+        fn x_flip() {
+            let flags = super::super::SpriteFlags::new(0b00000000);
+            assert_eq!(flags.x_flip(), true);
+
+            let flags = super::super::SpriteFlags::new(0b00100000);
+            assert_eq!(flags.x_flip(), false);
+        }
+
+        #[test]
+        fn palette_number() {
+            let flags = super::super::SpriteFlags::new(0b00000000);
+            assert_eq!(flags.palette_number(), super::super::PaletteNumber::OBP0);
+
+            let flags = super::super::SpriteFlags::new(0b00010000);
+            assert_eq!(flags.palette_number(), super::super::PaletteNumber::OBP1);
         }
     }
 }
