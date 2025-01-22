@@ -1,10 +1,11 @@
 mod timer;
+
+use crate::core::cartridge::Cartridge;
 use crate::core::data::Interrupt;
 
 pub struct MMU {
-    rom: [u8; 0x8000],
+    cartridge: Box<dyn Cartridge>,
     vram: [u8; 0x2000],
-    iram: [u8; 0x2000],
     wrams: [u8; 0x2000],
     sprites: [u8; 0xA0],
     empty: [u8; 0x60],
@@ -16,11 +17,10 @@ pub struct MMU {
 }
 
 impl MMU {
-    pub fn new() -> MMU {
+    pub fn new(cartridge: Box<dyn Cartridge>) -> MMU {
         let mut mmu = MMU {
-            rom: [0; 0x8000],
+            cartridge,
             vram: [0; 0x2000],
-            iram: [0; 0x2000],
             wrams: [0; 0x2000],
             sprites: [0; 0xA0],
             empty: [0; 0x60],
@@ -63,9 +63,9 @@ impl MMU {
 
     pub fn read_u8(&self, addr: u16) -> u8 {
         match addr {
-            0..0x8000 => self.rom[addr as usize],
+            0..0x8000 => self.cartridge.read_rom(addr),
             0x8000..0xA000 => self.vram[(addr - 0x8000) as usize],
-            0xA000..0xC000 => self.iram[(addr - 0xA000) as usize],
+            0xA000..0xC000 => self.cartridge.read_ram(addr),
             0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize],
             0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize],
             0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize],
@@ -90,16 +90,16 @@ impl MMU {
 
     pub fn write_u8(&mut self, addr: u16, value: u8) {
         match addr {
-            0..0x8000 => self.rom[addr as usize] = value,
+            0..0x8000 => self.cartridge.write_rom(addr, value),
             0x8000..0xA000 => self.vram[(addr - 0x8000) as usize] = value,
-            0xA000..0xC000 => self.iram[(addr - 0xA000) as usize] = value,
+            0xA000..0xC000 => self.cartridge.write_ram(addr, value),
             0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize] = value,
             0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize] = value,
             0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize] = value,
             0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize] = value,
             // TODO: review
             0xFF00..0xFF80 => match addr {
-                // 0xFF01 => print!("{}", value as char),
+                0xFF01 => print!("{}", value as char),
                 0xFF04..0xFF08 => self.timer.write(addr, value),
                 _ => self.io[(addr - 0xFF00) as usize] = value,
             },
@@ -114,13 +114,6 @@ impl MMU {
 
         self.write_u8(addr, low);
         self.write_u8(addr + 1, high);
-    }
-
-    // TODO: upper bound
-    pub fn load_rom(&mut self, data: &[u8]) {
-        for (i, byte) in data.iter().enumerate() {
-            self.rom[i] = *byte;
-        }
     }
 
     pub fn step(&mut self, m_cycles: u8) {
@@ -138,11 +131,13 @@ impl MMU {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::cartridge::NoMBC;
+
     use super::*;
 
     #[test]
     fn read_rom_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0..0x8000 {
             mmu.write_u8(i, 0);
@@ -157,7 +152,7 @@ mod tests {
 
     #[test]
     fn read_vram_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0x8000..0xA000 {
             mmu.write_u8(i, 0);
@@ -172,7 +167,7 @@ mod tests {
 
     #[test]
     fn read_iram_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xA000..0xC000 {
             mmu.write_u8(i, 0);
@@ -187,7 +182,7 @@ mod tests {
 
     #[test]
     fn read_wram_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xC000..0xE000 {
             mmu.write_u8(i, 0);
@@ -202,7 +197,7 @@ mod tests {
 
     #[test]
     fn read_wram_echo_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xE000..0xFE00 {
             mmu.write_u8(i, 0);
@@ -217,7 +212,7 @@ mod tests {
 
     #[test]
     fn read_sprite_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xFE00..0xFEA0 {
             mmu.write_u8(i, 0);
@@ -232,7 +227,7 @@ mod tests {
 
     #[test]
     fn read_empty_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xFEA0..0xFF00 {
             mmu.write_u8(i, 0);
@@ -247,7 +242,7 @@ mod tests {
 
     #[test]
     fn read_timer() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         mmu.write_u8(0xFF04, 0x10);
         assert_eq!(mmu.read_u8(0xFF04), 0);
@@ -260,7 +255,7 @@ mod tests {
 
     #[test]
     fn read_hram_space() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         for i in 0xFF80..0xFFFF {
             mmu.write_u8(i, 0);
@@ -275,7 +270,7 @@ mod tests {
 
     #[test]
     fn read_ie() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
 
         mmu.write_u8(0xFFFF, 0x10);
         assert_eq!(mmu.read_u8(0xFFFF), 0x10);
@@ -283,7 +278,7 @@ mod tests {
 
     #[test]
     fn initialises_with_boot_rom() {
-        let mmu = MMU::new();
+        let mmu = mock_mmu();
 
         assert_eq!(mmu.read_u8(0xff10), 0x80);
         assert_eq!(mmu.read_u8(0xff11), 0xbf);
@@ -292,7 +287,7 @@ mod tests {
 
     #[test]
     fn step_steps_timer() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
         mmu.write_u8(0xFF07, 0b0000_0111);
 
         for _ in 0..=64 {
@@ -305,7 +300,7 @@ mod tests {
 
     #[test]
     fn timer_interrupt_request() {
-        let mut mmu = MMU::new();
+        let mut mmu = mock_mmu();
         mmu.write_u8(0xFF07, 0b0000_0101);
         mmu.write_u8(0xFF05, 0xFF);
 
@@ -314,5 +309,12 @@ mod tests {
         }
 
         assert_eq!(mmu.interrupts_requested(), Some(Interrupt::Timer));
+    }
+
+    pub fn mock_mmu() -> MMU {
+        let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
+        let mmu = MMU::new(cartridge);
+
+        mmu
     }
 }

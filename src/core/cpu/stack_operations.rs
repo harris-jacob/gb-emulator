@@ -120,11 +120,13 @@ pub fn stack_pop(cpu: &mut CPU) -> u16 {
 
 #[cfg(test)]
 mod tests {
+    use cartridge::NoMBC;
+
     use super::*;
 
     #[test]
     fn stack_push_and_pop() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.write_sixteen(SixteenBitRegister::SP, 0xFFFE);
         stack_push(&mut cpu, 0x1234);
         stack_push(&mut cpu, 0x5678);
@@ -136,7 +138,7 @@ mod tests {
 
     #[test]
     fn call_and_return() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         call(&mut cpu, 0x5678);
         assert_eq!(cpu.registers.read_sixteen(SixteenBitRegister::PC), 0x5678);
@@ -146,7 +148,7 @@ mod tests {
 
     #[test]
     fn call_nz_when_not_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_zero_flag(false);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_nz(&mut cpu, 0x5678);
@@ -156,7 +158,7 @@ mod tests {
 
     #[test]
     fn call_nz_when_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_zero_flag(true);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_nz(&mut cpu, 0x5678);
@@ -166,7 +168,7 @@ mod tests {
 
     #[test]
     fn call_z_when_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_zero_flag(true);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_z(&mut cpu, 0x5678);
@@ -176,7 +178,7 @@ mod tests {
 
     #[test]
     fn call_z_when_not_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_zero_flag(false);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_z(&mut cpu, 0x5678);
@@ -186,7 +188,7 @@ mod tests {
 
     #[test]
     fn call_nc_when_not_carry() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_carry_flag(false);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_nc(&mut cpu, 0x5678);
@@ -196,7 +198,7 @@ mod tests {
 
     #[test]
     fn call_nc_when_carry() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_carry_flag(true);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_nc(&mut cpu, 0x5678);
@@ -206,7 +208,7 @@ mod tests {
 
     #[test]
     fn call_c_when_not_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_carry_flag(false);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_c(&mut cpu, 0x5678);
@@ -216,7 +218,7 @@ mod tests {
 
     #[test]
     fn call_c_when_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_carry_flag(true);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         let result = call_c(&mut cpu, 0x5678);
@@ -226,12 +228,17 @@ mod tests {
 
     #[test]
     fn ret_nz_when_not_zero() {
-        let mut cpu = CPU::new();
+        let mut cpu = mock_cpu();
         cpu.registers.set_zero_flag(false);
         cpu.registers.write_sixteen(SixteenBitRegister::PC, 0x1234);
         stack_push(&mut cpu, 0x5678);
         let result = ret_nz(&mut cpu);
         assert_eq!(result, ReturnResult::Returned);
         assert_eq!(cpu.registers.read_sixteen(SixteenBitRegister::PC), 0x5678);
+    }
+
+    fn mock_cpu() -> CPU {
+        let cartridge = NoMBC::new(vec![0; 0x8000]);
+        CPU::new(Box::new(cartridge))
     }
 }
