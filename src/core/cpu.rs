@@ -1,5 +1,6 @@
 mod alu_operations;
 mod bitwise_operations;
+mod shift_operations;
 mod cb_instructions;
 mod interrupts;
 mod jp_operations;
@@ -1728,17 +1729,17 @@ impl CPU {
                 }
             }
 
-            // CALL a16
+            // CALL C a16
             0xDC => {
                 let value = self.fetch_u16();
 
-                call(self, value);
+                call_c(self, value);
 
                 (6, 3)
             }
 
             // SBC A, d8
-            0xDD => {
+            0xDE => {
                 let value = self.fetch_u8();
 
                 alu_sbc_value(&mut self.registers, value);
