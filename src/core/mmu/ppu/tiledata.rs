@@ -16,9 +16,10 @@ pub struct TileData {
 ///   Meaning we can access tiles 0-255. i.e. Blocks 0 and 1.
 /// - UnsignedMethod ($8800 method). Uses 0x8800 as the base pointer. And a signed offset
 ///   which means we can access tiles 128-394 i.e. Blocks 1 and 2.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TileAddressingMethod {
-    SignedAddressing,
-    UnsignedAddressing,
+    Signed,
+    Unsigned,
 }
 
 impl TileData {
@@ -40,13 +41,13 @@ impl TileData {
 
     pub(super) fn tile_at(&self, tile_number: u8, addressing_method: TileAddressingMethod) -> Tile {
         let start = match addressing_method {
-            TileAddressingMethod::SignedAddressing => {
+            TileAddressingMethod::Signed => {
                 let tile_number = tile_number as i8;
 
                 (0x1000 + (tile_number as i8) as i16 * 16) as usize
             }
 
-            TileAddressingMethod::UnsignedAddressing => tile_number as usize * 16,
+            TileAddressingMethod::Unsigned => tile_number as usize * 16,
         };
 
         Tile::new(self.tile_data(start))
@@ -112,7 +113,7 @@ mod tests {
             tiledata.write(100 * 16 + i, smiley_face[i as usize]);
         }
 
-        let tile = tiledata.tile_at(100, TileAddressingMethod::UnsignedAddressing);
+        let tile = tiledata.tile_at(100, TileAddressingMethod::Unsigned);
 
         assert_smiley_face(tile);
     }
@@ -127,7 +128,7 @@ mod tests {
             tiledata.write(300 * 16 + i, smiley_face[i as usize]);
         }
 
-        let tile = tiledata.tile_at(44, TileAddressingMethod::SignedAddressing);
+        let tile = tiledata.tile_at(44, TileAddressingMethod::Signed);
 
         assert_smiley_face(tile);
     }
@@ -143,7 +144,7 @@ mod tests {
         }
 
         let offset = -56;
-        let tile = tiledata.tile_at(offset as u8, TileAddressingMethod::SignedAddressing);
+        let tile = tiledata.tile_at(offset as u8, TileAddressingMethod::Signed);
 
         assert_smiley_face(tile);
     }

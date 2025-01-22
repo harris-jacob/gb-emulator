@@ -2,11 +2,16 @@ mod background_map;
 mod oam;
 mod tile;
 mod tiledata;
+mod lcd_control;
 
 use background_map::BackgroundMap;
 use tile::Pixel;
 use tile::Tile;
 use tiledata::TileData;
+
+pub use tiledata::TileAddressingMethod;
+pub use background_map::BackgroundMapSelection;
+pub use oam::SpriteSize;
 
 pub struct PPU {
     ly: u8,

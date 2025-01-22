@@ -27,6 +27,15 @@ pub struct Sprite {
     pub flags: SpriteFlags,
 }
 
+/// Size of the sprite
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum SpriteSize {
+    // Normal sprites are 8x8
+    Normal,
+    // Long sprites are 8x16
+    Long,
+}
+
 /// Which Palette number is the sprite using
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum PaletteNumber {
@@ -164,40 +173,42 @@ mod tests {
     }
 
     mod sprite_flags {
+        use super::*;
+
         #[test]
         fn bg_priority() {
-            let flags = super::super::SpriteFlags::new(0b00000000);
+            let flags = SpriteFlags::new(0b00000000);
             assert_eq!(flags.bg_priority(), true);
 
-            let flags = super::super::SpriteFlags::new(0b10000000);
+            let flags = SpriteFlags::new(0b10000000);
             assert_eq!(flags.bg_priority(), false);
         }
 
         #[test]
         fn y_flip() {
-            let flags = super::super::SpriteFlags::new(0b00000000);
+            let flags = SpriteFlags::new(0b00000000);
             assert_eq!(flags.y_flip(), true);
 
-            let flags = super::super::SpriteFlags::new(0b01000000);
+            let flags = SpriteFlags::new(0b01000000);
             assert_eq!(flags.y_flip(), false);
         }
 
         #[test]
         fn x_flip() {
-            let flags = super::super::SpriteFlags::new(0b00000000);
+            let flags = SpriteFlags::new(0b00000000);
             assert_eq!(flags.x_flip(), true);
 
-            let flags = super::super::SpriteFlags::new(0b00100000);
+            let flags = SpriteFlags::new(0b00100000);
             assert_eq!(flags.x_flip(), false);
         }
 
         #[test]
         fn palette_number() {
-            let flags = super::super::SpriteFlags::new(0b00000000);
-            assert_eq!(flags.palette_number(), super::super::PaletteNumber::OBP0);
+            let flags = SpriteFlags::new(0b00000000);
+            assert_eq!(flags.palette_number(), PaletteNumber::OBP0);
 
-            let flags = super::super::SpriteFlags::new(0b00010000);
-            assert_eq!(flags.palette_number(), super::super::PaletteNumber::OBP1);
+            let flags = SpriteFlags::new(0b00010000);
+            assert_eq!(flags.palette_number(), PaletteNumber::OBP1);
         }
     }
 }
