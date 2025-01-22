@@ -14,6 +14,7 @@ pub struct MMU {
     hram: [u8; 0x80],
     ie: u8,
     timer: timer::Timer,
+    pub serial: Vec<char>,
 }
 
 impl MMU {
@@ -28,6 +29,7 @@ impl MMU {
             hram: [0; 0x80],
             ie: 0,
             timer: timer::Timer::new(),
+            serial: Vec::new(),
         };
 
         // Pretend we loaded the boot rom values
@@ -82,7 +84,6 @@ impl MMU {
     }
 
     pub fn read_u16(&self, addr: u16) -> u16 {
-        dbg!(addr);
         let low = self.read_u8(addr) as u16;
         let high = self.read_u8(addr + 1) as u16;
 
@@ -100,7 +101,7 @@ impl MMU {
             0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize] = value,
             // TODO: review
             0xFF00..0xFF80 => match addr {
-                0xFF01 => print!("{}", value as char),
+                0xFF01 => self.serial.push(value as char),
                 0xFF04..0xFF08 => self.timer.write(addr, value),
                 _ => self.io[(addr - 0xFF00) as usize] = value,
             },
