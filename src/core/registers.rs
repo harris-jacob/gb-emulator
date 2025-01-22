@@ -87,14 +87,14 @@ impl Registers {
         }
     }
 
-    pub fn update_eight(&mut self, register: EightBitRegister, updator: fn(u8) -> u8) {
+    pub fn update_eight(&mut self, register: EightBitRegister, updator: impl Fn(u8) -> u8) {
         let value = self.read_eight(register);
         self.write_eight(register, updator(value));
     }
 
-    pub fn update_sixteen(&mut self, register: SixteenBitRegister, updator: fn(u8) -> u8) {
-        let value = self.read_eight(register);
-        self.write_eight(register, updator(value));
+    pub fn update_sixteen(&mut self, register: SixteenBitRegister, updator: impl Fn(u16) -> u16) {
+        let value = self.read_sixteen(register);
+        self.write_sixteen(register, updator(value));
     }
 
     pub fn set_zero_flag(&mut self, value: bool) {

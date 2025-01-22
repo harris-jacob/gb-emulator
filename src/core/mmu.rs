@@ -169,7 +169,6 @@ mod tests {
         assert_eq!(mmu.read_u8(0xff48), 0xff);
     }
 
-
     #[test]
     fn interrupt_enable_flags() {
         let mut mmu = MMU::new();
