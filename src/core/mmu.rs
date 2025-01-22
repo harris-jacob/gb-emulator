@@ -1,4 +1,5 @@
 mod timer;
+mod ppu;
 
 use crate::core::cartridge::Cartridge;
 use crate::core::data::Interrupt;
