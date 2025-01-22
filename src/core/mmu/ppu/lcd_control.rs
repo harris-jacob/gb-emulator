@@ -1,4 +1,4 @@
-use super::{BackgroundMapSelection, SpriteSize, TileAddressingMethod};
+use super::*;
 
 /// Each bit in this register controls state of the LCD and its rendering
 /// behaviour.
