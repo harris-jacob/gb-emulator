@@ -1,7 +1,9 @@
 mod alu_operations;
 mod jp_operations;
+mod stack_operations;
 use alu_operations::*;
 use jp_operations::*;
+use stack_operations::*;
 
 use crate::core::*;
 
@@ -1726,46 +1728,498 @@ impl CPU {
                 1
             }
 
-            // // RET NZ
-            // 0xC0 => {
-            //     match ret_nz(&mut self.registers, &self.mmu) {
-            //         JumpResult::Jumped => 5,
-            //         JumpResult::DidNotJump => 2,
-            //     }
-            // }
+            // RET NZ
+            0xC0 => match ret_nz(self) {
+                ReturnResult::Returned => 5,
+                ReturnResult::DidNotReturn => 2,
+            },
 
-            // // POP BB
-            // 0xC1 => {
-            //     let value = self.pop_stack(&mut self.registers, &self.mmu);
+            // POP BB
+            0xC1 => {
+                let value = stack_pop(self);
 
-            //     self.registers.write_sixteen(SixteenBitRegister::BC, value);
+                self.registers.write_sixteen(SixteenBitRegister::BC, value);
 
-            //     3
-            // }
+                3
+            }
 
-            // // JP NZ, a16
-            // 0xC2 => {
-            //     let value = self
-            //         .mmu
-            //         .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+            // JP NZ, a16
+            0xC2 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
 
-            //     match jp_nz(&mut self.registers, &self.mmu, value) {
-            //         JumpResult::Jumped => 4,
-            //         JumpResult::DidNotJump => 3,
-            //     }
-            // }
+                match jp_nz(&mut self.registers, value) {
+                    JumpResult::Jumped => 4,
+                    JumpResult::DidNotJump => 3,
+                }
+            }
 
-            // // JP a16
-            // 0xC3 => {
-            //     let value = self
-            //         .mmu
-            //         .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+            // JP a16
+            0xC3 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
 
-            //     jp(&mut self.registers, value);
+                jp(&mut self.registers, value);
 
-            //     0
-            // }
+                4
+            }
 
+            // CALL NZ, a16
+            0xC4 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match call_nz(self, value) {
+                    CallResult::Called => 6,
+                    CallResult::DidNotCall => 3,
+                }
+            }
+
+            // PUSH BC
+            0xC5 => {
+                let value = self.registers.read_sixteen(SixteenBitRegister::BC);
+
+                stack_push(self, value);
+
+                4
+            }
+
+            // ADD A, d8
+            0xC6 => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_add_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 00H
+            0xC7 => {
+                // TODO:
+                0
+            }
+
+            // RET Z
+            0xC8 => match ret_z(self) {
+                ReturnResult::Returned => 5,
+                ReturnResult::DidNotReturn => 2,
+            },
+
+            // RET
+            0xC9 => {
+                ret(self);
+
+                4
+            }
+
+            // JP Z, a16
+            0xCA => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match jp_z(&mut self.registers, value) {
+                    JumpResult::Jumped => 4,
+                    JumpResult::DidNotJump => 3,
+                }
+            }
+
+            // PREFIX CB
+            0xCB => {
+                // TODO: CB instructions
+                0
+            }
+
+            // CALL Z, a16
+            0xCC => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match call_z(self, value) {
+                    CallResult::Called => 6,
+                    CallResult::DidNotCall => 3,
+                }
+            }
+
+            // CALL a16
+            0xCD => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                call(self, value);
+
+                6
+            }
+
+            // ADC A, d8
+            0xCE => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_adc_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 08H
+            0xCF => {
+                // TODO:
+                0
+            }
+
+            // RET NC
+            0xD0 => match ret_nc(self) {
+                ReturnResult::Returned => 5,
+                ReturnResult::DidNotReturn => 2,
+            },
+
+            // POP DE
+            0xD1 => {
+                let value = stack_pop(self);
+
+                self.registers.write_sixteen(SixteenBitRegister::DE, value);
+
+                3
+            }
+
+            // JP NC, a16
+            0xD2 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match jp_nc(&mut self.registers, value) {
+                    JumpResult::Jumped => 4,
+                    JumpResult::DidNotJump => 3,
+                }
+            }
+
+            0xD3 => {
+                panic!("Unknown opcode: {:#04x}", opcode);
+            }
+
+            // CALL NC, a16
+            0xD4 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match call_nc(self, value) {
+                    CallResult::Called => 6,
+                    CallResult::DidNotCall => 3,
+                }
+            }
+
+            // PUSH DE
+            0xD5 => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                stack_push(self, value);
+
+                4
+            }
+
+            // SUB d8
+            0xD6 => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_sub_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 10H
+            0xD7 => {
+                // TODO:
+                0
+            }
+            // RET C
+            0xD8 => match ret_c(self) {
+                ReturnResult::Returned => 5,
+                ReturnResult::DidNotReturn => 2,
+            },
+
+            // RETI
+            0xD9 => {
+                // TODO: reti
+
+                4
+            }
+
+            // JP C, a16
+            0xDA => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                match jp_c(&mut self.registers, value) {
+                    JumpResult::Jumped => 4,
+                    JumpResult::DidNotJump => 3,
+                }
+            }
+
+            // CALL a16
+            0xDC => {
+                let value = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                call(self, value);
+
+                6
+            }
+
+            // SBC A, d8
+            0xDD => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_sbc_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 18H
+            0xDF => {
+                // TODO:
+                0
+            }
+
+            // LDH (a8), A
+            0xE0 => {
+                let offset = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC))
+                    as u16;
+
+                let addr = offset + 0xFF00;
+
+                let value = self.registers.read_eight(EightBitRegister::A);
+
+                self.mmu.write_u8(addr, value);
+
+                2
+            }
+
+            // POP HL
+            0xE1 => {
+                let value = stack_pop(self);
+
+                self.registers.write_sixteen(SixteenBitRegister::HL, value);
+
+                3
+            }
+
+            // LD (C), A
+            0xE2 => {
+                let offset = self.registers.read_eight(EightBitRegister::C) as u16;
+                let addr = 0xFF00 + offset;
+                let value = self.registers.read_eight(EightBitRegister::A);
+
+                self.mmu.write_u8(addr, value);
+
+                2
+            }
+
+            // PUSH HL
+            0xE5 => {
+                let value = self.registers.read_sixteen(SixteenBitRegister::HL);
+                stack_push(self, value);
+
+                4
+            }
+
+            // AND d8
+            0xE6 => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_and_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 20H
+            0xE7 => {
+                // TODO:
+                0
+            }
+
+            // ADD SP, r8
+            0xE8 => {
+                // TODO:
+                0
+            }
+
+            // JP (HL)
+            0xE9 => {
+                let addr = self.registers.read_sixteen(SixteenBitRegister::HL);
+
+                jp(&mut self.registers, addr);
+
+                1
+            }
+
+            // LD (a16), A
+            0xEA => {
+                let addr = self
+                    .mmu
+                    .read_u16(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                let value = self.registers.read_eight(EightBitRegister::A);
+
+                self.mmu.write_u8(addr, value);
+
+                4
+            }
+
+            // XOR d8
+            0xEE => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_xor_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 28H
+            0xEF => {
+                // TODO:
+                0
+            }
+
+            // LDH A, (a8)
+            0xF0 => {
+                let offset = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC))
+                    as u16;
+
+                let addr = offset + 0xFF00;
+
+                let value = self.mmu.read_u8(addr);
+
+                self.registers.write_eight(EightBitRegister::A, value);
+
+                2
+            }
+
+            // POP AF
+            0xF1 => {
+                let value = stack_pop(self);
+
+                self.registers.write_sixteen(SixteenBitRegister::AF, value);
+
+                3
+            }
+
+            // LD A, (C)
+            0xF2 => {
+                let offset = self.registers.read_eight(EightBitRegister::C) as u16;
+                let addr = 0xFF00 + offset;
+                let value = self.mmu.read_u8(addr);
+
+                self.registers.write_eight(EightBitRegister::A, value);
+
+                2
+            }
+
+            // DI
+            0xF3 => {
+                // TODO:
+            }
+
+            // PUSH AF
+            0xF4 => {
+                let value = self.registers.read_sixteen(SixteenBitRegister::AF);
+                stack_push(self, value);
+
+                4
+            }
+
+            // OR d8
+            0xF6 => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_or_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 30H
+            0xF7 => {
+                // TODO:
+                0
+            }
+
+            // LD HP, SP + e8
+            0xF8 => {
+                // TODO
+                0
+            }
+
+            // LD SP, HL
+            0xF9 => {
+                let value = self.registers.read_sixteen(SixteenBitRegister::HL);
+
+                self.registers.write_sixteen(SixteenBitRegister::SP, value);
+
+                2
+            }
+
+            // LD A, [n16]
+            0xFA => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                self.registers.write_eight(EightBitRegister::A, value);
+
+                4
+            }
+
+            // RI
+            0xFB => {
+                // TODO:
+                0
+            }
+
+            // CP A, n8
+            0xFE => {
+                let value = self
+                    .mmu
+                    .read_u8(self.registers.read_sixteen(SixteenBitRegister::PC));
+
+                alu_cp_value(&mut self.registers, value);
+
+                2
+            }
+
+            // RST 38H
+            0xFF => {
+                // TODO:
+                0
+            }
+
+            //
             _ => {
                 panic!("Unknown opcode: {:#04x}", opcode);
             }
