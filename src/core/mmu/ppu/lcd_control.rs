@@ -22,7 +22,7 @@ impl LCDControl {
         self.0
     }
 
-    pub fn write(&mut self, value: u8) {
+    pub(crate) fn write(&mut self, value: u8) {
         self.0 = value
     }
 
