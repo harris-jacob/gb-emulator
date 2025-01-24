@@ -121,6 +121,7 @@ pub fn stack_pop(cpu: &mut CPU) -> u16 {
 #[cfg(test)]
 mod tests {
     use cartridge::NoMBC;
+    use mmu::TestRenderer;
 
     use super::*;
 
@@ -238,7 +239,10 @@ mod tests {
     }
 
     fn mock_cpu() -> CPU {
-        let cartridge = NoMBC::new(vec![0; 0x8000]);
-        CPU::new(Box::new(cartridge))
+        let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
+        let ppu = PPU::new(Box::new(TestRenderer));
+        let mmu = MMU::new(ppu, cartridge);
+
+        CPU::new(mmu)
     }
 }

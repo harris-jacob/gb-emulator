@@ -4,14 +4,14 @@ use super::*;
 
 // TODO: double check these
 const HBLANK_CYCLES: u32 = 204 / 4;
-const VBlANK_CYCLES: u32 = 456 / 4;
+const VBLANK_CYCLES: u32 = 456 / 4;
 const DRAWING_CYCLS: u32 = 172 / 4;
 const OAM_CYCLES: u32 = 80 / 4;
 
 impl PPU {
     /// Run a single rendering step of the PPU for the given
     /// amount of clock cycles.
-    pub fn step(&mut self, cycles: u8) {
+    pub(crate) fn step(&mut self, cycles: u8) {
         self.update_clock(cycles);
 
         match self.lcd_stat.ppu_mode() {
@@ -19,6 +19,15 @@ impl PPU {
             PPUMode::VBlank => self.vblank_step(),
             PPUMode::OAM => self.oam_step(),
             PPUMode::Drawing => self.drawing_step(),
+        }
+    }
+
+    pub(super) fn update_ly(&mut self, value: u8) {
+        self.ly = value;
+        self.lcd_stat.set_lyc_eq_ly(self.ly == self.lyc);
+
+        if self.lcd_stat.lyc_ly_stat_ie() {
+            self.request_stat_interrupt()
         }
     }
 
@@ -38,11 +47,11 @@ impl PPU {
     }
 
     fn vblank_step(&mut self) {
-        if self.clock < VBlANK_CYCLES {
+        if self.clock < VBLANK_CYCLES {
             return;
         }
 
-        self.clock %= VBlANK_CYCLES;
+        self.clock %= VBLANK_CYCLES;
 
         if self.ly < 153 {
             self.update_ly(self.ly + 1);
@@ -67,6 +76,8 @@ impl PPU {
         }
 
         self.clock %= DRAWING_CYCLS;
+        self.renderer.render(self.buffer);
+        self.reset_buffer();
         self.switch_mode(PPUMode::HBlank);
     }
 
@@ -101,16 +112,6 @@ impl PPU {
 
     fn update_clock(&mut self, cycles: u8) {
         self.clock += cycles as u32;
-    }
-
-    // TODO: also need to handle stat interrupt
-    fn update_ly(&mut self, value: u8) {
-        self.ly = value;
-        self.lcd_stat.set_lyc_eq_ly(self.ly == self.lyc);
-
-        if self.lcd_stat.lyc_ly_stat_ie() {
-            self.request_stat_interrupt()
-        }
     }
 
     fn request_stat_interrupt(&mut self) {

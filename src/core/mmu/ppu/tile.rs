@@ -3,7 +3,7 @@
 /// the pixel color information at given x,y co-ordinates.
 pub struct Tile([u8; 16]);
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Pixel {
     Color0,
     Color1,

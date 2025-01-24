@@ -81,6 +81,15 @@ impl LCDControl {
     pub fn background_and_window_enabled(&self) -> bool {
         self.0 & 0b00000001 != 0
     }
+
+    /// Returns true when a new write to the LCDC buffer (value)
+    /// would cause the LCD enable bit to be toggled off.
+    /// When this happens some state needs to reset in the PPU.
+    pub fn is_lcd_enable_toggled_off(&self, value: u8) -> bool {
+        let is_new_lcd_enable = value & 0b10000000 == 1;
+
+        !is_new_lcd_enable && self.lcd_enable()
+    }
 }
 
 #[cfg(test)]

@@ -21,14 +21,14 @@ pub struct CPU {
 }
 
 impl CPU {
-    pub fn new(cartridge: Box<dyn cartridge::Cartridge>) -> Self {
+    pub fn new(mmu: MMU) -> Self {
         CPU {
             clock: 0,
             halted: false,
-            mmu: MMU::new(cartridge),
             registers: Registers::new(),
             ime: false,
             stopped: false,
+            mmu,
         }
     }
 
