@@ -225,7 +225,6 @@ impl PPU {
 
     /// Read from the LY register
     pub(crate) fn read_ly(&self) -> u8 {
-        dbg!(self.ly);
         self.ly
     }
 

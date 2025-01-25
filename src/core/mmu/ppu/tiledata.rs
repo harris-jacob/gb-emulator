@@ -97,8 +97,6 @@ mod tests {
         for addr in 0..0x17FF {
             tiledata.write(addr, 1);
 
-            dbg!(128 >> 7);
-
             assert_eq!(tiledata.read(addr), 1);
         }
     }
