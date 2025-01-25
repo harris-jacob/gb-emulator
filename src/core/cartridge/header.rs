@@ -31,7 +31,7 @@ impl Header {
             ROMSize::KB8192 => 512,
         }
     }
-    
+
     pub fn ram_bank_count(&self) -> usize {
         match self.ram_size {
             RAMSize::None => 0,

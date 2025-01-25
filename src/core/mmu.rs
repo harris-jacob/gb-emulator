@@ -22,9 +22,7 @@ pub struct MMU {
     io: [u8; 0x80],
     ppu: PPU,
     pub serial: Vec<char>,
-    sprites: [u8; 0xA0],
     timer: timer::Timer,
-    vram: [u8; 0x2000],
     wrams: [u8; 0x2000],
 }
 
@@ -38,9 +36,7 @@ impl MMU {
             io: [0; 0x80],
             ppu,
             serial: Vec::new(),
-            sprites: [0; 0xA0],
             timer: timer::Timer::new(),
-            vram: [0; 0x2000],
             wrams: [0; 0x2000],
         };
 
@@ -101,8 +97,8 @@ impl MMU {
             0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCY),
             0xFF44 => 0x90,
             0xFF45 => self.ppu.read_lyc(),
-            0xFF46 => 0,                                 // DMA transfer
-            0xFF47 => self.io[(addr - 0xFF00) as usize], // BG palette
+            0xFF46 => 0, // DMA transfer
+            0xFF47 => self.ppu.read_background_palette(),
             0xFF48 => self.io[(addr - 0xFF00) as usize], // OBJ palette 0
             0xFF49 => self.io[(addr - 0xFF00) as usize], // OBJ palette 1
             0xFF4A => self.ppu.read_window_position(WindowPositionRegister::WX),
@@ -155,8 +151,8 @@ impl MMU {
                 .write_background_viewport(ViewportRegister::SCY, value),
             0xFF44 => {} // LY is read-only
             0xFF45 => self.ppu.write_lyc(value),
-            0xFF46 => {}                                         // DMA transfer
-            0xFF47 => self.io[(addr - 0xFF00) as usize] = value, // BG palette
+            0xFF46 => {} // DMA transfer
+            0xFF47 => self.ppu.write_background_palette(value),
             0xFF48 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 0
             0xFF49 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 1
             0xFF4A => self

@@ -1,4 +1,5 @@
 mod background_map;
+mod background_palette;
 mod background_viewport;
 mod lcd_control;
 mod lcdc_status;
@@ -10,6 +11,7 @@ mod tiledata;
 mod window_position;
 
 use background_map::BackgroundMap;
+use background_palette::BackgroundPalette;
 use background_viewport::BackgroundViewport;
 use lcd_control::LCDControl;
 use lcdc_status::LCDStatus;
@@ -32,6 +34,7 @@ pub use renderer::TestRenderer;
 pub struct PPU {
     pub interrupt_request: InterruptRequests,
     background_viewport: BackgroundViewport,
+    background_palette: BackgroundPalette,
     buffer: [Pixel; 160 * 144],
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
@@ -67,6 +70,7 @@ impl PPU {
     pub fn new(renderer: Box<dyn Renderer>) -> Self {
         Self {
             background_viewport: BackgroundViewport::default(),
+            background_palette: BackgroundPalette::new(),
             bg_map0: BackgroundMap::new(),
             bg_map1: BackgroundMap::new(),
             buffer: [Pixel::Color0; 160 * 144],
@@ -101,6 +105,16 @@ impl PPU {
             ViewportRegister::SCX => self.background_viewport.scx = value,
             ViewportRegister::SCY => self.background_viewport.scy = value,
         }
+    }
+
+    /// Read from the background palette register.
+    pub(crate) fn read_background_palette(&self) -> u8 {
+        self.background_palette.read()
+    }
+
+    /// Write to the background palette register.
+    pub(crate) fn write_background_palette(&mut self, value: u8) {
+        self.background_palette.write(value)
     }
 
     /// Read from one of the background maps. Each background map accepts

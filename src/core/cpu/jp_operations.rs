@@ -313,5 +313,3 @@ fn jp_c_no_carry() {
     assert_eq!(registers.read_sixteen(SixteenBitRegister::PC), 0x20);
     assert!(result == JumpResult::DidNotJump);
 }
-
-

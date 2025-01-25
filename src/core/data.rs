@@ -1,3 +1,3 @@
 mod interrupts;
 
-pub use interrupts::Interrupt; 
+pub use interrupts::Interrupt;

@@ -161,6 +161,9 @@ mod tests {
         let mut reg = Registers::new();
         reg.write_eight(EightBitRegister::B, 0b1010_1010);
         set(&mut reg, EightBitRegister::B, 1);
-        assert_eq!(reg.read_eight(EightBitRegister::B), 0b1010_1010 | 0b0000_0010);
+        assert_eq!(
+            reg.read_eight(EightBitRegister::B),
+            0b1010_1010 | 0b0000_0010
+        );
     }
 }
