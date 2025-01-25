@@ -32,11 +32,11 @@ impl LCDControl {
     }
 
     /// Which Background map the window layer uses.
-    pub fn window_background_map(&self) -> BackgroundMapSelection {
+    pub fn window_background_map(&self) -> BGMapSelection {
         if self.0 & 0b01000000 == 0 {
-            BackgroundMapSelection::Map0
+            BGMapSelection::Map0
         } else {
-            BackgroundMapSelection::Map1
+            BGMapSelection::Map1
         }
     }
 
@@ -55,11 +55,11 @@ impl LCDControl {
     }
 
     /// Which Background map the background layer uses.
-    pub fn background_background_map(&self) -> BackgroundMapSelection {
+    pub fn background_background_map(&self) -> BGMapSelection {
         if self.0 & 0b00001000 == 0 {
-            BackgroundMapSelection::Map0
+            BGMapSelection::Map0
         } else {
-            BackgroundMapSelection::Map1
+            BGMapSelection::Map1
         }
     }
 
@@ -119,10 +119,10 @@ mod tests {
     fn window_background_map() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b01000000);
-        assert_eq!(lcdc.window_background_map(), BackgroundMapSelection::Map1);
+        assert_eq!(lcdc.window_background_map(), BGMapSelection::Map1);
 
         lcdc.write(0b00000000);
-        assert_eq!(lcdc.window_background_map(), BackgroundMapSelection::Map0);
+        assert_eq!(lcdc.window_background_map(), BGMapSelection::Map0);
     }
 
     #[test]
@@ -149,16 +149,10 @@ mod tests {
     fn background_background_map() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b00001000);
-        assert_eq!(
-            lcdc.background_background_map(),
-            BackgroundMapSelection::Map1
-        );
+        assert_eq!(lcdc.background_background_map(), BGMapSelection::Map1);
 
         lcdc.write(0b00000000);
-        assert_eq!(
-            lcdc.background_background_map(),
-            BackgroundMapSelection::Map0
-        );
+        assert_eq!(lcdc.background_background_map(), BGMapSelection::Map0);
     }
 
     #[test]

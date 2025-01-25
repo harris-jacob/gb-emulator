@@ -1,6 +1,10 @@
 mod ppu;
 mod timer;
 
+use ppu::BGMapSelection;
+use ppu::ViewportRegister;
+use ppu::WindowPositionRegister;
+
 use crate::core::cartridge::Cartridge;
 use crate::core::data::Interrupt;
 pub use crate::core::mmu::ppu::Pixel;
@@ -73,20 +77,39 @@ impl MMU {
 
     pub(crate) fn read_u8(&self, addr: u16) -> u8 {
         match addr {
-            0..0x8000 => self.cartridge.read_rom(addr),
-            0x8000..0xA000 => self.vram[(addr - 0x8000) as usize],
-            0xA000..0xC000 => self.cartridge.read_ram(addr),
-            0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize],
-            0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize],
-            0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize],
-            0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize],
-            0xFF00..0xFF80 => match addr {
-                0xFF04..0xFF08 => self.timer.read(addr),
-                // TODO: temp while we don't have an LCD
-                0xFF44 => 0x90,
-                _ => self.io[(addr - 0xFF00) as usize],
-            },
-            0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize],
+            0..=0x7FFF => self.cartridge.read_rom(addr),
+            0x8000..=0x97FF => self.ppu.read_tiledata(addr - 0x8000),
+            0x9800..=0x9BFF => self.ppu.read_bg_map(BGMapSelection::Map0, addr - 0x9800),
+            0x9C00..=0x9FFF => self.ppu.read_bg_map(BGMapSelection::Map1, addr - 0x9C00),
+            0xA000..=0xBFFF => self.cartridge.read_ram(addr),
+            0xC000..=0xCFFF => self.wrams[(addr - 0xC000) as usize],
+            0xD000..=0xDFFF => self.wrams[(addr - 0xD000) as usize],
+            0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize], // Echo ram
+            0xFE00..=0xFE9F => self.ppu.read_oam(addr - 0xFEA0),
+            0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize],
+            0xFF00 => self.io[(addr - 0xFF00) as usize], // Joypad
+            0xFF01..=0xFF02 => self.io[(addr - 0xFF00) as usize], // Serial transfer,
+            0xFF03 => 0,                                 // Nothing
+            0xFF04..=0xFF07 => self.timer.read(addr - 0xFF0),
+            0xFF08..=0xFF0E => 0,                                 // Nothing
+            0xFF0F => self.io[(addr - 0xFF00) as usize],          // Interrupts
+            0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize], // Audio
+            0xFF27..=0xFF2F => 0,                                 // Nothing
+            0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize], // Wave pattern
+            0xFF40 => self.ppu.read_lcdc(),
+            0xFF41 => self.ppu.read_lcd_stat(),
+            0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCX),
+            0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCY),
+            0xFF44 => self.ppu.read_ly(),
+            0xFF45 => self.ppu.read_lyc(),
+            0xFF46 => 0,                                 // DMA transfer
+            0xFF47 => self.io[(addr - 0xFF00) as usize], // BG palette
+            0xFF48 => self.io[(addr - 0xFF00) as usize], // OBJ palette 0
+            0xFF49 => self.io[(addr - 0xFF00) as usize], // OBJ palette 1
+            0xFF4A => self.ppu.read_window_position(WindowPositionRegister::WX),
+            0xFF4B => self.ppu.read_window_position(WindowPositionRegister::WY),
+            0xFF4C..=0xFF7F => 0, // Nothing
+            0xFF80..=0xFFFE => self.hram[(addr - 0xFF80) as usize],
             0xFFFF => self.ie,
         }
     }
@@ -100,19 +123,51 @@ impl MMU {
 
     pub(crate) fn write_u8(&mut self, addr: u16, value: u8) {
         match addr {
-            0..0x8000 => self.cartridge.write_rom(addr, value),
-            0x8000..0xA000 => self.vram[(addr - 0x8000) as usize] = value,
-            0xA000..0xC000 => self.cartridge.write_ram(addr, value),
-            0xC000..0xE000 => self.wrams[(addr - 0xC000) as usize] = value,
-            0xE000..0xFE00 => self.wrams[(addr - 0xE000) as usize] = value,
-            0xFE00..0xFEA0 => self.sprites[(addr - 0xFE00) as usize] = value,
-            0xFEA0..0xFF00 => self.empty[(addr - 0xFEA0) as usize] = value,
-            // TODO: review
-            0xFF00..0xFF80 => match addr {
-                0xFF01 => self.serial.push(value as char),
-                0xFF04..0xFF08 => self.timer.write(addr, value),
-                _ => self.io[(addr - 0xFF00) as usize] = value,
-            },
+            0..=0x7FFF => self.cartridge.write_rom(addr, value),
+            0x8000..=0x97FF => self.ppu.write_tiledata(addr - 0x8000, value),
+            0x9800..=0x9BFF => self
+                .ppu
+                .write_bg_map(BGMapSelection::Map0, addr - 0x9800, value),
+            0x9C00..=0x9FFF => self
+                .ppu
+                .write_bg_map(BGMapSelection::Map0, addr - 0x9800, value),
+            0xA000..=0xBFFF => self.cartridge.write_ram(addr, value),
+            0xC000..=0xCFFF => self.wrams[(addr - 0xC000) as usize] = value,
+            0xD000..=0xDFFF => self.wrams[(addr - 0xD000) as usize] = value,
+            0xE000..=0xFDFF => {} // Echo ram
+            0xFE00..=0xFE9F => self.ppu.write_oam(addr - 0xFEA0, value),
+            0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize] = value,
+            0xFF00 => self.io[(addr - 0xFF00) as usize] = value,
+            0xFF01 => self.serial.push(value as char),
+            0xFF02 => self.io[(addr - 0xFF00) as usize] = value,
+            0xFF03 => {} // Nothing
+            0xFF04..=0xFF07 => self.timer.write(addr, value),
+            0xFF08..=0xFF0E => {}                                // Nothing
+            0xFF0F => self.io[(addr - 0xFF00) as usize] = value, // Interrupts
+            0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize] = value, // Audio
+            0xFF27..=0xFF2F => {}                                // Nothing
+            0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize] = value, // Wave pattern
+            0xFF40 => self.ppu.write_lcdc(value),
+            0xFF41 => self.ppu.write_lcd_stat(value),
+            0xFF42 => self
+                .ppu
+                .write_background_viewport(ViewportRegister::SCX, value),
+            0xFF43 => self
+                .ppu
+                .write_background_viewport(ViewportRegister::SCY, value),
+            0xFF44 => {} // LY is read-only
+            0xFF45 => self.ppu.write_lyc(value),
+            0xFF46 => {}                                         // DMA transfer
+            0xFF47 => self.io[(addr - 0xFF00) as usize] = value, // BG palette
+            0xFF48 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 0
+            0xFF49 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 1
+            0xFF4A => self
+                .ppu
+                .write_window_position(WindowPositionRegister::WX, value),
+            0xFF4B => self
+                .ppu
+                .write_window_position(WindowPositionRegister::WY, value),
+            0xFF4C..=0xFF7F => {} // Nothing
             0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize] = value,
             0xFFFF => self.ie = value,
         }

@@ -7,7 +7,7 @@ pub struct BackgroundMap([u8; 0x3FF]);
 /// - Background map 0: $9800-9BFF
 /// - Background map 1: $9C00-9FFF
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum BackgroundMapSelection {
+pub enum BGMapSelection {
     Map0,
     Map1,
 }

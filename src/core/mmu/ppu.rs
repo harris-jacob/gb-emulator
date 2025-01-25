@@ -18,7 +18,7 @@ use tile::Tile;
 use tiledata::TileData;
 use window_position::WindowPosition;
 
-pub use background_map::BackgroundMapSelection;
+pub use background_map::BGMapSelection;
 pub use background_viewport::ViewportRegister;
 pub use oam::SpriteSize;
 pub use renderer::Renderer;
@@ -105,19 +105,19 @@ impl PPU {
 
     /// Read from one of the background maps. Each background map accepts
     /// an address in the range: 0-0x3FE (inclusive).
-    pub(crate) fn read_bg_map(&self, bgmap: BackgroundMapSelection, addr: u16) -> u8 {
+    pub(crate) fn read_bg_map(&self, bgmap: BGMapSelection, addr: u16) -> u8 {
         match bgmap {
-            BackgroundMapSelection::Map0 => self.bg_map0.read(addr),
-            BackgroundMapSelection::Map1 => self.bg_map1.read(addr),
+            BGMapSelection::Map0 => self.bg_map0.read(addr),
+            BGMapSelection::Map1 => self.bg_map1.read(addr),
         }
     }
 
     /// Write from one of the background maps. Each background map accepts
     /// an address in the range: 0-0x3FE (inclusive).
-    pub(crate) fn write_bg_map(&mut self, bgmap: BackgroundMapSelection, addr: u16, value: u8) {
+    pub(crate) fn write_bg_map(&mut self, bgmap: BGMapSelection, addr: u16, value: u8) {
         match bgmap {
-            BackgroundMapSelection::Map0 => self.bg_map0.write(addr, value),
-            BackgroundMapSelection::Map1 => self.bg_map1.write(addr, value),
+            BGMapSelection::Map0 => self.bg_map0.write(addr, value),
+            BGMapSelection::Map1 => self.bg_map1.write(addr, value),
         }
     }
 
@@ -146,6 +146,16 @@ impl PPU {
         }
 
         self.lcdc.write(value)
+    }
+
+    /// Read from tiledata. Accepts addresses in the range: 0-17FF (inclusive)
+    pub(crate) fn read_tiledata(&self, addr: u16) -> u8 {
+        self.tiledata.read(addr)
+    }
+
+    /// Write to tiledata. Accepts addresses in the range: 0-17FF (inclusive)
+    pub(crate) fn write_tiledata(&mut self, addr: u16, value: u8) {
+        self.tiledata.write(addr, value)
     }
 
     /// Read from OAM (sprite data). Accepts addresses in the range: 0-159 (inclusive)
