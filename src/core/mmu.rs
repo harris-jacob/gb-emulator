@@ -2,6 +2,7 @@ mod ppu;
 mod timer;
 
 use ppu::BGMapSelection;
+use ppu::SpritePaletteSelection;
 use ppu::ViewportRegister;
 use ppu::WindowPositionRegister;
 
@@ -95,12 +96,16 @@ impl MMU {
             0xFF41 => self.ppu.read_lcd_stat(),
             0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCX),
             0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCY),
-            0xFF44 => 0x90,
+            0xFF44 => self.ppu.read_ly(),
             0xFF45 => self.ppu.read_lyc(),
             0xFF46 => 0, // DMA transfer
             0xFF47 => self.ppu.read_background_palette(),
-            0xFF48 => self.io[(addr - 0xFF00) as usize], // OBJ palette 0
-            0xFF49 => self.io[(addr - 0xFF00) as usize], // OBJ palette 1
+            0xFF48 => self
+                .ppu
+                .read_sprite_palette(SpritePaletteSelection::Palette0),
+            0xFF49 => self
+                .ppu
+                .read_sprite_palette(SpritePaletteSelection::Palette1),
             0xFF4A => self.ppu.read_window_position(WindowPositionRegister::WX),
             0xFF4B => self.ppu.read_window_position(WindowPositionRegister::WY),
             0xFF4C..=0xFF7F => 0, // Nothing
@@ -153,8 +158,12 @@ impl MMU {
             0xFF45 => self.ppu.write_lyc(value),
             0xFF46 => {} // DMA transfer
             0xFF47 => self.ppu.write_background_palette(value),
-            0xFF48 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 0
-            0xFF49 => self.io[(addr - 0xFF00) as usize] = value, // OBJ palette 1
+            0xFF48 => self
+                .ppu
+                .write_sprite_palette(SpritePaletteSelection::Palette0, value),
+            0xFF49 => self
+                .ppu
+                .write_sprite_palette(SpritePaletteSelection::Palette1, value),
             0xFF4A => self
                 .ppu
                 .write_window_position(WindowPositionRegister::WX, value),
@@ -177,11 +186,22 @@ impl MMU {
 
     pub(crate) fn step(&mut self, m_cycles: u8) {
         self.timer.step(m_cycles);
+        self.ppu.step(m_cycles);
     }
 
-    pub(crate) fn interrupts_requested(&self) -> Option<Interrupt> {
+    // TODO: this isn't how this should work
+    pub(crate) fn interrupts_requested(&mut self) -> Option<Interrupt> {
         if self.timer.interrupt_request {
+            self.timer.interrupt_request = false;
             return Some(Interrupt::Timer);
+        }
+        if self.ppu.interrupt_request.stat {
+            self.ppu.interrupt_request.stat = false;
+            return Some(Interrupt::LCDStat);
+        }
+        if self.ppu.interrupt_request.vblank {
+            self.ppu.interrupt_request.vblank = false;
+            return Some(Interrupt::VBlank);
         } else {
             return None;
         }

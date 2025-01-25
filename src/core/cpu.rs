@@ -36,13 +36,13 @@ impl CPU {
         if self.stopped {
             panic!("CPU is stopped");
         }
-        if self.stopped || self.halted {
-            return;
-        }
 
-        let opcode = self.fetch_u8();
-
-        let cycles = self.handle_op(opcode);
+        let cycles = if !self.halted {
+            let opcode = self.fetch_u8();
+            self.handle_op(opcode)
+        } else {
+            1
+        };
 
         // TODO: tidy this
         self.mmu.step(cycles);

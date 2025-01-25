@@ -6,6 +6,7 @@ mod lcdc_status;
 mod oam;
 mod renderer;
 mod rendering;
+mod sprite_palette;
 mod tile;
 mod tiledata;
 mod window_position;
@@ -16,6 +17,7 @@ use background_viewport::BackgroundViewport;
 use lcd_control::LCDControl;
 use lcdc_status::LCDStatus;
 use oam::OAM;
+use sprite_palette::SpritePalette;
 use tile::Tile;
 use tiledata::TileData;
 use window_position::WindowPosition;
@@ -24,6 +26,7 @@ pub use background_map::BGMapSelection;
 pub use background_viewport::ViewportRegister;
 pub use oam::SpriteSize;
 pub use renderer::Renderer;
+pub use sprite_palette::SpritePaletteSelection;
 pub use tile::Pixel;
 pub use tiledata::TileAddressingMethod;
 pub use window_position::WindowPositionRegister;
@@ -44,6 +47,8 @@ pub struct PPU {
     ly: u8,
     lyc: u8,
     oam: OAM,
+    sprite_palette_0: SpritePalette,
+    sprite_palette_1: SpritePalette,
     tiledata: TileData,
     window_position: WindowPosition,
     // TODO: review box
@@ -81,6 +86,8 @@ impl PPU {
             ly: 0,
             lyc: 0,
             oam: OAM::new(),
+            sprite_palette_0: SpritePalette::new(),
+            sprite_palette_1: SpritePalette::new(),
             tiledata: TileData::new(),
             window_position: WindowPosition::default(),
             renderer,
@@ -162,6 +169,22 @@ impl PPU {
         self.lcdc.write(value)
     }
 
+    /// Read from one of the 2 available sprite palettes
+    pub(crate) fn read_sprite_palette(&self, palette: SpritePaletteSelection) -> u8 {
+        match palette {
+            SpritePaletteSelection::Palette0 => self.sprite_palette_0.read(),
+            SpritePaletteSelection::Palette1 => self.sprite_palette_1.read(),
+        }
+    }
+
+    /// Write to one of the 2 available sprite palettes
+    pub(crate) fn write_sprite_palette(&mut self, palette: SpritePaletteSelection, value: u8) {
+        match palette {
+            SpritePaletteSelection::Palette0 => self.sprite_palette_0.write(value),
+            SpritePaletteSelection::Palette1 => self.sprite_palette_1.write(value),
+        }
+    }
+
     /// Read from tiledata. Accepts addresses in the range: 0-17FF (inclusive)
     pub(crate) fn read_tiledata(&self, addr: u16) -> u8 {
         self.tiledata.read(addr)
@@ -202,6 +225,7 @@ impl PPU {
 
     /// Read from the LY register
     pub(crate) fn read_ly(&self) -> u8 {
+        dbg!(self.ly);
         self.ly
     }
 
