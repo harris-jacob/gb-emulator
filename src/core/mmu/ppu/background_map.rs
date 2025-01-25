@@ -1,7 +1,7 @@
 /// There are two of these in memory at $9000-$9BFF & $9C00-9FFF. Each represents
 /// a 32x32 map, where each entry in the grid corresponds to a tile number.
 /// These maps control which tiles are displayed in the background / window layers.
-pub struct BackgroundMap([u8; 0x3FF]);
+pub struct BackgroundMap([u8; 0x400]);
 
 /// Which background map is selected.
 /// - Background map 0: $9800-9BFF
@@ -14,7 +14,7 @@ pub enum BGMapSelection {
 
 impl BackgroundMap {
     pub fn new() -> Self {
-        Self([0; 0x3FF])
+        Self([0; 0x400])
     }
 
     pub fn read(&self, addr: u16) -> u8 {
@@ -30,7 +30,7 @@ impl BackgroundMap {
     }
 
     pub fn check_addr_range(addr: u16) {
-        if addr > 0x3FF {
+        if addr > 0x400 {
             panic!("address out of range for background map")
         }
     }
@@ -45,7 +45,7 @@ mod tests {
     fn out_of_range_read_panics() {
         let map = BackgroundMap::new();
 
-        map.read(0x400);
+        map.read(0x401);
     }
 
     #[test]
@@ -53,13 +53,13 @@ mod tests {
     fn out_of_range_write_panics() {
         let mut map = BackgroundMap::new();
 
-        map.write(0x400, 0);
+        map.write(0x401, 0);
     }
 
     #[test]
     fn read_write() {
         let mut map = BackgroundMap::new();
-        for i in 0u16..0x3FF {
+        for i in 0u16..0x400 {
             map.write(i, 1);
 
             assert_eq!(map.read(i), 1);

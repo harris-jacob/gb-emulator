@@ -82,10 +82,9 @@ impl MMU {
             0x9800..=0x9BFF => self.ppu.read_bg_map(BGMapSelection::Map0, addr - 0x9800),
             0x9C00..=0x9FFF => self.ppu.read_bg_map(BGMapSelection::Map1, addr - 0x9C00),
             0xA000..=0xBFFF => self.cartridge.read_ram(addr),
-            0xC000..=0xCFFF => self.wrams[(addr - 0xC000) as usize],
-            0xD000..=0xDFFF => self.wrams[(addr - 0xD000) as usize],
+            0xC000..=0xDFFF => self.wrams[(addr - 0xC000) as usize],
             0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize], // Echo ram
-            0xFE00..=0xFE9F => self.ppu.read_oam(addr - 0xFEA0),
+            0xFE00..=0xFE9F => self.ppu.read_oam(addr - 0xFE00),
             0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize],
             0xFF00 => self.io[(addr - 0xFF00) as usize], // Joypad
             0xFF01..=0xFF02 => self.io[(addr - 0xFF00) as usize], // Serial transfer,
@@ -100,7 +99,7 @@ impl MMU {
             0xFF41 => self.ppu.read_lcd_stat(),
             0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCX),
             0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCY),
-            0xFF44 => self.ppu.read_ly(),
+            0xFF44 => 0x90,
             0xFF45 => self.ppu.read_lyc(),
             0xFF46 => 0,                                 // DMA transfer
             0xFF47 => self.io[(addr - 0xFF00) as usize], // BG palette
@@ -130,12 +129,11 @@ impl MMU {
                 .write_bg_map(BGMapSelection::Map0, addr - 0x9800, value),
             0x9C00..=0x9FFF => self
                 .ppu
-                .write_bg_map(BGMapSelection::Map0, addr - 0x9800, value),
+                .write_bg_map(BGMapSelection::Map1, addr - 0x9C00, value),
             0xA000..=0xBFFF => self.cartridge.write_ram(addr, value),
-            0xC000..=0xCFFF => self.wrams[(addr - 0xC000) as usize] = value,
-            0xD000..=0xDFFF => self.wrams[(addr - 0xD000) as usize] = value,
-            0xE000..=0xFDFF => {} // Echo ram
-            0xFE00..=0xFE9F => self.ppu.write_oam(addr - 0xFEA0, value),
+            0xC000..=0xDFFF => self.wrams[(addr - 0xC000) as usize] = value,
+            0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize] = value,
+            0xFE00..=0xFE9F => self.ppu.write_oam(addr - 0xFE00, value),
             0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize] = value,
             0xFF00 => self.io[(addr - 0xFF00) as usize] = value,
             0xFF01 => self.serial.push(value as char),
