@@ -1,5 +1,3 @@
-use super::Pixel;
-
 /// Render is implemented to control drawing pixels to some output device.
 /// This [Renderers] render function will be called everytime the PPU enters the
 /// drawing mode. Note the gameboy typically runs at 60FPS it is up to implementation
@@ -8,7 +6,7 @@ use super::Pixel;
 pub trait Renderer {
     /// Called with the updated buffer of pixels to be renderd to the device.
     /// Is called everytime the PPU enters drawing mode.
-    fn render(&mut self, buffer: [Pixel; 160 * 144]);
+    fn render(&self, buffer: [Color; 160 * 144]);
 }
 
 #[cfg(test)]
@@ -16,5 +14,13 @@ pub struct TestRenderer;
 
 #[cfg(test)]
 impl Renderer for TestRenderer {
-    fn render(&mut self, _: [Pixel; 160 * 144]) {}
+    fn render(&self, _: [Color; 160 * 144]) {}
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum Color {
+    White,
+    LightGray,
+    DarkGray,
+    Black,
 }

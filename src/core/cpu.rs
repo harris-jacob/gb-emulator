@@ -12,7 +12,6 @@ use stack_operations::*;
 use crate::core::*;
 
 pub struct CPU {
-    pub clock: u64,
     halted: bool,
     pub mmu: MMU,
     registers: Registers,
@@ -23,7 +22,6 @@ pub struct CPU {
 impl CPU {
     pub fn new(mmu: MMU) -> Self {
         CPU {
-            clock: 0,
             halted: false,
             registers: Registers::new(),
             ime: false,
@@ -32,7 +30,7 @@ impl CPU {
         }
     }
 
-    pub fn step(&mut self) {
+    pub fn step(&mut self) -> u8 {
         if self.stopped {
             panic!("CPU is stopped");
         }
@@ -53,7 +51,7 @@ impl CPU {
 
         let interrupt_cycles = self.interrupt_step();
 
-        self.clock += cycles as u64 + interrupt_cycles as u64;
+        cycles + interrupt_cycles
     }
 
     pub fn debug_output(&self) {

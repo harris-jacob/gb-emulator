@@ -1,4 +1,4 @@
-use std::{fs::File, io::Read};
+use std::{fs::File, io::Read, sync::Arc};
 
 #[test]
 fn passes_test_roms() {
@@ -8,13 +8,15 @@ fn passes_test_roms() {
     fp.read_to_end(&mut data).expect("Should read");
 
     let cartridge = emulator::create_cartridge(data);
-    let ppu = emulator::PPU::new(Box::new(TestRenderer));
+    let ppu = emulator::PPU::new(Arc::new(TestRenderer));
     let mmu = emulator::MMU::new(ppu, cartridge);
 
+    let mut clock = 0;
     let mut cpu = emulator::CPU::new(mmu);
 
-    while cpu.clock < 60000000 {
-        cpu.step();
+    while clock < 60000000 {
+        let cycles = cpu.step();
+        clock += cycles as u32;
     }
 
     let s = String::from_iter(cpu.mmu.serial);
@@ -24,5 +26,5 @@ fn passes_test_roms() {
 pub struct TestRenderer;
 
 impl emulator::Renderer for TestRenderer {
-    fn render(&mut self, _: [emulator::Pixel; 160 * 144]) {}
+    fn render(&self, _: [emulator::Color; 160 * 144]) {}
 }

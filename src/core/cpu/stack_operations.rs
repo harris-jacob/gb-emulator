@@ -120,6 +120,8 @@ pub fn stack_pop(cpu: &mut CPU) -> u16 {
 
 #[cfg(test)]
 mod tests {
+    use std::sync::Arc;
+
     use cartridge::NoMBC;
     use mmu::TestRenderer;
 
@@ -240,7 +242,7 @@ mod tests {
 
     fn mock_cpu() -> CPU {
         let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
-        let ppu = PPU::new(Box::new(TestRenderer));
+        let ppu = PPU::new(Arc::new(TestRenderer));
         let mmu = MMU::new(ppu, cartridge);
 
         CPU::new(mmu)

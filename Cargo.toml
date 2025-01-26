@@ -3,5 +3,8 @@ name = "emulator"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+minifb = "0.28.0"
+
 [dev-dependencies]
 mockall = "0.13.0"

@@ -11,6 +11,8 @@ mod tile;
 mod tiledata;
 mod window_position;
 
+use std::sync::Arc;
+
 use background_map::BackgroundMap;
 use background_palette::BackgroundPalette;
 use background_viewport::BackgroundViewport;
@@ -25,9 +27,9 @@ use window_position::WindowPosition;
 pub use background_map::BGMapSelection;
 pub use background_viewport::ViewportRegister;
 pub use oam::SpriteSize;
+pub use renderer::Color;
 pub use renderer::Renderer;
 pub use sprite_palette::SpritePaletteSelection;
-pub use tile::Pixel;
 pub use tiledata::TileAddressingMethod;
 pub use window_position::WindowPositionRegister;
 
@@ -38,7 +40,7 @@ pub struct PPU {
     pub interrupt_request: InterruptRequests,
     background_viewport: BackgroundViewport,
     background_palette: BackgroundPalette,
-    buffer: [Pixel; 160 * 144],
+    buffer: [Color; 160 * 144],
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
     clock: u32,
@@ -52,7 +54,7 @@ pub struct PPU {
     tiledata: TileData,
     window_position: WindowPosition,
     // TODO: review box
-    renderer: Box<dyn Renderer>,
+    renderer: Arc<dyn Renderer>,
 }
 
 /// TODO: this can be a more compact type
@@ -72,13 +74,13 @@ impl Default for InterruptRequests {
 }
 
 impl PPU {
-    pub fn new(renderer: Box<dyn Renderer>) -> Self {
+    pub fn new(renderer: Arc<dyn Renderer>) -> Self {
         Self {
             background_viewport: BackgroundViewport::default(),
             background_palette: BackgroundPalette::new(),
             bg_map0: BackgroundMap::new(),
             bg_map1: BackgroundMap::new(),
-            buffer: [Pixel::Color0; 160 * 144],
+            buffer: [Color::Black; 160 * 144],
             clock: 0,
             interrupt_request: InterruptRequests::default(),
             lcd_stat: LCDStatus::new(),
@@ -237,6 +239,6 @@ impl PPU {
     }
 
     fn reset_buffer(&mut self) {
-        self.buffer = [Pixel::Color0; 160 * 144];
+        self.buffer = [Color::Black; 160 * 144];
     }
 }

@@ -1,4 +1,4 @@
-use super::Pixel;
+use super::tile::Pixel;
 
 /// This struct is used for Object palette registers
 /// which there are two of. It assigns gray shades to color ids

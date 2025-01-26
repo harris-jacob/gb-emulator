@@ -8,7 +8,7 @@ use ppu::WindowPositionRegister;
 
 use crate::core::cartridge::Cartridge;
 use crate::core::data::Interrupt;
-pub use crate::core::mmu::ppu::Pixel;
+pub use crate::core::mmu::ppu::Color;
 pub use crate::core::mmu::ppu::Renderer;
 pub use crate::core::mmu::ppu::PPU;
 
