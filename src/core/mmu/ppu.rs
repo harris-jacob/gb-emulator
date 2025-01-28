@@ -7,7 +7,7 @@ mod oam;
 mod renderer;
 mod rendering;
 mod sprite_palette;
-mod tile;
+mod background_tile;
 mod tiledata;
 mod window_position;
 
@@ -20,7 +20,8 @@ use lcd_control::LCDControl;
 use lcdc_status::LCDStatus;
 use oam::OAM;
 use sprite_palette::SpritePalette;
-use tile::Tile;
+use background_tile::Tile;
+use background_tile::Pixel;
 use tiledata::TileData;
 use window_position::WindowPosition;
 
@@ -35,7 +36,6 @@ pub use window_position::WindowPositionRegister;
 
 #[cfg(test)]
 pub use renderer::TestRenderer;
-
 
 pub const HEIGHT: usize = 144;
 pub const WIDTH: usize = 160;

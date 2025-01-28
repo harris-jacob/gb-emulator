@@ -81,7 +81,7 @@ impl PPU {
         }
 
         self.clock %= DRAWING_CYCLES;
-        self.render_background_scanline();
+        self.render_scanline();
         self.switch_mode(PPUMode::HBlank);
     }
 
@@ -114,14 +114,67 @@ impl PPU {
         }
     }
 
+    fn render_scanline(&mut self) {
+        if self.lcdc.background_and_window_enabled() {
+            self.render_background_scanline();
+        }
+    }
+
+    fn render_sprites(&mut self) {
+        for x in 0..40 {}
+    }
+
+    fn render_sprite(&mut self, sprite_number: u8) {
+        let sprite = self.oam.sprite_at(sprite_number);
+
+        let tile = self
+            .tiledata
+            .tile_at(sprite.tile_number, TileAddressingMethod::Unsigned);
+    }
+
     fn render_background_scanline(&mut self) {
-        if !self.lcdc.background_and_window_enabled() {
-            return;
+        for x in 0..WIDTH {
+            if self.is_window_pixel(x as u8, self.ly) {
+                self.render_window_layer_pixel(x as u8, self.ly);
+            } else {
+                self.render_background_layer_pixel(x as u8, self.ly);
+            }
+        }
+    }
+
+    fn is_window_pixel(&self, x: u8, y: u8) -> bool {
+        if self.lcdc.window_enabled() {
+            return false;
         }
 
-        for x in 0..WIDTH {
-            self.render_background_layer_pixel(x as u8, self.ly);
-        }
+        // TODO: handle cases where wx is < 7
+        return x >= self.window_position.wx() && y >= self.window_position.wy();
+    }
+
+    fn render_window_layer_pixel(&mut self, x: u8, y: u8) {
+        let window_map = self.current_window_map();
+
+        // Safety: this function shouldn't be called if wx < x. If this is the
+        // case, this pixel should be rendered using the bckground map instead
+        // because it doesn't overlap with the window.
+        let tile_x = x - self.window_position.wx();
+        // Same as above.
+        let tile_y = y - self.window_position.wy();
+
+        // TODO: everything below here is the same as background
+        let tile_number = window_map.tile_number_at(tile_x, tile_y);
+        let addressing_method = self.lcdc.addressing_method();
+
+        let tile = self.tiledata.tile_at(tile_number, addressing_method);
+
+        let pixel_x = tile_x % 8;
+        let pixel_y = tile_y % 8;
+
+        let pixel = tile.pixel_at(pixel_x, pixel_y);
+
+        let color = self.background_palette.color_from_pixel(pixel);
+
+        self.buffer[y as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
     }
 
     fn render_background_layer_pixel(&mut self, x: u8, y: u8) {
@@ -131,12 +184,6 @@ impl PPU {
         let tile_y = y.wrapping_add(self.background_viewport.scy);
 
         let tile_number = bg_map.tile_number_at(tile_x, tile_y);
-        // if tile_number != 0 && tile_number != 0x32 {
-        //     println!("tile_number: {}", tile_number);
-        //     println!("tile_x: {}", tile_x);
-        //     println!("tile_y: {}", tile_y);
-        //     panic!()
-        // }
         let addressing_method = self.lcdc.addressing_method();
 
         let tile = self.tiledata.tile_at(tile_number, addressing_method);

@@ -101,13 +101,7 @@ impl OAM {
         self.0[addr as usize] = value;
     }
 
-    fn check_addr_range(addr: u16) {
-        if addr > 160 {
-            panic!("Address out of range for OAM")
-        }
-    }
-
-    fn sprite_at(&self, sprite_number: u8) -> Sprite {
+    pub fn sprite_at(&self, sprite_number: u8) -> Sprite {
         if sprite_number > 40 {
             panic!("There are only 40 sprites")
         }
@@ -119,6 +113,12 @@ impl OAM {
             y: self.0[base + 1],
             tile_number: self.0[base + 2],
             flags: SpriteFlags::new(self.0[base + 3]),
+        }
+    }
+
+    fn check_addr_range(addr: u16) {
+        if addr > 160 {
+            panic!("Address out of range for OAM")
         }
     }
 }

@@ -1,4 +1,5 @@
-use super::{tile::Pixel, Color};
+use super::Pixel;
+use super::Color;
 
 /// This register assigns gray shades to the color ids of the BG and window
 /// tiles.

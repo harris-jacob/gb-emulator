@@ -70,8 +70,6 @@ impl<'a> TileData {
 
 #[cfg(test)]
 mod tests {
-    use tile::Pixel;
-
     use super::*;
 
     #[should_panic]
