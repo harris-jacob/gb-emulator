@@ -8,7 +8,7 @@ pub use mbc1::MBC1;
 pub use no_mbc::NoMBC;
 
 #[cfg_attr(test, mockall::automock)]
-pub trait Cartridge {
+pub trait Cartridge: Send {
     /// Read a byte from the cartridge's RAM
     fn read_ram(&self, address: u16) -> u8;
     /// Write a byte to the cartridge's RAM

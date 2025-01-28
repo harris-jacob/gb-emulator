@@ -26,5 +26,5 @@ fn passes_test_roms() {
 pub struct TestRenderer;
 
 impl emulator::Renderer for TestRenderer {
-    fn render(&self, _: [emulator::Color; 160 * 144]) {}
+    fn render(&self, _: [u32; 160 * 144]) {}
 }

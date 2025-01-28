@@ -1,4 +1,4 @@
-use super::tile::Pixel;
+use super::{tile::Pixel, Color};
 
 /// This register assigns gray shades to the color ids of the BG and window
 /// tiles.
@@ -59,6 +59,18 @@ impl From<u8> for BackgroundColor {
             2 => Self::DarkGray,
             3 => Self::Black,
             _ => unreachable!(),
+        }
+    }
+}
+
+// TODO: remove this when proper pixel mixing is implemented
+impl From<BackgroundColor> for Color {
+    fn from(value: BackgroundColor) -> Self {
+        match value {
+            BackgroundColor::White => Color::White,
+            BackgroundColor::LightGray => Color::LightGray,
+            BackgroundColor::DarkGray => Color::DarkGray,
+            BackgroundColor::Black => Color::Black,
         }
     }
 }

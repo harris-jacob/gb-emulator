@@ -115,7 +115,6 @@ impl Timer {
             self.counter = self.counter.wrapping_add(1);
             if self.counter == 0 {
                 self.counter = self.modulo;
-                // println!("Timer interrupt");
                 self.interrupt_request = true;
             }
             self.internal_counter -= cycles;

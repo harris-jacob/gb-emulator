@@ -26,6 +26,20 @@ impl Emulator {
             limiter.step(cycles);
         }
     }
+
+    pub fn dump_tilset(&mut self) -> Vec<u32> {
+
+        let mut limiter = Limiter::new();
+        let mut clock = 0;
+
+        while clock < 4000000  {
+            let cycles = self.cpu.step();
+            clock += cycles as u32;
+            limiter.step(cycles);
+        }
+
+        return self.cpu.mmu.ppu.dump_tileset()
+    }
 }
 
 /// Limiter designed to keeo the emulator running at the correct clock speed.
@@ -40,7 +54,7 @@ pub struct Limiter {
 }
 
 const FPS: u64 = 60;
-const CYCLES_PER_SECOND: u64 = 4194304; // Hz
+const CYCLES_PER_SECOND: u64 = 4194304 / 4; // Hz
 const CYCLES_PER_FRAME: u64 = CYCLES_PER_SECOND / FPS;
 const TARGET_FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS);
 
@@ -62,8 +76,16 @@ impl Limiter {
         let now = Instant::now();
         let frame_duration = now - self.frame_start;
 
-        // TODO: handle case where emulator is running slower than target
-        std::thread::sleep(TARGET_FRAME_DURATION - frame_duration);
+        let sleep_for = TARGET_FRAME_DURATION
+            .checked_sub(frame_duration)
+            .unwrap_or_else(|| {
+                println!("Emulator not hitting target frame rate");
+
+                Duration::from_secs(0)
+            });
+
+        std::thread::sleep(sleep_for);
+        self.next_frame();
     }
 
     fn next_frame(&mut self) {

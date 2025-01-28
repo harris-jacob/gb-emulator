@@ -36,11 +36,15 @@ pub use window_position::WindowPositionRegister;
 #[cfg(test)]
 pub use renderer::TestRenderer;
 
+
+pub const HEIGHT: usize = 144;
+pub const WIDTH: usize = 160;
+
 pub struct PPU {
     pub interrupt_request: InterruptRequests,
     background_viewport: BackgroundViewport,
     background_palette: BackgroundPalette,
-    buffer: [Color; 160 * 144],
+    pub buffer: [u32; WIDTH * HEIGHT],
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
     clock: u32,
@@ -53,7 +57,6 @@ pub struct PPU {
     sprite_palette_1: SpritePalette,
     tiledata: TileData,
     window_position: WindowPosition,
-    // TODO: review box
     renderer: Arc<dyn Renderer>,
 }
 
@@ -80,7 +83,7 @@ impl PPU {
             background_palette: BackgroundPalette::new(),
             bg_map0: BackgroundMap::new(),
             bg_map1: BackgroundMap::new(),
-            buffer: [Color::Black; 160 * 144],
+            buffer: [renderer.palette(Color::Black); 160 * 144],
             clock: 0,
             interrupt_request: InterruptRequests::default(),
             lcd_stat: LCDStatus::new(),
@@ -94,6 +97,35 @@ impl PPU {
             window_position: WindowPosition::default(),
             renderer,
         }
+    }
+
+    ///// FIXME: DELETE ME LATER
+    pub fn dump_tileset(&self) -> Vec<u32> {
+        let mut tiles = vec![0; 64 * 2];
+
+        for i in 0u8..2 {
+            let tile = self.tiledata.tile_at(i, TileAddressingMethod::Unsigned);
+
+            // dbg!(&tile);
+
+            // 0..128
+            for x in 0..8 {
+                for y in 0..8 {
+                    let pixel = tile.pixel_at(x, y);
+                    let color = self.background_palette.color_from_pixel(pixel);
+                    // [x-]  [--] [00] [11] [x---0011]
+                    // [-x]  [-x] [00] [11] [-x-x0011]
+                    let x = x as usize + i as usize * 8;
+                    dbg!(x);
+                    let y = y as usize;
+                    dbg!(y);
+                    let idx = y * 16 + x;
+                    tiles[idx] = self.renderer.palette(color.into());
+                }
+            }
+        }
+
+        tiles
     }
 
     /// Read from the SCX, SCY registers.
@@ -239,6 +271,6 @@ impl PPU {
     }
 
     fn reset_buffer(&mut self) {
-        self.buffer = [Color::Black; 160 * 144];
+        self.buffer = [self.renderer.palette(Color::Black); 160 * 144];
     }
 }

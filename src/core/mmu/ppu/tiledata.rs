@@ -8,7 +8,7 @@ use super::*;
 /// -- Block 1: $8800-8FFF (128 tiles)
 /// -- Block 2: $9000-97FF (128 tiles)
 pub struct TileData {
-    data: [u8; 0x17FF],
+    data: [u8; 0x1800],
 }
 
 /// There are two ways of accessing tile data:
@@ -22,9 +22,9 @@ pub enum TileAddressingMethod {
     Unsigned,
 }
 
-impl TileData {
+impl<'a> TileData {
     pub fn new() -> Self {
-        Self { data: [0; 0x17FF] }
+        Self { data: [0; 0x1800] }
     }
 
     pub fn read(&self, addr: u16) -> u8 {
@@ -39,11 +39,14 @@ impl TileData {
         self.data[addr as usize] = value;
     }
 
-    pub(super) fn tile_at(&self, tile_number: u8, addressing_method: TileAddressingMethod) -> Tile {
+    pub(super) fn tile_at(
+        &'a self,
+        tile_number: u8,
+        addressing_method: TileAddressingMethod,
+    ) -> Tile<'a> {
         let start = match addressing_method {
             TileAddressingMethod::Signed => {
                 let tile_number = tile_number as i8;
-
                 (0x1000 + (tile_number as i8) as i16 * 16) as usize
             }
 
@@ -54,17 +57,12 @@ impl TileData {
     }
 
     // TODO: make this work without the extra array
-    fn tile_data(&self, start: usize) -> [u8; 16] {
-        let mut data = [0; 16];
-        for i in 0..16 {
-            data[i] = self.data[start + i];
-        }
-
-        data
+    fn tile_data(&self, start: usize) -> &[u8] {
+        &self.data[start..start + 16]
     }
 
     fn check_addr_range(addr: u16) {
-        if addr > 0x17FF {
+        if addr > 0x18FF {
             panic!("Address out of range for TileData access")
         }
     }
@@ -96,7 +94,7 @@ mod tests {
     fn read_write_data() {
         let mut tiledata = TileData::new();
 
-        for addr in 0..0x17FF {
+        for addr in 0..0x1800 {
             tiledata.write(addr, 1);
 
             dbg!(128 >> 7);

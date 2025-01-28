@@ -21,7 +21,7 @@ pub struct MMU {
     hram: [u8; 0x80],
     ie: u8,
     io: [u8; 0x80],
-    ppu: PPU,
+    pub ppu: PPU,
     pub serial: Vec<char>,
     timer: timer::Timer,
     wrams: [u8; 0x2000],
@@ -156,7 +156,7 @@ impl MMU {
                 .write_background_viewport(ViewportRegister::SCY, value),
             0xFF44 => {} // LY is read-only
             0xFF45 => self.ppu.write_lyc(value),
-            0xFF46 => {} // DMA transfer
+            0xFF46 => self.dma_transfer(value),
             0xFF47 => self.ppu.write_background_palette(value),
             0xFF48 => self
                 .ppu
@@ -187,6 +187,15 @@ impl MMU {
     pub(crate) fn step(&mut self, m_cycles: u8) {
         self.timer.step(m_cycles);
         self.ppu.step(m_cycles);
+    }
+
+    fn dma_transfer(&mut self, value: u8) {
+        let start_address: u16 = (value as u16) << 8;
+
+        for offset in 0..160 {
+            self.ppu
+                .write_oam(offset, self.read_u8(start_address + offset))
+        }
     }
 
     // TODO: this isn't how this should work

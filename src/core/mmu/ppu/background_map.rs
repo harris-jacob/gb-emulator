@@ -29,6 +29,14 @@ impl BackgroundMap {
         self.0[addr as usize] = value;
     }
 
+    // Tile number in the backgrounc map at the specificed X, Y coordinate
+    pub fn tile_number_at(&self, x: u8, y: u8) -> u8 {
+        let x = x / 8;
+        let y = y / 8;
+
+        self.0[y as usize * 32 + x as usize]
+    }
+
     pub fn check_addr_range(addr: u16) {
         if addr > 0x400 {
             panic!("address out of range for background map")
@@ -64,5 +72,19 @@ mod tests {
 
             assert_eq!(map.read(i), 1);
         }
+    }
+
+    #[test]
+    fn tile_index_at() {
+        let mut map = BackgroundMap::new();
+        map.write(0, 1);
+        map.write(1, 2);
+        map.write(32, 3);
+        map.write(33, 4);
+
+        assert_eq!(map.tile_number_at(0, 0), 1);
+        assert_eq!(map.tile_number_at(8, 3), 2);
+        assert_eq!(map.tile_number_at(2, 8), 3);
+        assert_eq!(map.tile_number_at(8, 8), 4);
     }
 }
