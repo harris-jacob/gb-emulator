@@ -87,7 +87,7 @@ impl PPU {
             background_palette: BackgroundPalette::new(),
             bg_map0: BackgroundMap::new(),
             bg_map1: BackgroundMap::new(),
-            buffer: [renderer.palette(Color::Black); 160 * 144],
+            buffer: [Color; 160 * 144],
             clock: 0,
             interrupt_request: InterruptRequests::default(),
             lcd_stat: LCDStatus::new(),

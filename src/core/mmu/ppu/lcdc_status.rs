@@ -82,11 +82,6 @@ impl LCDStatus {
         self.0 & 0b00001000 != 0
     }
 
-    /// Is LYC currently equal to LY
-    pub fn lyc_eq_ly(&self) -> bool {
-        self.0 & 0b00000100 != 0
-    }
-
     /// What is the current Mode of the PPU
     pub fn ppu_mode(&self) -> PPUMode {
         (self.0 & 0b00000011).into()
@@ -161,17 +156,6 @@ mod tests {
         lcd_status.write(0b00000000);
         assert_eq!(lcd_status.hblank_stat_ie(), false);
     }
-
-    #[test]
-    fn lyc_eq_ly() {
-        let mut lcd_status = LCDStatus::new();
-        lcd_status.set_lyc_eq_ly(true);
-        assert_eq!(lcd_status.lyc_eq_ly(), true);
-
-        lcd_status.set_lyc_eq_ly(false);
-        assert_eq!(lcd_status.lyc_eq_ly(), false);
-    }
-
     #[test]
     fn ppu_mode() {
         let mut lcd_status = LCDStatus::new();

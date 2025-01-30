@@ -53,18 +53,37 @@ impl<'a> TileData {
             TileAddressingMethod::Unsigned => tile_number as usize * 16,
         };
 
-        BackgroundTile::new(self.tile_data(start))
+        BackgroundTile::new(&self.data[start..start + 16])
     }
 
-    // TODO: test
-    pub(super) fn sprite_tile_at(&'a self, tile_number: u8) -> SpriteTile<'a> {
+    pub(super) fn sprite_tile_at(
+        &'a self,
+        tile_number: u8,
+        sprite_size: SpriteSize,
+    ) -> SpriteTile<'a> {
+        let tile_number = {
+            match sprite_size {
+                SpriteSize::Normal => tile_number,
+                // For "long" sprites, the tile number of the 'top' tile is
+                // the requested tile number with the least significant bit
+                // set to 0, the 'bottom' tile is the requested tile with the
+                // least significant bit set to 1. Here are are calculating the
+                // tile number of the top tile, knowing that below when we setup
+                // our tile, the next tile in the array will become the bottom
+                // tile.
+                SpriteSize::Long => tile_number & !0b1,
+            }
+        };
+
         let start = tile_number as usize * 16;
 
-        SpriteTile::new(self.tile_data(start))
-    }
+        // The sprites can either be 8x8 like backgrounds, meaning the can
+        // be encoded into 16 bytes (2bpp) or they can be 16x8, meaning they
+        // can be encoded into 32 bytes. This ensures the slice is the correct
+        // size based on the sprite height. (16/32 bytes).
+        let end = start + (sprite_size.height() as usize) * 2;
 
-    fn tile_data(&self, start: usize) -> &[u8] {
-        &self.data[start..start + 16]
+        SpriteTile::new(&self.data[start..end], sprite_size)
     }
 
     fn check_addr_range(addr: u16) {
@@ -100,60 +119,115 @@ mod tests {
 
         for addr in 0..0x1800 {
             tiledata.write(addr, 1);
-
-            dbg!(128 >> 7);
-
             assert_eq!(tiledata.read(addr), 1);
         }
     }
 
-    #[test]
-    fn tile_at_unsigned_access() {
-        let smiley_face = smiley_face();
-        let mut tiledata = TileData::new();
+    mod tile_at {
+        use super::*;
 
-        // put a smiley face at tile 100
-        for i in 0..16 {
-            tiledata.write(100 * 16 + i, smiley_face[i as usize]);
+        #[test]
+        fn unsigned_access() {
+            let smiley_face = smiley_face();
+            let mut tiledata = TileData::new();
+
+            // put a smiley face at tile 100
+            for i in 0..16 {
+                tiledata.write(100 * 16 + i, smiley_face[i as usize]);
+            }
+
+            let tile = tiledata.tile_at(100, TileAddressingMethod::Unsigned);
+
+            assert_smiley_face_bg_tile(tile);
         }
 
-        let tile = tiledata.tile_at(100, TileAddressingMethod::Unsigned);
+        #[test]
+        fn signed_access_positive_offset() {
+            let smiley_face = smiley_face();
+            let mut tiledata = TileData::new();
 
-        assert_smiley_face(tile);
-    }
+            // put a smiley face at tile 300
+            for i in 0..16 {
+                tiledata.write(300 * 16 + i, smiley_face[i as usize]);
+            }
 
-    #[test]
-    fn tile_at_signed_access_positive_offset() {
-        let smiley_face = smiley_face();
-        let mut tiledata = TileData::new();
+            let tile = tiledata.tile_at(44, TileAddressingMethod::Signed);
 
-        // put a smiley face at tile 300
-        for i in 0..16 {
-            tiledata.write(300 * 16 + i, smiley_face[i as usize]);
+            assert_smiley_face_bg_tile(tile);
         }
 
-        let tile = tiledata.tile_at(44, TileAddressingMethod::Signed);
+        #[test]
+        fn signed_access_negative_offset() {
+            let smiley_face = smiley_face();
+            let mut tiledata = TileData::new();
 
-        assert_smiley_face(tile);
+            // put a smiley face at tile 300
+            for i in 0..16 {
+                tiledata.write(200 * 16 + i, smiley_face[i as usize]);
+            }
+
+            let offset = -56;
+            let tile = tiledata.tile_at(offset as u8, TileAddressingMethod::Signed);
+
+            assert_smiley_face_bg_tile(tile);
+        }
     }
 
-    #[test]
-    fn tile_at_signed_access_negative_offset() {
-        let smiley_face = smiley_face();
-        let mut tiledata = TileData::new();
+    mod sprite_tile_at {
+        use super::*;
 
-        // put a smiley face at tile 300
-        for i in 0..16 {
-            tiledata.write(200 * 16 + i, smiley_face[i as usize]);
+        #[test]
+        fn normal_size_tile() {
+            let smiley_face = smiley_face();
+            let mut tiledata = TileData::new();
+
+            // put a smiley face at tile 100
+            for i in 0..16 {
+                tiledata.write(100 * 16 + i, smiley_face[i as usize]);
+            }
+
+            let tile = tiledata.sprite_tile_at(100, SpriteSize::Normal);
+            let flags = SpriteFlags::new(0);
+
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 7, flags), Pixel::Color0);
         }
 
-        let offset = -56;
-        let tile = tiledata.tile_at(offset as u8, TileAddressingMethod::Signed);
+        #[test]
+        fn long_size_tile() {
+            let smiley_face = tall_smile_face();
+            let mut tiledata = TileData::new();
 
-        assert_smiley_face(tile);
+            // put a smiley face at tile 100
+            for i in 0..32 {
+                tiledata.write(100 * 16 + i, smiley_face[i as usize]);
+            }
+
+            let tile = tiledata.sprite_tile_at(100, SpriteSize::Long);
+            let flags = SpriteFlags::new(0);
+
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color2);
+
+            assert_eq!(tile.pixel_at(2, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 14, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 14, flags), Pixel::Color3);
+
+            assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
+        }
     }
 
-    fn assert_smiley_face(tile: BackgroundTile) {
+    fn assert_smiley_face_bg_tile(tile: BackgroundTile) {
         assert_eq!(tile.pixel_at(2, 1), Pixel::Color1);
         assert_eq!(tile.pixel_at(2, 2), Pixel::Color1);
         assert_eq!(tile.pixel_at(5, 1), Pixel::Color2);
@@ -170,6 +244,13 @@ mod tests {
             0b00000000, 0b00000000, 0b00100000, 0b00000100, 0b00100000, 0b00000100, 0b00000000,
             0b00000000, 0b00000000, 0b00000000, 0b00100100, 0b00100100, 0b00011000, 0b00011000,
             0b00000000, 0b00000000,
+        ]
+    }
+
+    fn tall_smile_face() -> [u8; 32] {
+        [
+            0, 0, 32, 4, 32, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 36,
+            24, 24, 0, 0,
         ]
     }
 }

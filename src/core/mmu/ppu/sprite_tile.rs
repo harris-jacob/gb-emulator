@@ -8,29 +8,23 @@ use super::SpriteSize;
 /// on top of one another to create a single 16x8 sprite. Also Sprite tiles
 /// can be flipped in x or y.
 #[derive(Debug)]
-pub struct SpriteTile<'a>(&'a [u8]);
+pub struct SpriteTile<'a> {
+    data: &'a [u8],
+    size: SpriteSize,
+}
 
 impl<'a> SpriteTile<'a> {
-    pub fn new(data: &'a [u8]) -> SpriteTile<'a> {
-        Self(data)
+    pub fn new(data: &'a [u8], size: SpriteSize) -> SpriteTile<'a> {
+        Self { data, size }
     }
 
-    pub fn pixel_at(&self, x: u8, y: u8, size: SpriteSize, flags: SpriteFlags) -> Pixel {
-        Self::check_coord_range(x, y, size);
-
-        match size {
-            SpriteSize::Normal => self.pixel_at_normal_sprite(x, y, flags),
-            SpriteSize::Long => todo!(),
-        }
-    }
-
-    fn pixel_at_normal_sprite(&self, mut x: u8, mut y: u8, flags: SpriteFlags) -> Pixel {
+    pub fn pixel_at(&self, mut x: u8, mut y: u8, flags: SpriteFlags) -> Pixel {
         if flags.x_flip() {
             x = 7 - x
         }
 
         if flags.y_flip() {
-            y = 7 - y
+            y = self.size.height() - 1 - y
         }
 
         let line_first_byte = self.idx(y * 2);
@@ -45,22 +39,7 @@ impl<'a> SpriteTile<'a> {
     }
 
     fn idx(&self, idx: u8) -> u8 {
-        self.0[idx as usize]
-    }
-
-    fn check_coord_range(x: u8, y: u8, size: SpriteSize) {
-        match size {
-            SpriteSize::Normal => {
-                if y >= 8 || x >= 8 {
-                    panic!("pixel out of range")
-                }
-            }
-            SpriteSize::Long => {
-                if y >= 16 || x >= 8 {
-                    panic!("pixel out of range")
-                }
-            }
-        }
+        self.data[idx as usize]
     }
 }
 
@@ -70,100 +49,157 @@ mod tests {
 
     mod normal_sprite {
         use super::*;
-        #[should_panic]
-        #[test]
-        fn tile_at_panics_reading_out_of_range_coords() {
-            let tile = SpriteTile::new(&[0; 16]);
-
-            tile.pixel_at(9, 9, SpriteSize::Normal, SpriteFlags::new(0));
-        }
-
         #[test]
         fn pixel_at_default_flags() {
             let face = smiley_face();
-            let tile = SpriteTile::new(&face);
+            let tile = SpriteTile::new(&face, SpriteSize::Normal);
             let flags = SpriteFlags::new(0);
-            let size = SpriteSize::Normal;
 
-            assert_eq!(tile.pixel_at(2, 1, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(2, 2, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(5, 1, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(5, 2, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(2, 5, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(5, 5, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(3, 6, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(4, 6, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(7, 7, size, flags), Pixel::Color0);
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 7, flags), Pixel::Color0);
         }
 
         #[test]
         fn pixel_with_x_flip() {
             let face = smiley_face();
-            let tile = SpriteTile::new(&face);
+            let tile = SpriteTile::new(&face, SpriteSize::Normal);
             let flags = SpriteFlags::new(0b00100000);
-            let size = SpriteSize::Normal;
 
-            assert_eq!(tile.pixel_at(2, 1, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(2, 2, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(5, 1, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(5, 2, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(2, 5, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(5, 5, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(3, 6, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(4, 6, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(7, 7, size, flags), Pixel::Color0);
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 5, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 6, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 7, flags), Pixel::Color0);
         }
 
         #[test]
         fn pixel_with_y_flip() {
             let face = smiley_face();
-            let tile = SpriteTile::new(&face);
+            let tile = SpriteTile::new(&face, SpriteSize::Normal);
             let flags = SpriteFlags::new(0b01000000);
-            let size = SpriteSize::Normal;
 
-            assert_eq!(tile.pixel_at(2, 5, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(2, 6, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(5, 5, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(5, 6, size, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 5, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 6, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 5, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 6, flags), Pixel::Color2);
 
-            assert_eq!(tile.pixel_at(2, 2, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(5, 2, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(3, 1, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(4, 1, size, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 1, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 1, flags), Pixel::Color3);
 
-            assert_eq!(tile.pixel_at(7, 7, size, flags), Pixel::Color0);
+            assert_eq!(tile.pixel_at(7, 7, flags), Pixel::Color0);
         }
 
         #[test]
-        fn pixel_with_both_flipped() {
+        fn pixel_at_with_both_flipped() {
             let face = smiley_face();
-            let tile = SpriteTile::new(&face);
+            let tile = SpriteTile::new(&face, SpriteSize::Normal);
             let flags = SpriteFlags::new(0b01100000);
-            let size = SpriteSize::Normal;
 
-            assert_eq!(tile.pixel_at(2, 5, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(2, 6, size, flags), Pixel::Color2);
-            assert_eq!(tile.pixel_at(5, 5, size, flags), Pixel::Color1);
-            assert_eq!(tile.pixel_at(5, 6, size, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 5, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 6, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 5, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 6, flags), Pixel::Color1);
 
-            assert_eq!(tile.pixel_at(2, 2, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(5, 2, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(3, 1, size, flags), Pixel::Color3);
-            assert_eq!(tile.pixel_at(4, 1, size, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 1, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 1, flags), Pixel::Color3);
 
-            assert_eq!(tile.pixel_at(7, 7, size, flags), Pixel::Color0);
+            assert_eq!(tile.pixel_at(7, 7, flags), Pixel::Color0);
         }
     }
 
     mod long_sprite {
         use super::*;
-        #[should_panic]
-        #[test]
-        fn tile_at_panics_reading_out_of_range_coords_tall_sprite() {
-            let tile = SpriteTile::new(&[0; 32]);
 
-            tile.pixel_at(17, 7, SpriteSize::Long, SpriteFlags::new(0));
+        #[test]
+        fn pixel_at_default_flags() {
+            let face = tall_smile_face();
+            let tile = SpriteTile::new(&face, SpriteSize::Long);
+            let flags = SpriteFlags::new(0);
+
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color2);
+
+            assert_eq!(tile.pixel_at(2, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 14, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 14, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
         }
+
+        #[test]
+        fn pixel_at_x_flip() {
+            let face = tall_smile_face();
+            let tile = SpriteTile::new(&face, SpriteSize::Long);
+            let flags = SpriteFlags::new(0b00100000);
+
+            assert_eq!(tile.pixel_at(2, 1, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 1, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color1);
+
+            assert_eq!(tile.pixel_at(2, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 13, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 14, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 14, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
+
+        }
+
+        #[test]
+        fn pixel_at_y_flip() {
+            let face = tall_smile_face();
+            let tile = SpriteTile::new(&face, SpriteSize::Long);
+            let flags = SpriteFlags::new(0b01000000);
+
+            assert_eq!(tile.pixel_at(2, 14, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(2, 13, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 14, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 13, flags), Pixel::Color2);
+
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 1, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 1, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
+
+        }        
+
+        #[test]
+        fn pixel_at_with_both_flipped() {
+            let face = tall_smile_face();
+            let tile = SpriteTile::new(&face, SpriteSize::Long);
+            let flags = SpriteFlags::new(0b01100000);
+
+            assert_eq!(tile.pixel_at(2, 14, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(2, 13, flags), Pixel::Color2);
+            assert_eq!(tile.pixel_at(5, 14, flags), Pixel::Color1);
+            assert_eq!(tile.pixel_at(5, 13, flags), Pixel::Color1);
+
+            assert_eq!(tile.pixel_at(2, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(5, 2, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(3, 1, flags), Pixel::Color3);
+            assert_eq!(tile.pixel_at(4, 1, flags), Pixel::Color3);
+
+            assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
+        }
+
     }
 
     fn smiley_face() -> [u8; 16] {
@@ -171,6 +207,13 @@ mod tests {
             0b00000000, 0b00000000, 0b00100000, 0b00000100, 0b00100000, 0b00000100, 0b00000000,
             0b00000000, 0b00000000, 0b00000000, 0b00100100, 0b00100100, 0b00011000, 0b00011000,
             0b00000000, 0b00000000,
+        ]
+    }
+
+    fn tall_smile_face() -> [u8; 32] {
+        [
+            0, 0, 32, 4, 32, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 36,
+            24, 24, 0, 0,
         ]
     }
 }

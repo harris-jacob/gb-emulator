@@ -36,6 +36,15 @@ pub enum SpriteSize {
     Long,
 }
 
+impl SpriteSize {
+    pub fn height(&self) -> u8 {
+        match self {
+            SpriteSize::Normal => 8,
+            SpriteSize::Long => 16,
+        }
+    }
+}
+
 /// Which Palette number is the sprite using
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum PaletteNumber {
@@ -183,8 +192,8 @@ mod tests {
 
             let sprite = map.sprite_at(20);
 
-            assert_eq!(sprite.x, 0x10);
-            assert_eq!(sprite.y, 0x20);
+            assert_eq!(sprite.x, 0x20);
+            assert_eq!(sprite.y, 0x10);
             assert_eq!(sprite.tile_number, 0x30);
             assert_eq!(sprite.flags, SpriteFlags::new(0x40));
         }

@@ -132,32 +132,29 @@ impl PPU {
 
     fn render_sprite_at_scanline(&mut self, sprite_number: u8) {
         let sprite = self.oam.sprite_at(sprite_number);
+        let sprite_size = self.lcdc.sprite_size();
 
-        // Sprite not on scanline TODO: tall sprites
         let ly = self.ly as i16;
-        if ly < sprite.y() || ly >= sprite.y() + 8 {
+        if ly < sprite.y() || ly >= sprite.y() + (sprite_size.height() as i16) {
             return;
         }
 
         // Safety: line above
         let y = (ly - sprite.y()) as u8;
 
-        let tile = self.tiledata.sprite_tile_at(sprite.tile_number);
+        let tile = self
+            .tiledata
+            .sprite_tile_at(sprite.tile_number, sprite_size);
 
         for x in 0..8 {
-            let size = self.lcdc.sprite_size();
-            let pixel = tile.pixel_at(x, y, size, sprite.flags);
+            let pixel = tile.pixel_at(x, y, sprite.flags);
             let palette = self.sprite_palette(sprite.flags);
 
             let color = palette.color_from_pixel(pixel);
 
-            // this is probably not safe, in practise sprites should only
-            // 'inside the screen' but checking bounds is probably a good idea. 
-            let x = {
-                let x = x as i16 + sprite.x();
-            }; 
+            let x = x as i16 + sprite.x();
 
-            // sprite pixel outside of LCD range 
+            // sprite pixel outside of LCD range
             if x > 160 || y > 144 {
                 return;
             }
@@ -167,13 +164,12 @@ impl PPU {
         }
     }
 
-
     fn render_background_scanline(&mut self) {
-        for x in 0..WIDTH {
-            if self.is_window_pixel(x as u8, self.ly) {
-                self.render_window_layer_pixel(x as u8, self.ly);
+        for x in 0..(WIDTH as u8) {
+            if self.is_window_pixel(x, self.ly) {
+                self.render_window_layer_pixel(x, self.ly);
             } else {
-                self.render_background_layer_pixel(x as u8, self.ly);
+                self.render_background_layer_pixel(x, self.ly);
             }
         }
     }
@@ -194,8 +190,9 @@ impl PPU {
         // case, this pixel should be rendered using the bckground map instead
         // because it doesn't overlap with the window.
         let tile_x = x - self.window_position.wx();
+
         // Same as above.
-        let tile_y = y - self.window_position.wy();
+        let tile_y = y - self.window_position.wy;
 
         // TODO: everything below here is the same as background
         let tile_number = window_map.tile_number_at(tile_x, tile_y);
