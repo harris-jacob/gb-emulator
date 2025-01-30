@@ -1,4 +1,4 @@
-use super::Pixel;
+use super::{Color, Pixel};
 
 /// This struct is used for Object palette registers
 /// which there are two of. It assigns gray shades to color ids
@@ -64,6 +64,19 @@ impl From<u8> for SpriteColor {
             2 => Self::DarkGray,
             3 => Self::Black,
             _ => unreachable!(),
+        }
+    }
+}
+
+// TODO: remove this when proper pixel mixing is implemented
+impl From<SpriteColor> for Color {
+    fn from(value: SpriteColor) -> Self {
+        match value {
+            SpriteColor::White => Color::White,
+            SpriteColor::LightGray => Color::LightGray,
+            SpriteColor::DarkGray => Color::DarkGray,
+            SpriteColor::Black => Color::Black,
+            SpriteColor::Transparent => Color::White,
         }
     }
 }

@@ -21,8 +21,8 @@ pub struct OAM([u8; 160]);
 /// Byte 3 - Sprite Flags. The last Byte represents bit-flags that alter the
 /// rendering of a sprite. See [SpriteFlags] struct for more details
 pub struct Sprite {
-    pub x: u8,
-    pub y: u8,
+    x: u8,
+    y: u8,
     pub tile_number: u8,
     pub flags: SpriteFlags,
 }
@@ -65,15 +65,15 @@ impl SpriteFlags {
     /// If true, sprite is always rendered above the BG, otherwise the sprite
     /// is only rendered above Color0.
     pub fn bg_priority(&self) -> bool {
-        self.0 & 0b10000000 == 0
+        self.0 & 0b10000000 != 0
     }
     /// Is the sprite flipped in Y
     pub fn y_flip(&self) -> bool {
-        self.0 & 0b01000000 == 0
+        self.0 & 0b01000000 != 0
     }
     // Is the sprite flipped in X
     pub fn x_flip(&self) -> bool {
-        self.0 & 0b00100000 == 0
+        self.0 & 0b00100000 != 0
     }
     pub fn palette_number(&self) -> PaletteNumber {
         if self.0 & 0b00010000 == 0 {
@@ -81,6 +81,24 @@ impl SpriteFlags {
         } else {
             PaletteNumber::OBP1
         }
+    }
+}
+
+impl Sprite {
+    // Returns the sprites true Y position. To allow scrolling in,
+    // 16 is subtracted from Y sprites, giving their true position.
+    pub fn y(&self) -> i16 {
+        let y = self.y as i16;
+
+        y - 16
+    }
+
+    // Returns sprites true X position. To allow scrolling in,
+    // 8 is subtracted form X sprites, giving their true position.
+    pub fn x(&self) -> i16 {
+        let x = self.x as i16;
+
+        x - 8
     }
 }
 
@@ -109,8 +127,8 @@ impl OAM {
         let base = (sprite_number * 4) as usize;
 
         Sprite {
-            x: self.0[base],
-            y: self.0[base + 1],
+            x: self.0[base + 1],
+            y: self.0[base],
             tile_number: self.0[base + 2],
             flags: SpriteFlags::new(self.0[base + 3]),
         }
@@ -178,28 +196,28 @@ mod tests {
         #[test]
         fn bg_priority() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.bg_priority(), true);
+            assert_eq!(flags.bg_priority(), false);
 
             let flags = SpriteFlags::new(0b10000000);
-            assert_eq!(flags.bg_priority(), false);
+            assert_eq!(flags.bg_priority(), true);
         }
 
         #[test]
         fn y_flip() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.y_flip(), true);
+            assert_eq!(flags.y_flip(), false);
 
             let flags = SpriteFlags::new(0b01000000);
-            assert_eq!(flags.y_flip(), false);
+            assert_eq!(flags.y_flip(), true);
         }
 
         #[test]
         fn x_flip() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.x_flip(), true);
+            assert_eq!(flags.x_flip(), false);
 
             let flags = SpriteFlags::new(0b00100000);
-            assert_eq!(flags.x_flip(), false);
+            assert_eq!(flags.x_flip(), true);
         }
 
         #[test]

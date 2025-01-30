@@ -118,19 +118,55 @@ impl PPU {
         if self.lcdc.background_and_window_enabled() {
             self.render_background_scanline();
         }
+
+        if self.lcdc.sprites_enabled() {
+            self.render_sprites_at_scanline();
+        }
     }
 
-    fn render_sprites(&mut self) {
-        for x in 0..40 {}
+    fn render_sprites_at_scanline(&mut self) {
+        for idx in 0..40 {
+            self.render_sprite_at_scanline(idx);
+        }
     }
 
-    fn render_sprite(&mut self, sprite_number: u8) {
+    fn render_sprite_at_scanline(&mut self, sprite_number: u8) {
         let sprite = self.oam.sprite_at(sprite_number);
 
-        let tile = self
-            .tiledata
-            .tile_at(sprite.tile_number, TileAddressingMethod::Unsigned);
+        // Sprite not on scanline TODO: tall sprites
+        let ly = self.ly as i16;
+        if ly < sprite.y() || ly >= sprite.y() + 8 {
+            return;
+        }
+
+        // Safety: line above
+        let y = (ly - sprite.y()) as u8;
+
+        let tile = self.tiledata.sprite_tile_at(sprite.tile_number);
+
+        for x in 0..8 {
+            let size = self.lcdc.sprite_size();
+            let pixel = tile.pixel_at(x, y, size, sprite.flags);
+            let palette = self.sprite_palette(sprite.flags);
+
+            let color = palette.color_from_pixel(pixel);
+
+            // this is probably not safe, in practise sprites should only
+            // 'inside the screen' but checking bounds is probably a good idea. 
+            let x = {
+                let x = x as i16 + sprite.x();
+            }; 
+
+            // sprite pixel outside of LCD range 
+            if x > 160 || y > 144 {
+                return;
+            }
+
+            self.buffer[self.ly as usize * WIDTH + x as usize] =
+                self.renderer.palette(color.into());
+        }
     }
+
 
     fn render_background_scanline(&mut self) {
         for x in 0..WIDTH {
@@ -196,6 +232,13 @@ impl PPU {
         let color = self.background_palette.color_from_pixel(pixel);
 
         self.buffer[y as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
+    }
+
+    fn sprite_palette(&self, flags: SpriteFlags) -> &SpritePalette {
+        match flags.palette_number() {
+            oam::PaletteNumber::OBP0 => &self.sprite_palette_0,
+            oam::PaletteNumber::OBP1 => &self.sprite_palette_1,
+        }
     }
 
     fn current_background_map(&self) -> &BackgroundMap {

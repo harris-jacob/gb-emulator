@@ -43,7 +43,7 @@ impl<'a> TileData {
         &'a self,
         tile_number: u8,
         addressing_method: TileAddressingMethod,
-    ) -> Tile<'a> {
+    ) -> BackgroundTile<'a> {
         let start = match addressing_method {
             TileAddressingMethod::Signed => {
                 let tile_number = tile_number as i8;
@@ -53,10 +53,16 @@ impl<'a> TileData {
             TileAddressingMethod::Unsigned => tile_number as usize * 16,
         };
 
-        Tile::new(self.tile_data(start))
+        BackgroundTile::new(self.tile_data(start))
     }
 
-    // TODO: make this work without the extra array
+    // TODO: test
+    pub(super) fn sprite_tile_at(&'a self, tile_number: u8) -> SpriteTile<'a> {
+        let start = tile_number as usize * 16;
+
+        SpriteTile::new(self.tile_data(start))
+    }
+
     fn tile_data(&self, start: usize) -> &[u8] {
         &self.data[start..start + 16]
     }
@@ -147,7 +153,7 @@ mod tests {
         assert_smiley_face(tile);
     }
 
-    fn assert_smiley_face(tile: Tile) {
+    fn assert_smiley_face(tile: BackgroundTile) {
         assert_eq!(tile.pixel_at(2, 1), Pixel::Color1);
         assert_eq!(tile.pixel_at(2, 2), Pixel::Color1);
         assert_eq!(tile.pixel_at(5, 1), Pixel::Color2);

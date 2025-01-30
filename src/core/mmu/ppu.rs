@@ -1,13 +1,15 @@
 mod background_map;
 mod background_palette;
+mod background_tile;
 mod background_viewport;
 mod lcd_control;
 mod lcdc_status;
 mod oam;
+mod pixel;
 mod renderer;
 mod rendering;
 mod sprite_palette;
-mod background_tile;
+mod sprite_tile;
 mod tiledata;
 mod window_position;
 
@@ -15,19 +17,21 @@ use std::sync::Arc;
 
 use background_map::BackgroundMap;
 use background_palette::BackgroundPalette;
+use background_tile::BackgroundTile;
 use background_viewport::BackgroundViewport;
 use lcd_control::LCDControl;
 use lcdc_status::LCDStatus;
+use oam::SpriteFlags;
+use oam::SpriteSize;
 use oam::OAM;
+use pixel::Pixel;
 use sprite_palette::SpritePalette;
-use background_tile::Tile;
-use background_tile::Pixel;
+use sprite_tile::SpriteTile;
 use tiledata::TileData;
 use window_position::WindowPosition;
 
 pub use background_map::BGMapSelection;
 pub use background_viewport::ViewportRegister;
-pub use oam::SpriteSize;
 pub use renderer::Color;
 pub use renderer::Renderer;
 pub use sprite_palette::SpritePaletteSelection;

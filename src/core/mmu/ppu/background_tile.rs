@@ -1,19 +1,13 @@
-/// A tile is a 8x8 pixel image encoded using the 2bpp representation.
+use super::Pixel;
+
+/// A background tile is a 8x8 pixel image encoded using the 2bpp representation.
 /// This type handles the nitty-gritty of the encoding and allows access to
 /// the pixel color information at given x,y co-ordinates.
 #[derive(Debug)]
-pub struct Tile<'a>(&'a [u8]);
+pub struct BackgroundTile<'a>(&'a [u8]);
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Pixel {
-    Color0,
-    Color1,
-    Color2,
-    Color3,
-}
-
-impl<'a> Tile<'a> {
-    pub fn new(data: &'a [u8]) -> Tile<'a> {
+impl<'a> BackgroundTile<'a> {
+    pub fn new(data: &'a [u8]) -> BackgroundTile<'a> {
         Self(data)
     }
 
@@ -31,13 +25,7 @@ impl<'a> Tile<'a> {
 
         let pixel = (bit_two << 1) | bit_one;
 
-        match pixel {
-            0 => Pixel::Color0,
-            1 => Pixel::Color1,
-            2 => Pixel::Color2,
-            3 => Pixel::Color3,
-            _ => unreachable!(),
-        }
+        pixel.into()
     }
 
     fn idx(&self, idx: u8) -> u8 {
@@ -58,7 +46,7 @@ mod tests {
     #[should_panic]
     #[test]
     fn tile_at_panics_reading_out_of_range_coords() {
-        let tile = Tile::new(&[0; 16]);
+        let tile = BackgroundTile::new(&[0; 16]);
 
         tile.pixel_at(9, 9);
     }
@@ -66,7 +54,7 @@ mod tests {
     #[test]
     fn pixel_at_returns_correct_pixel() {
         let face = smiley_face();
-        let tile = Tile::new(&face);
+        let tile = BackgroundTile::new(&face);
 
         assert_eq!(tile.pixel_at(2, 1), Pixel::Color1);
         assert_eq!(tile.pixel_at(2, 2), Pixel::Color1);
