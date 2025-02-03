@@ -142,15 +142,42 @@ impl PPU {
         // Safety: line above
         let y = (ly - sprite.y()) as u8;
 
-        let tile = self
-            .tiledata
-            .sprite_tile_at(sprite.tile_number, sprite_size);
-
         for x in 0..8 {
+            let tile = self
+                .tiledata
+                .sprite_tile_at(sprite.tile_number, sprite_size);
             let pixel = tile.pixel_at(x, y, sprite.flags);
+            self.render_sprite_pixel(pixel, &sprite, x, y);
+        }
+    }
+
+    /// Apply pixel mixing to a sprite_pixel, and insert it
+    /// into the buffer over the background pixel if the following
+    /// conditions are met:
+    /// 1) If the color number of the Sprite Pixel is 0,
+    ///   the Background Pixel is pushed to the LCD.
+    /// 2) If the BG-to-OBJ-Priority bit is 1 and the color
+    /// number of the Background Pixel is anything other than 0,
+    /// the Background Pixel is pushed to the LCD.
+    /// 3) If none of the above conditions apply, the Sprite
+    /// Pixel is pushed to the LCD.
+    ///
+    /// NOTE: this function has a few caveats for it to be valid:
+    /// - The background scanline must always be rendered before the sprite
+    /// - Background scanline rendering function must push BG pixel
+    /// to the bg_priority buffer
+    fn render_sprite_pixel(&mut self, sprite_pixel: Pixel, sprite: &oam::Sprite, x: u8, y: u8) {
+        if sprite_pixel == Pixel::Color0 {
+            return;
+        }
+
+        let background_pixel = self.bg_priority[y as usize * WIDTH + x as usize];
+        if sprite.flags.bg_priority() && background_pixel != Pixel::Color0 {
+            return;
+        } else {
             let palette = self.sprite_palette(sprite.flags);
 
-            let color = palette.color_from_pixel(pixel);
+            let color = palette.color_from_pixel(sprite_pixel);
 
             let x = x as i16 + sprite.x();
 
@@ -175,7 +202,7 @@ impl PPU {
     }
 
     fn is_window_pixel(&self, x: u8, y: u8) -> bool {
-        if self.lcdc.window_enabled() {
+        if !self.lcdc.window_enabled() {
             return false;
         }
 
@@ -257,7 +284,6 @@ impl PPU {
     }
 
     fn request_stat_interrupt(&mut self) {
-        println!("Requesting STAT interrupt");
         self.interrupt_request.stat = true
     }
 

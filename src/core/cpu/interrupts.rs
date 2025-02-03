@@ -1,12 +1,8 @@
+use mmu::Interrupt;
+
 use super::*;
-use crate::core::data::Interrupt;
 
 impl CPU {
-    pub fn request_interrupt(&mut self, interrupt: Interrupt) {
-        let interrupt_flag = self.mmu.read_u8(0xFF0F);
-        self.mmu
-            .write_u8(0xFF0F, interrupt_flag | (1 << interrupt as u8));
-    }
     pub fn interrupt_step(&mut self) -> u8 {
         match (self.ime, self.halted) {
             (false, false) => 0,
@@ -17,7 +13,7 @@ impl CPU {
     }
 
     fn halted_pending_interrupt(&mut self) -> u8 {
-        if self.read_interrupts() == 0 {
+        if self.mmu.interrupts.interrupt_mask() == 0 {
             return 0;
         }
 
@@ -26,8 +22,7 @@ impl CPU {
     }
 
     fn halted_interrupt(&mut self) -> u8 {
-        let interrupts = self.read_interrupts();
-        if interrupts == 0 {
+        if self.mmu.interrupts.has_interrupt() {
             return 0;
         }
 
@@ -36,13 +31,13 @@ impl CPU {
     }
 
     fn interrupt(&mut self) -> u8 {
-        let interrupts = self.read_interrupts();
+        let interrupts = self.mmu.interrupts.interrupt_mask();
 
         for i in 0..5 {
             if interrupts & (1 << i) != 0 {
+                let interrupt: Interrupt = (1 << i).into();
                 self.ime = false;
-                self.mmu
-                    .write_u8(0xFF0F, self.mmu.read_u8(0xFF0F) & !(1 << i));
+                self.mmu.interrupts.interrupt_service(interrupt);
                 stack_push(self, self.registers.read_sixteen(SixteenBitRegister::PC));
                 self.interrupt_jump(i);
                 return 4;
@@ -50,10 +45,6 @@ impl CPU {
         }
 
         return 0;
-    }
-
-    fn read_interrupts(&self) -> u8 {
-        self.mmu.read_u8(0xFF0F) & self.mmu.read_u8(0xFFFF)
     }
 
     fn interrupt_jump(&mut self, interrupt: u8) {

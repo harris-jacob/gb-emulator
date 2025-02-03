@@ -42,12 +42,7 @@ impl CPU {
             1
         };
 
-        // TODO: tidy this
         self.mmu.step(cycles);
-        match self.mmu.interrupts_requested() {
-            Some(interrupt) => self.request_interrupt(interrupt),
-            None => {}
-        };
 
         let interrupt_cycles = self.interrupt_step();
 

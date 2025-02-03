@@ -1,3 +1,4 @@
+mod interrupts;
 mod ppu;
 mod timer;
 
@@ -7,10 +8,11 @@ use ppu::ViewportRegister;
 use ppu::WindowPositionRegister;
 
 use crate::core::cartridge::Cartridge;
-use crate::core::data::Interrupt;
 pub use crate::core::mmu::ppu::Color;
 pub use crate::core::mmu::ppu::Renderer;
 pub use crate::core::mmu::ppu::PPU;
+pub use interrupts::Interrupt;
+pub use interrupts::Interrupts;
 
 #[cfg(test)]
 pub use crate::core::mmu::ppu::TestRenderer;
@@ -19,12 +21,12 @@ pub struct MMU {
     cartridge: Box<dyn Cartridge>,
     empty: [u8; 0x60],
     hram: [u8; 0x80],
-    ie: u8,
     io: [u8; 0x80],
     pub ppu: PPU,
     pub serial: Vec<char>,
     timer: timer::Timer,
     wrams: [u8; 0x2000],
+    pub interrupts: Interrupts,
 }
 
 impl MMU {
@@ -33,12 +35,12 @@ impl MMU {
             cartridge,
             empty: [0; 0x60],
             hram: [0; 0x80],
-            ie: 0,
             io: [0; 0x80],
             ppu,
             serial: Vec::new(),
             timer: timer::Timer::new(),
             wrams: [0; 0x2000],
+            interrupts: Interrupts::new(),
         };
 
         // Pretend we loaded the boot rom values
@@ -83,19 +85,19 @@ impl MMU {
             0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize], // Echo ram
             0xFE00..=0xFE9F => self.ppu.read_oam(addr - 0xFE00),
             0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize],
-            0xFF00 => self.io[(addr - 0xFF00) as usize], // Joypad
+            0xFF00 => 0xF,                                        // Joypad
             0xFF01..=0xFF02 => self.io[(addr - 0xFF00) as usize], // Serial transfer,
-            0xFF03 => 0,                                 // Nothing
+            0xFF03 => 0,                                          // Nothing
             0xFF04..=0xFF07 => self.timer.read(addr - 0xFF0),
-            0xFF08..=0xFF0E => 0,                                 // Nothing
-            0xFF0F => self.io[(addr - 0xFF00) as usize],          // Interrupts
+            0xFF08..=0xFF0E => 0, // Nothing
+            0xFF0F => self.interrupts.read_interrupt_flag(),
             0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize], // Audio
             0xFF27..=0xFF2F => 0,                                 // Nothing
             0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize], // Wave pattern
             0xFF40 => self.ppu.read_lcdc(),
             0xFF41 => self.ppu.read_lcd_stat(),
-            0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCX),
-            0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCY),
+            0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCY),
+            0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCX),
             0xFF44 => self.ppu.read_ly(),
             0xFF45 => self.ppu.read_lyc(),
             0xFF46 => 0, // DMA transfer
@@ -110,7 +112,7 @@ impl MMU {
             0xFF4B => self.ppu.read_window_position(WindowPositionRegister::WY),
             0xFF4C..=0xFF7F => 0, // Nothing
             0xFF80..=0xFFFE => self.hram[(addr - 0xFF80) as usize],
-            0xFFFF => self.ie,
+            0xFFFF => self.interrupts.read_interrupt_enabled(),
         }
     }
 
@@ -141,19 +143,22 @@ impl MMU {
             0xFF02 => self.io[(addr - 0xFF00) as usize] = value,
             0xFF03 => {} // Nothing
             0xFF04..=0xFF07 => self.timer.write(addr, value),
-            0xFF08..=0xFF0E => {}                                // Nothing
-            0xFF0F => self.io[(addr - 0xFF00) as usize] = value, // Interrupts
+            0xFF08..=0xFF0E => {} // Nothing
+            0xFF0F => {
+                println!("Writing to interrupt flag {}", value);
+                self.interrupts.write_interrupt_flag(value)
+            },
             0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize] = value, // Audio
-            0xFF27..=0xFF2F => {}                                // Nothing
+            0xFF27..=0xFF2F => {}                                         // Nothing
             0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize] = value, // Wave pattern
             0xFF40 => self.ppu.write_lcdc(value),
             0xFF41 => self.ppu.write_lcd_stat(value),
             0xFF42 => self
                 .ppu
-                .write_background_viewport(ViewportRegister::SCX, value),
+                .write_background_viewport(ViewportRegister::SCY, value),
             0xFF43 => self
                 .ppu
-                .write_background_viewport(ViewportRegister::SCY, value),
+                .write_background_viewport(ViewportRegister::SCX, value),
             0xFF44 => {} // LY is read-only
             0xFF45 => self.ppu.write_lyc(value),
             0xFF46 => self.dma_transfer(value),
@@ -172,7 +177,7 @@ impl MMU {
                 .write_window_position(WindowPositionRegister::WY, value),
             0xFF4C..=0xFF7F => {} // Nothing
             0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize] = value,
-            0xFFFF => self.ie = value,
+            0xFFFF => self.interrupts.write_interrupt_enabled(value),
         }
     }
 
@@ -187,6 +192,21 @@ impl MMU {
     pub(crate) fn step(&mut self, m_cycles: u8) {
         self.timer.step(m_cycles);
         self.ppu.step(m_cycles);
+
+        if self.timer.interrupt_request {
+            self.interrupts.request_interrupt(Interrupt::Timer);
+            self.timer.interrupt_request = false;
+        }
+
+        if self.ppu.interrupt_request.stat {
+            self.interrupts.request_interrupt(Interrupt::LCDStat);
+            self.ppu.interrupt_request.stat = false;
+        }
+
+        if self.ppu.interrupt_request.vblank {
+            self.interrupts.request_interrupt(Interrupt::VBlank);
+            self.ppu.interrupt_request.vblank = false;
+        }
     }
 
     fn dma_transfer(&mut self, value: u8) {
@@ -197,22 +217,10 @@ impl MMU {
                 .write_oam(offset, self.read_u8(start_address + offset))
         }
     }
+}
 
-    // TODO: this isn't how this should work
-    pub(crate) fn interrupts_requested(&mut self) -> Option<Interrupt> {
-        if self.timer.interrupt_request {
-            self.timer.interrupt_request = false;
-            return Some(Interrupt::Timer);
-        }
-        if self.ppu.interrupt_request.stat {
-            self.ppu.interrupt_request.stat = false;
-            return Some(Interrupt::LCDStat);
-        }
-        if self.ppu.interrupt_request.vblank {
-            self.ppu.interrupt_request.vblank = false;
-            return Some(Interrupt::VBlank);
-        } else {
-            return None;
-        }
-    }
+pub struct MMUInterrupts {
+    pub timer: bool,
+    pub lcd_stat: bool,
+    pub vblank: bool,
 }

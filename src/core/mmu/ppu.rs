@@ -49,6 +49,8 @@ pub struct PPU {
     background_viewport: BackgroundViewport,
     background_palette: BackgroundPalette,
     pub buffer: [u32; WIDTH * HEIGHT],
+    // TODO: refactor to eliminate this
+    bg_priority: [Pixel; WIDTH * HEIGHT],
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
     clock: u32,
@@ -85,9 +87,10 @@ impl PPU {
         Self {
             background_viewport: BackgroundViewport::default(),
             background_palette: BackgroundPalette::new(),
+            bg_priority: [Pixel::Color0; WIDTH * HEIGHT],
             bg_map0: BackgroundMap::new(),
             bg_map1: BackgroundMap::new(),
-            buffer: [Color; 160 * 144],
+            buffer: [renderer.palette(Color::Black); WIDTH * HEIGHT],
             clock: 0,
             interrupt_request: InterruptRequests::default(),
             lcd_stat: LCDStatus::new(),
@@ -117,12 +120,8 @@ impl PPU {
                 for y in 0..8 {
                     let pixel = tile.pixel_at(x, y);
                     let color = self.background_palette.color_from_pixel(pixel);
-                    // [x-]  [--] [00] [11] [x---0011]
-                    // [-x]  [-x] [00] [11] [-x-x0011]
                     let x = x as usize + i as usize * 8;
-                    dbg!(x);
                     let y = y as usize;
-                    dbg!(y);
                     let idx = y * 16 + x;
                     tiles[idx] = self.renderer.palette(color.into());
                 }

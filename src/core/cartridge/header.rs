@@ -74,13 +74,16 @@ pub enum RAMSize {
 }
 
 impl TryFrom<&u8> for CartridgeType {
-    type Error = &'static str;
+    type Error = String;
 
     fn try_from(value: &u8) -> Result<Self, Self::Error> {
         match value {
             0x00 => Ok(CartridgeType::ROMOnly),
             0x01 => Ok(CartridgeType::MBC1),
-            _ => Err("Unknown cartridge type"),
+            n => {
+                let error = format!("Unsupported Cartridge type {:X}", n);
+                Err(error)
+            }
         }
     }
 }

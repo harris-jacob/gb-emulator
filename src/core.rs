@@ -1,6 +1,5 @@
 mod cartridge;
 mod cpu;
-mod data;
 mod mmu;
 mod registers;
 
