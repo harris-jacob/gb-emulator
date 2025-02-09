@@ -22,7 +22,7 @@ impl CPU {
     }
 
     fn halted_interrupt(&mut self) -> u8 {
-        if self.mmu.interrupts.has_interrupt() {
+        if !self.mmu.interrupts.has_interrupt() {
             return 0;
         }
 

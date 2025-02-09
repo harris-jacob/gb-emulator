@@ -26,10 +26,6 @@ impl Interrupts {
     pub fn request_interrupt(&mut self, interrupt: Interrupt) {
         let interrupt: u8 = interrupt.into();
         self.interrupt_flag |= interrupt;
-        println!(
-            "Requestion interrupt: {}, flag: {}",
-            interrupt, self.interrupt_flag
-        );
     }
 
     /// To be called once an interrupt is serviced by the CPU.
@@ -37,7 +33,6 @@ impl Interrupts {
     pub fn interrupt_service(&mut self, interrupt: Interrupt) {
         let interrupt: u8 = interrupt.into();
         self.interrupt_flag &= !interrupt;
-        println!("Servicing interrupt: {}, flag: {}", interrupt, self.interrupt_flag)
     }
 
     /// Compares interrupt flag register with interrupt enable register

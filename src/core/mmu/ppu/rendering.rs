@@ -28,11 +28,7 @@ impl PPU {
 
     pub(super) fn update_ly(&mut self, value: u8) {
         self.ly = value;
-        self.lcd_stat.set_lyc_eq_ly(self.ly == self.lyc);
-
-        if self.lcd_stat.lyc_ly_stat_ie() {
-            self.request_stat_interrupt()
-        }
+        self.ly_compare();
     }
 
     fn hblank_step(&mut self) {
@@ -167,6 +163,13 @@ impl PPU {
     /// - Background scanline rendering function must push BG pixel
     /// to the bg_priority buffer
     fn render_sprite_pixel(&mut self, sprite_pixel: Pixel, sprite: &oam::Sprite, x: u8, y: u8) {
+        let x = x as i16 + sprite.x();
+
+        // sprite pixel outside of LCD range
+        if x > 160 || x < 0 {
+            return;
+        }
+
         if sprite_pixel == Pixel::Color0 {
             return;
         }
@@ -178,13 +181,6 @@ impl PPU {
             let palette = self.sprite_palette(sprite.flags);
 
             let color = palette.color_from_pixel(sprite_pixel);
-
-            let x = x as i16 + sprite.x();
-
-            // sprite pixel outside of LCD range
-            if x > 160 || y > 144 {
-                return;
-            }
 
             self.buffer[self.ly as usize * WIDTH + x as usize] =
                 self.renderer.palette(color.into());
@@ -216,19 +212,19 @@ impl PPU {
         // Safety: this function shouldn't be called if wx < x. If this is the
         // case, this pixel should be rendered using the bckground map instead
         // because it doesn't overlap with the window.
-        let tile_x = x - self.window_position.wx();
+        let x = x - self.window_position.wx();
 
         // Same as above.
-        let tile_y = y - self.window_position.wy;
+        let y = y - self.window_position.wy;
 
         // TODO: everything below here is the same as background
-        let tile_number = window_map.tile_number_at(tile_x, tile_y);
+        let tile_number = window_map.tile_number_at(x, y);
         let addressing_method = self.lcdc.addressing_method();
 
         let tile = self.tiledata.tile_at(tile_number, addressing_method);
 
-        let pixel_x = tile_x % 8;
-        let pixel_y = tile_y % 8;
+        let pixel_x = x % 8;
+        let pixel_y = y % 8;
 
         let pixel = tile.pixel_at(pixel_x, pixel_y);
 
@@ -281,13 +277,5 @@ impl PPU {
 
     fn update_clock(&mut self, cycles: u8) {
         self.clock += cycles as u32;
-    }
-
-    fn request_stat_interrupt(&mut self) {
-        self.interrupt_request.stat = true
-    }
-
-    fn request_vblank_interrupt(&mut self) {
-        self.interrupt_request.vblank = true
     }
 }

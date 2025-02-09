@@ -257,7 +257,8 @@ impl PPU {
 
     /// Write to the LYC register
     pub(crate) fn write_lyc(&mut self, value: u8) {
-        self.lyc = value
+        self.lyc = value;
+        self.ly_compare();
     }
 
     /// Read from the LY register
@@ -271,6 +272,24 @@ impl PPU {
             WindowPositionRegister::WX => self.window_position.wx = value,
             WindowPositionRegister::WY => self.window_position.wy = value,
         }
+    }
+
+    /// Compare Ly and Lyc register, setting coincidence flag and requesting
+    /// STAT interrupt if enabled
+    pub(super) fn ly_compare(&mut self) {
+        self.lcd_stat.set_lyc_eq_ly(self.ly == self.lyc);
+
+        if self.lcd_stat.lyc_ly_stat_ie() {
+            self.request_stat_interrupt()
+        }
+    }
+
+    pub(super) fn request_stat_interrupt(&mut self) {
+        self.interrupt_request.stat = true
+    }
+
+    pub(super) fn request_vblank_interrupt(&mut self) {
+        self.interrupt_request.vblank = true
     }
 
     fn reset_buffer(&mut self) {

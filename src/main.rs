@@ -6,8 +6,7 @@ const HEIGHT: usize = 144;
 fn main() {
     let display = Arc::new(WindowDisplay::new());
 
-    let filename = "./roms/dr-mario.gb";
-    // let filename = "./roms/cpu_instrs/cpu_instrs.gb";
+    let filename = "./roms/mem_timing.gb";
     let mut fp = File::open(filename).expect("Should exist");
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
@@ -18,7 +17,6 @@ fn main() {
 
     let cpu = emulator::CPU::new(mmu);
     let mut emulator = emulator::Emulator::new(cpu);
-
 
     thread::spawn(move || {
         emulator.run();

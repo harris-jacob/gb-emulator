@@ -88,7 +88,10 @@ impl MMU {
             0xFF00 => 0xF,                                        // Joypad
             0xFF01..=0xFF02 => self.io[(addr - 0xFF00) as usize], // Serial transfer,
             0xFF03 => 0,                                          // Nothing
-            0xFF04..=0xFF07 => self.timer.read(addr - 0xFF0),
+            0xFF04 => self.timer.read_divider(),
+            0xFF05 => self.timer.read_counter(),
+            0xFF06 => self.timer.read_modulo(),
+            0xFF07 => self.timer.read_control(),
             0xFF08..=0xFF0E => 0, // Nothing
             0xFF0F => self.interrupts.read_interrupt_flag(),
             0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize], // Audio
@@ -142,12 +145,12 @@ impl MMU {
             0xFF01 => self.serial.push(value as char),
             0xFF02 => self.io[(addr - 0xFF00) as usize] = value,
             0xFF03 => {} // Nothing
-            0xFF04..=0xFF07 => self.timer.write(addr, value),
+            0xFF04 => self.timer.write_divider(value),
+            0xFF05 => self.timer.write_counter(value),
+            0xFF06 => self.timer.write_modulo(value),
+            0xFF07 => self.timer.write_control(value),
             0xFF08..=0xFF0E => {} // Nothing
-            0xFF0F => {
-                println!("Writing to interrupt flag {}", value);
-                self.interrupts.write_interrupt_flag(value)
-            },
+            0xFF0F => self.interrupts.write_interrupt_flag(value),
             0xFF10..=0xFF26 => self.io[(addr - 0xFF00) as usize] = value, // Audio
             0xFF27..=0xFF2F => {}                                         // Nothing
             0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize] = value, // Wave pattern
@@ -217,10 +220,4 @@ impl MMU {
                 .write_oam(offset, self.read_u8(start_address + offset))
         }
     }
-}
-
-pub struct MMUInterrupts {
-    pub timer: bool,
-    pub lcd_stat: bool,
-    pub vblank: bool,
 }

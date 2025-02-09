@@ -17,6 +17,16 @@ pub struct CPU {
     registers: Registers,
     ime: bool,
     stopped: bool,
+    clock: u32,
+}
+
+pub struct RegisterDump {
+    pub b: u8,
+    pub c: u8,
+    pub d: u8,
+    pub e: u8,
+    pub h: u8,
+    pub l: u8,
 }
 
 impl CPU {
@@ -27,6 +37,7 @@ impl CPU {
             ime: false,
             stopped: false,
             mmu,
+            clock: 0,
         }
     }
 
@@ -35,6 +46,7 @@ impl CPU {
             panic!("CPU is stopped");
         }
 
+        self.debug_output();
         let cycles = if !self.halted {
             let opcode = self.fetch_u8();
             self.handle_op(opcode)
@@ -45,6 +57,8 @@ impl CPU {
         self.mmu.step(cycles);
 
         let interrupt_cycles = self.interrupt_step();
+
+        self.clock += cycles as u32 + interrupt_cycles as u32;
 
         cycles + interrupt_cycles
     }
@@ -66,6 +80,17 @@ impl CPU {
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 2),
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 3)
         );
+    }
+
+    pub fn registers(self) -> RegisterDump {
+        RegisterDump {
+            b: self.registers.read_eight(EightBitRegister::B),
+            c: self.registers.read_eight(EightBitRegister::C),
+            d: self.registers.read_eight(EightBitRegister::D),
+            e: self.registers.read_eight(EightBitRegister::E),
+            h: self.registers.read_eight(EightBitRegister::H),
+            l: self.registers.read_eight(EightBitRegister::L),
+        }
     }
 
     fn fetch_u8(&mut self) -> u8 {
@@ -227,7 +252,8 @@ impl CPU {
             0x18 => {
                 let value = self.fetch_u8();
                 jr(&mut self.registers, value);
-                1
+
+                3
             }
             // ADD HL, DE
             0x19 => {
@@ -1593,9 +1619,7 @@ impl CPU {
             // PREFIX CB
             0xCB => {
                 let opcode = self.fetch_u8();
-                cb_instructions::handle_cb_instructions(self, opcode);
-
-                2
+                cb_instructions::handle_cb_instructions(self, opcode)
             }
 
             // CALL Z, a16
@@ -1718,9 +1742,10 @@ impl CPU {
             0xDC => {
                 let value = self.fetch_u16();
 
-                call_c(self, value);
-
-                6
+                match call_c(self, value) {
+                    CallResult::Called => 6,
+                    CallResult::DidNotCall => 3,
+                }
             }
 
             // SBC A, d8
@@ -1849,7 +1874,7 @@ impl CPU {
 
                 self.registers.write_eight(EightBitRegister::A, value);
 
-                2
+                3
             }
 
             // POP AF

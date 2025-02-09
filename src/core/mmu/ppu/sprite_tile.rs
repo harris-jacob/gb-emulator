@@ -159,7 +159,6 @@ mod tests {
             assert_eq!(tile.pixel_at(3, 14, flags), Pixel::Color3);
             assert_eq!(tile.pixel_at(4, 14, flags), Pixel::Color3);
             assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
-
         }
 
         #[test]
@@ -178,8 +177,7 @@ mod tests {
             assert_eq!(tile.pixel_at(3, 1, flags), Pixel::Color3);
             assert_eq!(tile.pixel_at(4, 1, flags), Pixel::Color3);
             assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
-
-        }        
+        }
 
         #[test]
         fn pixel_at_with_both_flipped() {
@@ -199,7 +197,6 @@ mod tests {
 
             assert_eq!(tile.pixel_at(7, 15, flags), Pixel::Color0);
         }
-
     }
 
     fn smiley_face() -> [u8; 16] {

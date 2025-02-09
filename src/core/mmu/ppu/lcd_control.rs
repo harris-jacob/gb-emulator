@@ -86,7 +86,7 @@ impl LCDControl {
     /// would cause the LCD enable bit to be toggled off.
     /// When this happens some state needs to reset in the PPU.
     pub fn is_lcd_enable_toggled_off(&self, value: u8) -> bool {
-        let is_new_lcd_enable = value & 0b10000000 == 1;
+        let is_new_lcd_enable = value & 0b10000000 == 128;
 
         !is_new_lcd_enable && self.lcd_enable()
     }

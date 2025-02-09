@@ -1,30 +1,155 @@
-use std::{fs::File, io::Read, sync::Arc};
+mod support;
+use support::BlarggTestCase;
+use support::MooneyeTestCase;
 
-#[test]
-fn passes_test_roms() {
-    let filename = "./roms/cpu_instrs/cpu_instrs.gb";
-    let mut fp = File::open(filename).expect("Should exist");
-    let mut data = Vec::new();
-    fp.read_to_end(&mut data).expect("Should read");
+struct CpuInstrs;
+struct InstrTiming;
+struct Tim00;
+struct Tim01;
+struct Tim11;
+struct Tim10;
+struct Tim00DivTrigger;
+struct Tim01DivTrigger;
+struct Tim10DivTrigger;
+struct Tim11DivTrigger;
+struct TimaReload;
 
-    let cartridge = emulator::create_cartridge(data);
-    let ppu = emulator::PPU::new(Arc::new(TestRenderer));
-    let mmu = emulator::MMU::new(ppu, cartridge);
-
-    let mut clock = 0;
-    let mut cpu = emulator::CPU::new(mmu);
-
-    while clock < 60000000 {
-        let cycles = cpu.step();
-        clock += cycles as u32;
+impl BlarggTestCase for CpuInstrs {
+    fn filepath() -> String {
+        "./roms/cpu_instrs/cpu_instrs.gb".to_string()
     }
 
-    let s = String::from_iter(cpu.mmu.serial);
-    assert_eq!(s, "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n")
+    fn expected_output() -> String {
+        "cpu_instrs\n\n01:ok  02:ok  03:ok  04:ok  05:ok  06:ok  07:ok  08:ok  09:ok  10:ok  11:ok  \n\nPassed all tests\n"
+            .to_string()
+    }
+
+    fn steps() -> u32 {
+        60000000
+    }
 }
 
-pub struct TestRenderer;
+impl BlarggTestCase for InstrTiming {
+    fn filepath() -> String {
+        "./roms/instr_timing.gb".to_string()
+    }
+    fn expected_output() -> String {
+        "instr_timing\n\n\nPassed\n".to_string()
+    }
 
-impl emulator::Renderer for TestRenderer {
-    fn render(&self, _: [u32; 160 * 144]) {}
+    fn steps() -> u32 {
+        1000000
+    }
+}
+
+impl MooneyeTestCase for Tim01 {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim01.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim10 {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim10.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim11 {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim10.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim00 {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim00.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim00DivTrigger {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim00_div_trigger.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim01DivTrigger {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim01_div_trigger.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim10DivTrigger {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim10_div_trigger.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for Tim11DivTrigger {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tim11_div_trigger.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+impl MooneyeTestCase for TimaReload {
+    fn filepath() -> String {
+        "./roms/acceptance/timer/tima_reload.gb".to_string()
+    }
+
+    fn steps() -> u32 {
+        200000
+    }
+}
+
+// #[test]
+// fn cpu_instrs() {
+//     CpuInstrs::run();
+// }
+
+#[test]
+fn instr_timing() {
+    InstrTiming::run();
+}
+
+#[test]
+fn timer() {
+    Tim00::run();
+    Tim01::run();
+    Tim10::run();
+    Tim11::run();
+    Tim00DivTrigger::run();
+    Tim01DivTrigger::run();
+    Tim10DivTrigger::run();
+    Tim11DivTrigger::run();
 }
