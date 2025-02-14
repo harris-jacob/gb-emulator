@@ -1,6 +1,4 @@
 pub struct Header {
-    // 16 byte title of the rom
-    pub name: String,
     pub cartridge_type: CartridgeType,
     // Enum for rom size
     pub rom_size: ROMSize,
@@ -11,7 +9,6 @@ pub struct Header {
 impl Header {
     pub fn new(data: &Vec<u8>) -> Self {
         Self {
-            name: String::from_utf8_lossy(&data[0x134..0x143]).to_string(),
             cartridge_type: (&data[0x147]).try_into().expect("Unknown cartridge type"),
             rom_size: (&data[0x148]).try_into().expect("Unknown rom size"),
             ram_size: (&data[0x149]).try_into().expect("Unknown ram size"),

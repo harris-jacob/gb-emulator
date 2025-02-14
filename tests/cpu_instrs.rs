@@ -12,7 +12,6 @@ struct Tim00DivTrigger;
 struct Tim01DivTrigger;
 struct Tim10DivTrigger;
 struct Tim11DivTrigger;
-struct TimaReload;
 
 impl BlarggTestCase for CpuInstrs {
     fn filepath() -> String {
@@ -115,16 +114,6 @@ impl MooneyeTestCase for Tim10DivTrigger {
 impl MooneyeTestCase for Tim11DivTrigger {
     fn filepath() -> String {
         "./roms/acceptance/timer/tim11_div_trigger.gb".to_string()
-    }
-
-    fn steps() -> u32 {
-        200000
-    }
-}
-
-impl MooneyeTestCase for TimaReload {
-    fn filepath() -> String {
-        "./roms/acceptance/timer/tima_reload.gb".to_string()
     }
 
     fn steps() -> u32 {

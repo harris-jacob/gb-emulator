@@ -17,7 +17,6 @@ impl PPU {
         }
 
         self.update_clock(cycles);
-        self.global_clock += cycles as u32;
 
         match self.lcd_stat.ppu_mode() {
             PPUMode::HBlank => self.hblank_step(),
@@ -95,9 +94,6 @@ impl PPU {
                     self.request_stat_interrupt()
                 }
 
-                let now = std::time::Instant::now();
-                self.last_vblank = now;
-
                 self.request_vblank_interrupt();
 
                 self.lcd_stat.set_ppu_mode(PPUMode::VBlank)
@@ -109,9 +105,7 @@ impl PPU {
 
                 self.lcd_stat.set_ppu_mode(PPUMode::OAM)
             }
-            PPUMode::Drawing => { 
-                self.lcd_stat.set_ppu_mode(PPUMode::Drawing) 
-            },
+            PPUMode::Drawing => self.lcd_stat.set_ppu_mode(PPUMode::Drawing),
         }
     }
 

@@ -54,7 +54,7 @@ pub struct PPU {
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
     clock: u32,
-    pub lcd_stat: LCDStatus,
+    lcd_stat: LCDStatus,
     lcdc: LCDControl,
     ly: u8,
     lyc: u8,
@@ -64,8 +64,6 @@ pub struct PPU {
     tiledata: TileData,
     window_position: WindowPosition,
     renderer: Arc<dyn Renderer>,
-    last_vblank: std::time::Instant,
-    global_clock: u32
 }
 
 /// TODO: this can be a more compact type
@@ -105,8 +103,6 @@ impl PPU {
             tiledata: TileData::new(),
             window_position: WindowPosition::default(),
             renderer,
-            last_vblank: std::time::Instant::now(),
-            global_clock: 0,
         }
     }
 
@@ -289,7 +285,6 @@ impl PPU {
     }
 
     pub(super) fn request_stat_interrupt(&mut self) {
-        self.global_clock = 0;
         self.interrupt_request.stat = true
     }
 
