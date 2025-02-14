@@ -69,6 +69,7 @@ impl Timer {
     /// Write to the timer counter register
     /// Should be available at 0xFF05.
     pub fn write_counter(&mut self, value: u8) {
+        self.has_overflowed = false;
         self.counter = value;
     }
 

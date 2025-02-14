@@ -17,6 +17,7 @@ impl PPU {
         }
 
         self.update_clock(cycles);
+        self.global_clock += cycles as u32;
 
         match self.lcd_stat.ppu_mode() {
             PPUMode::HBlank => self.hblank_step(),
@@ -35,7 +36,6 @@ impl PPU {
         if self.clock < HBLANK_CYCLES {
             return;
         }
-
         self.clock %= HBLANK_CYCLES;
 
         if self.ly < 143 {
@@ -56,7 +56,7 @@ impl PPU {
         self.clock %= VBLANK_CYCLES;
         self.update_ly(self.ly + 1);
 
-        if self.ly >= 154 {
+        if self.ly >= 153 {
             self.update_ly(0);
             self.switch_mode(PPUMode::OAM)
         }
@@ -95,6 +95,9 @@ impl PPU {
                     self.request_stat_interrupt()
                 }
 
+                let now = std::time::Instant::now();
+                self.last_vblank = now;
+
                 self.request_vblank_interrupt();
 
                 self.lcd_stat.set_ppu_mode(PPUMode::VBlank)
@@ -106,7 +109,9 @@ impl PPU {
 
                 self.lcd_stat.set_ppu_mode(PPUMode::OAM)
             }
-            PPUMode::Drawing => self.lcd_stat.set_ppu_mode(PPUMode::Drawing),
+            PPUMode::Drawing => { 
+                self.lcd_stat.set_ppu_mode(PPUMode::Drawing) 
+            },
         }
     }
 
@@ -176,7 +181,12 @@ impl PPU {
 
         let background_pixel = self.bg_priority[y as usize * WIDTH + x as usize];
         if sprite.flags.bg_priority() && background_pixel != Pixel::Color0 {
-            return;
+            let palette = self.sprite_palette(sprite.flags);
+
+            let color = palette.color_from_pixel(sprite_pixel);
+
+            self.buffer[self.ly as usize * WIDTH + x as usize] =
+                self.renderer.palette(color.into());
         } else {
             let palette = self.sprite_palette(sprite.flags);
 
@@ -212,24 +222,25 @@ impl PPU {
         // Safety: this function shouldn't be called if wx < x. If this is the
         // case, this pixel should be rendered using the bckground map instead
         // because it doesn't overlap with the window.
-        let x = x - self.window_position.wx();
+        let tile_x = x - self.window_position.wx();
 
         // Same as above.
-        let y = y - self.window_position.wy;
+        let tile_y = y - self.window_position.wy;
 
         // TODO: everything below here is the same as background
-        let tile_number = window_map.tile_number_at(x, y);
+        let tile_number = window_map.tile_number_at(tile_x, tile_y);
         let addressing_method = self.lcdc.addressing_method();
 
         let tile = self.tiledata.tile_at(tile_number, addressing_method);
 
-        let pixel_x = x % 8;
-        let pixel_y = y % 8;
+        let pixel_x = tile_x % 8;
+        let pixel_y = tile_y % 8;
 
         let pixel = tile.pixel_at(pixel_x, pixel_y);
 
         let color = self.background_palette.color_from_pixel(pixel);
 
+        self.bg_priority[y as usize * WIDTH + x as usize] = pixel;
         self.buffer[y as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
     }
 
@@ -251,6 +262,7 @@ impl PPU {
 
         let color = self.background_palette.color_from_pixel(pixel);
 
+        self.bg_priority[y as usize * WIDTH + x as usize] = pixel;
         self.buffer[y as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
     }
 
@@ -263,15 +275,15 @@ impl PPU {
 
     fn current_background_map(&self) -> &BackgroundMap {
         match self.lcdc.background_background_map() {
-            BGMapSelection::Map0 => &self.bg_map0,
             BGMapSelection::Map1 => &self.bg_map1,
+            BGMapSelection::Map0 => &self.bg_map0,
         }
     }
 
     fn current_window_map(&self) -> &BackgroundMap {
         match self.lcdc.window_background_map() {
-            BGMapSelection::Map0 => &self.bg_map0,
             BGMapSelection::Map1 => &self.bg_map1,
+            BGMapSelection::Map0 => &self.bg_map0,
         }
     }
 

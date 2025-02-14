@@ -1,5 +1,5 @@
 mod interrupts;
-mod ppu;
+pub mod ppu;
 mod timer;
 
 use ppu::BGMapSelection;
@@ -111,8 +111,8 @@ impl MMU {
             0xFF49 => self
                 .ppu
                 .read_sprite_palette(SpritePaletteSelection::Palette1),
-            0xFF4A => self.ppu.read_window_position(WindowPositionRegister::WX),
-            0xFF4B => self.ppu.read_window_position(WindowPositionRegister::WY),
+            0xFF4A => self.ppu.read_window_position(WindowPositionRegister::WY),
+            0xFF4B => self.ppu.read_window_position(WindowPositionRegister::WX),
             0xFF4C..=0xFF7F => 0, // Nothing
             0xFF80..=0xFFFE => self.hram[(addr - 0xFF80) as usize],
             0xFFFF => self.interrupts.read_interrupt_enabled(),
@@ -174,10 +174,10 @@ impl MMU {
                 .write_sprite_palette(SpritePaletteSelection::Palette1, value),
             0xFF4A => self
                 .ppu
-                .write_window_position(WindowPositionRegister::WX, value),
+                .write_window_position(WindowPositionRegister::WY, value),
             0xFF4B => self
                 .ppu
-                .write_window_position(WindowPositionRegister::WY, value),
+                .write_window_position(WindowPositionRegister::WX, value),
             0xFF4C..=0xFF7F => {} // Nothing
             0xFF80..0xFFFF => self.hram[(addr - 0xFF80) as usize] = value,
             0xFFFF => self.interrupts.write_interrupt_enabled(value),

@@ -31,6 +31,8 @@ impl Interrupts {
     /// To be called once an interrupt is serviced by the CPU.
     /// Resets the corresponding but in the interrupt flag.
     pub fn interrupt_service(&mut self, interrupt: Interrupt) {
+        if interrupt == Interrupt::VBlank {
+        }
         let interrupt: u8 = interrupt.into();
         self.interrupt_flag &= !interrupt;
     }

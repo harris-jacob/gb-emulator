@@ -6,7 +6,7 @@ const HEIGHT: usize = 144;
 fn main() {
     let display = Arc::new(WindowDisplay::new());
 
-    let filename = "./roms/mem_timing.gb";
+    let filename = "./roms/tennis.gb";
     let mut fp = File::open(filename).expect("Should exist");
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");

@@ -30,6 +30,6 @@ impl WindowPosition {
     // subtracting 7 from stored value (clamped to 0).
     // Since the window can only render pixels where X >= 7.
     pub(super) fn wx(&self) -> u8 {
-        self.wx.checked_sub(7).unwrap_or(0)
+        self.wx.wrapping_sub(7)
     }
 }

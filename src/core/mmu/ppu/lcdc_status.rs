@@ -11,6 +11,7 @@
 ///         STAT interrupt is triggered).
 /// Bit 2 - Coincidence flag. Set if LY is currently equal to LYC.
 /// Bit 1-0 - Current rendering mode (See [PPUMode] for details).
+#[derive(Debug)]
 pub struct LCDStatus(u8);
 
 /// What mode is the PPU currently in.

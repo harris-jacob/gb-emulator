@@ -54,7 +54,7 @@ pub struct Limiter {
 }
 
 const FPS: u64 = 60;
-const CYCLES_PER_SECOND: u64 = 4194304; // Hz
+const CYCLES_PER_SECOND: u64 = 4194304 / 4; // Hz
 const CYCLES_PER_FRAME: u64 = CYCLES_PER_SECOND / FPS;
 const TARGET_FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS);
 

@@ -132,10 +132,10 @@ impl MooneyeTestCase for TimaReload {
     }
 }
 
-// #[test]
-// fn cpu_instrs() {
-//     CpuInstrs::run();
-// }
+#[test]
+fn cpu_instrs() {
+    CpuInstrs::run();
+}
 
 #[test]
 fn instr_timing() {

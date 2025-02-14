@@ -46,7 +46,7 @@ impl CPU {
             panic!("CPU is stopped");
         }
 
-        self.debug_output();
+        // self.debug_output();
         let cycles = if !self.halted {
             let opcode = self.fetch_u8();
             self.handle_op(opcode)

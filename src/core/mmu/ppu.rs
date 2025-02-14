@@ -3,7 +3,7 @@ mod background_palette;
 mod background_tile;
 mod background_viewport;
 mod lcd_control;
-mod lcdc_status;
+pub mod lcdc_status;
 mod oam;
 mod pixel;
 mod renderer;
@@ -54,7 +54,7 @@ pub struct PPU {
     bg_map0: BackgroundMap,
     bg_map1: BackgroundMap,
     clock: u32,
-    lcd_stat: LCDStatus,
+    pub lcd_stat: LCDStatus,
     lcdc: LCDControl,
     ly: u8,
     lyc: u8,
@@ -64,6 +64,8 @@ pub struct PPU {
     tiledata: TileData,
     window_position: WindowPosition,
     renderer: Arc<dyn Renderer>,
+    last_vblank: std::time::Instant,
+    global_clock: u32
 }
 
 /// TODO: this can be a more compact type
@@ -103,6 +105,8 @@ impl PPU {
             tiledata: TileData::new(),
             window_position: WindowPosition::default(),
             renderer,
+            last_vblank: std::time::Instant::now(),
+            global_clock: 0,
         }
     }
 
@@ -279,12 +283,13 @@ impl PPU {
     pub(super) fn ly_compare(&mut self) {
         self.lcd_stat.set_lyc_eq_ly(self.ly == self.lyc);
 
-        if self.lcd_stat.lyc_ly_stat_ie() {
+        if self.lcd_stat.lyc_ly_stat_ie() && self.lyc == self.ly {
             self.request_stat_interrupt()
         }
     }
 
     pub(super) fn request_stat_interrupt(&mut self) {
+        self.global_clock = 0;
         self.interrupt_request.stat = true
     }
 
