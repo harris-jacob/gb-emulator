@@ -1,5 +1,7 @@
 use std::{fs::File, io::Read, sync::Arc};
 
+use emulator::Joypad;
+
 pub trait BlarggTestCase {
     /// Path to the test ROM
     fn filepath() -> String;
@@ -59,7 +61,8 @@ pub fn setup_emulator(rom_path: &str) -> emulator::CPU {
 
     let cartridge = emulator::create_cartridge(data);
     let ppu = emulator::PPU::new(Arc::new(TestRenderer));
-    let mmu = emulator::MMU::new(ppu, cartridge);
+    let joypad = Arc::new(Joypad::new());
+    let mmu = emulator::MMU::new(ppu, cartridge, joypad);
 
     emulator::CPU::new(mmu)
 }

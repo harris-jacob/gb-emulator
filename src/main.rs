@@ -1,19 +1,23 @@
 use std::{cell::UnsafeCell, fs::File, io::Read, sync::Arc, thread};
 
+use emulator::Joypad;
+use minifb::InputCallback;
+
 const WIDTH: usize = 160;
 const HEIGHT: usize = 144;
 
 fn main() {
     let display = Arc::new(WindowDisplay::new());
 
-    let filename = "./roms/tennis.gb";
+    let filename = "./roms/dr-mario.gb";
     let mut fp = File::open(filename).expect("Should exist");
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
 
     let cartridge = emulator::create_cartridge(data);
     let ppu = emulator::PPU::new(display.clone());
-    let mmu = emulator::MMU::new(ppu, cartridge);
+    let joypad = Arc::new(emulator::Joypad::new());
+    let mmu = emulator::MMU::new(ppu, cartridge, joypad.clone());
 
     let cpu = emulator::CPU::new(mmu);
     let mut emulator = emulator::Emulator::new(cpu);
@@ -22,7 +26,7 @@ fn main() {
         emulator.run();
     });
 
-    display.run()
+    display.run(joypad)
 }
 
 struct WindowDisplay {
@@ -32,6 +36,33 @@ struct WindowDisplay {
 unsafe impl Sync for WindowDisplay {}
 unsafe impl Send for WindowDisplay {}
 
+struct InputTest {
+    joypad: Arc<Joypad>,
+}
+
+impl InputTest {
+    pub fn new(joypad: Arc<Joypad>) -> Self {
+        Self { joypad }
+    }
+}
+
+impl InputCallback for InputTest {
+    fn add_char(&mut self, _uni_char: u32) {
+        ()
+    }
+
+    fn set_key_state(&mut self, key: minifb::Key, state: bool) {
+        match (key, state) {
+            (minifb::Key::A, true) => {
+                println!("Pressing Start");
+                self.joypad.button_down(emulator::Button::Start)
+            },
+            (minifb::Key::A, false) => self.joypad.button_release(emulator::Button::A),
+            (_, _) => {}
+        }
+    }
+}
+
 impl WindowDisplay {
     pub fn new() -> Self {
         Self {
@@ -39,7 +70,7 @@ impl WindowDisplay {
         }
     }
 
-    pub fn run(&self) {
+    pub fn run(&self, joypad: Arc<Joypad>) {
         let mut window = minifb::Window::new(
             "GB Emulator",
             WIDTH,
@@ -50,6 +81,8 @@ impl WindowDisplay {
             },
         )
         .unwrap();
+
+        window.set_input_callback(Box::new(InputTest::new(joypad)));
 
         window.set_target_fps(60);
 

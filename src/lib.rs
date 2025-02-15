@@ -1,12 +1,15 @@
 mod core;
 
 pub use core::create_cartridge;
+pub use core::Button;
 pub use core::Color;
 pub use core::EightBitRegister;
+pub use core::Joypad;
 pub use core::Renderer;
 pub use core::CPU;
 pub use core::MMU;
 pub use core::PPU;
+
 use std::time::Duration;
 use std::time::Instant;
 
