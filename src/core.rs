@@ -9,6 +9,8 @@ pub use mmu::Color;
 pub use mmu::Renderer;
 pub use mmu::MMU;
 pub use mmu::PPU;
+pub use mmu::Joypad;
+pub use mmu::Button;
 
 // TODO: why are these pubbed?
 pub use registers::EightBitRegister;

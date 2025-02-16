@@ -243,7 +243,8 @@ mod tests {
     fn mock_cpu() -> CPU {
         let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
         let ppu = PPU::new(Arc::new(TestRenderer));
-        let mmu = MMU::new(ppu, cartridge);
+        let joypad = Arc::new(Joypad::new());
+        let mmu = MMU::new(ppu, cartridge, joypad);
 
         CPU::new(mmu)
     }
