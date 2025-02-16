@@ -30,4 +30,13 @@ impl Renderer for WindowBuffer {
             *value = buffer;
         }
     }
+
+    fn palette(&self, color: emulator_core::Color) -> u32 {
+        match color {
+            emulator_core::Color::White => 0x9BBC0F,
+            emulator_core::Color::LightGray => 0x8BAC0F,
+            emulator_core::Color::DarkGray => 0x306230,
+            emulator_core::Color::Black => 0x0F380F,
+        }
+    }
 }
