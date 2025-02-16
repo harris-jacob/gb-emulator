@@ -12,15 +12,21 @@ pub struct Joypad {
 struct State {
     // Everytime a button is pressed, a joypad interrupt is requested.
     interrupt_request: bool,
-    // Internal state of the register
-    register: u8,
+    // Internal state of 'buttons'
+    button_signal: u8,
+    // Internal state of 'buttons'
+    dpad_signal: u8,
+    // Mask set by MMU which controls which signal set to access
+    mask: u8,
 }
 
 impl State {
     pub fn new() -> Self {
         Self {
             interrupt_request: false,
-            register: 0xF,
+            button_signal: 0xF,
+            dpad_signal: 0xF,
+            mask: 0,
         }
     }
 }
@@ -79,15 +85,22 @@ impl Joypad {
     pub(super) fn read(&self) -> u8 {
         let guard = self.state.lock().expect("Should aqcuire mutext");
 
-        guard.register
+        if guard.mask & 0x10 == 0 {
+            return guard.dpad_signal | guard.mask;
+        }
+
+        if guard.mask & 0x20 == 0 {
+            return guard.button_signal | guard.mask;
+        }
+
+        return guard.mask | 0xF;
     }
 
     // Should be available at 0xFF00. Writes the state of the joypad register.
-    // NOTE: only the upper nibble is actually written to.
     pub(super) fn write(&self, value: u8) {
         let mut guard = self.state.lock().expect("Should aqcuire mutex");
 
-        guard.register = (value & 0xF0) | (guard.register & 0xF)
+        guard.mask = value & 0xF0
     }
 
     pub(super) fn interrupt_requested(&self) -> bool {
@@ -104,37 +117,35 @@ impl Joypad {
 
     // Signal that a button has been pressed
     pub fn button_down(&self, button: Button) {
-        let lower_nibble = match button {
-            Button::Up => 0x4 ^ 0xF,
-            Button::Down => 0x8 ^ 0xF,
-            Button::Left => 0x2 ^ 0xF,
-            Button::Right => 0x1 ^ 0xF,
-            Button::A => 0x1 ^ 0xF,
-            Button::B => 0x2 ^ 0xF,
-            Button::Select => 0x4 ^ 0xF,
-            Button::Start => 0x8 ^ 0xF,
+        let mut guard = self.state.lock().expect("Should aqcuire mutex");
+
+        match button {
+            Button::Up => guard.dpad_signal &= 0x4 ^ 0xF,
+            Button::Down => guard.dpad_signal &= 0x8 ^ 0xF,
+            Button::Left => guard.dpad_signal &= 0x2 ^ 0xF,
+            Button::Right => guard.dpad_signal &= 0x1 ^ 0xF,
+            Button::A => guard.button_signal &= 0x1 ^ 0xF,
+            Button::B => guard.button_signal &= 0x2 ^ 0xF,
+            Button::Select => guard.button_signal &= 0x4 ^ 0xF,
+            Button::Start => guard.button_signal &= 0x8 ^ 0xF,
         };
 
-        println!("Button down triggered");
-
-        let mut guard = self.state.lock().expect("Should aqcuire mutex");
-        guard.register = lower_nibble | (guard.register & 0xF0);
         guard.interrupt_request = true;
     }
 
     // Signal that a button has been released
     pub fn button_release(&self, button: Button) {
-        let mut guard = self.state.lock().expect("Should aqcuire mutex");
+        let mut guard = self.state.lock().expect("Should acquire mutex");
 
         match button {
-            Button::Up => guard.register |= 0x4,
-            Button::Down => guard.register |= 0x8,
-            Button::Left => guard.register |= 0x2,
-            Button::Right => guard.register |= 0x1,
-            Button::A => guard.register |= 0x1,
-            Button::B => guard.register |= 0x2,
-            Button::Select => guard.register |= 0x4,
-            Button::Start => guard.register |= 0x8,
+            Button::Up => guard.dpad_signal |= 0x4,
+            Button::Down => guard.dpad_signal |= 0x8,
+            Button::Left => guard.dpad_signal |= 0x2,
+            Button::Right => guard.dpad_signal |= 0x1,
+            Button::A => guard.button_signal |= 0x1,
+            Button::B => guard.button_signal |= 0x2,
+            Button::Select => guard.button_signal |= 0x4,
+            Button::Start => guard.button_signal |= 0x8,
         };
     }
 }
@@ -164,88 +175,85 @@ mod tests {
     #[test]
     fn button_down_release_buttons() {
         let joypad = Joypad::new();
-        joypad.write(0x20);
+        joypad.write(0x10);
 
         joypad.button_down(Button::A);
-        assert_eq!(joypad.read(), 0x20 | 0b1110);
+        assert_eq!(joypad.read(), 0x10 | 0b1110);
         joypad.button_release(Button::A);
-        assert_eq!(joypad.read(), 0x20 | 0xF);
+        assert_eq!(joypad.read(), 0x10 | 0xF);
 
         joypad.button_down(Button::B);
-        assert_eq!(joypad.read(), 0x20 | 0b1101);
+        assert_eq!(joypad.read(), 0x10 | 0b1101);
         joypad.button_release(Button::B);
-        assert_eq!(joypad.read(), 0x20 | 0xF);
+        assert_eq!(joypad.read(), 0x10 | 0xF);
 
         joypad.button_down(Button::Select);
-        assert_eq!(joypad.read(), 0x20 | 0b1011);
+        assert_eq!(joypad.read(), 0x10 | 0b1011);
         joypad.button_release(Button::Select);
-        assert_eq!(joypad.read(), 0x20 | 0xF);
+        assert_eq!(joypad.read(), 0x10 | 0xF);
 
         joypad.button_down(Button::Start);
-        assert_eq!(joypad.read(), 0x20 | 0b0111);
+        assert_eq!(joypad.read(), 0x10 | 0b0111);
         joypad.button_release(Button::Start);
-        assert_eq!(joypad.read(), 0x20 | 0xF);
+        assert_eq!(joypad.read(), 0x10 | 0xF);
     }
 
     #[test]
     fn button_down_release_dpad() {
         let joypad = Joypad::new();
-        joypad.write(0x10);
+        joypad.write(0x20);
 
         joypad.button_down(Button::Right);
-        assert_eq!(joypad.read(), 0x10 | 0b1110);
+        assert_eq!(joypad.read(), 0x20 | 0b1110);
         joypad.button_release(Button::Right);
-        assert_eq!(joypad.read(), 0x10 | 0xF);
+        assert_eq!(joypad.read(), 0x20 | 0xF);
 
         joypad.button_down(Button::Left);
-        assert_eq!(joypad.read(), 0x10 | 0b1101);
+        assert_eq!(joypad.read(), 0x20 | 0b1101);
         joypad.button_release(Button::Left);
-        assert_eq!(joypad.read(), 0x10 | 0xF);
+        assert_eq!(joypad.read(), 0x20 | 0xF);
 
         joypad.button_down(Button::Up);
-        assert_eq!(joypad.read(), 0x10 | 0b1011);
+        assert_eq!(joypad.read(), 0x20 | 0b1011);
         joypad.button_release(Button::Up);
-        assert_eq!(joypad.read(), 0x10 | 0xF);
+        assert_eq!(joypad.read(), 0x20 | 0xF);
 
         joypad.button_down(Button::Down);
-        assert_eq!(joypad.read(), 0x10 | 0b0111);
+        assert_eq!(joypad.read(), 0x20 | 0b0111);
         joypad.button_release(Button::Down);
+        assert_eq!(joypad.read(), 0x20 | 0xF);
+    }
+
+    #[test]
+    fn mask_switch_changes_read_dpad_output() {
+        let joypad = Joypad::new();
+
+        joypad.write(0x10);
+        joypad.button_down(Button::Up);
         assert_eq!(joypad.read(), 0x10 | 0xF);
+
+        // Switch mask
+        joypad.write(0x20);
+        assert_eq!(joypad.read(), 0x20 | 0b1011);
     }
 
     #[test]
-    fn two_buttons_down_first_released() {
+    fn mask_switch_changes_read_button_output() {
         let joypad = Joypad::new();
 
         joypad.write(0x20);
-
         joypad.button_down(Button::A);
-        joypad.button_down(Button::B);
-        joypad.button_release(Button::A);
+        assert_eq!(joypad.read(), 0x20 | 0xF);
 
-        // Because B was pressed last, A should still be "pressed"
-        assert_eq!(joypad.read(), 0x20 | 0b1101);
-    }
-
-    #[test]
-    fn two_buttons_down_second_release() {
-        let joypad = Joypad::new();
-
-        joypad.write(0x20);
-
-        joypad.button_down(Button::A);
-        joypad.button_down(Button::B);
-        joypad.button_release(Button::B);
-
-        // Because B was pressed last, nothing should now be "pressed" because
-        // we're assuming the gameboy can only handle 1 button down at a time.
-        assert_eq!(joypad.read(), 0x20 | 0b1111);
+        // Switch mask
+        joypad.write(0x10);
+        assert_eq!(joypad.read(), 0x10 | 0b1110);
     }
 
     #[test]
     fn interrupt_requested_when_button_pressed() {
         let joypad = Joypad::new();
-        joypad.write(0x20);
+        joypad.write(0x10);
         joypad.button_down(Button::A);
 
         assert_eq!(joypad.interrupt_requested(), true);
