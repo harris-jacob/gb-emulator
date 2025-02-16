@@ -1,4 +1,4 @@
-use mmu::Interrupt;
+use crate::mmu::Interrupt;
 
 use super::*;
 

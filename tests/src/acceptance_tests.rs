@@ -1,6 +1,5 @@
-mod support;
-use support::BlarggTestCase;
-use support::MooneyeTestCase;
+use crate::support::BlarggTestCase;
+use crate::support::MooneyeTestCase;
 
 struct CpuInstrs;
 struct InstrTiming;
@@ -15,7 +14,7 @@ struct Tim11DivTrigger;
 
 impl BlarggTestCase for CpuInstrs {
     fn filepath() -> String {
-        "./roms/cpu_instrs/cpu_instrs.gb".to_string()
+        "../roms/cpu_instrs/cpu_instrs.gb".to_string()
     }
 
     fn expected_output() -> String {
@@ -30,7 +29,7 @@ impl BlarggTestCase for CpuInstrs {
 
 impl BlarggTestCase for InstrTiming {
     fn filepath() -> String {
-        "./roms/instr_timing.gb".to_string()
+        "../roms/instr_timing.gb".to_string()
     }
     fn expected_output() -> String {
         "instr_timing\n\n\nPassed\n".to_string()
@@ -43,7 +42,7 @@ impl BlarggTestCase for InstrTiming {
 
 impl MooneyeTestCase for Tim01 {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim01.gb".to_string()
+        "../roms/acceptance/timer/tim01.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -53,7 +52,7 @@ impl MooneyeTestCase for Tim01 {
 
 impl MooneyeTestCase for Tim10 {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim10.gb".to_string()
+        "../roms/acceptance/timer/tim10.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -63,7 +62,7 @@ impl MooneyeTestCase for Tim10 {
 
 impl MooneyeTestCase for Tim11 {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim10.gb".to_string()
+        "../roms/acceptance/timer/tim10.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -73,7 +72,7 @@ impl MooneyeTestCase for Tim11 {
 
 impl MooneyeTestCase for Tim00 {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim00.gb".to_string()
+        "../roms/acceptance/timer/tim00.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -83,7 +82,7 @@ impl MooneyeTestCase for Tim00 {
 
 impl MooneyeTestCase for Tim00DivTrigger {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim00_div_trigger.gb".to_string()
+        "../roms/acceptance/timer/tim00_div_trigger.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -93,7 +92,7 @@ impl MooneyeTestCase for Tim00DivTrigger {
 
 impl MooneyeTestCase for Tim01DivTrigger {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim01_div_trigger.gb".to_string()
+        "../roms/acceptance/timer/tim01_div_trigger.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -103,7 +102,7 @@ impl MooneyeTestCase for Tim01DivTrigger {
 
 impl MooneyeTestCase for Tim10DivTrigger {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim10_div_trigger.gb".to_string()
+        "../roms/acceptance/timer/tim10_div_trigger.gb".to_string()
     }
 
     fn steps() -> u32 {
@@ -113,7 +112,7 @@ impl MooneyeTestCase for Tim10DivTrigger {
 
 impl MooneyeTestCase for Tim11DivTrigger {
     fn filepath() -> String {
-        "./roms/acceptance/timer/tim11_div_trigger.gb".to_string()
+        "../roms/acceptance/timer/tim11_div_trigger.gb".to_string()
     }
 
     fn steps() -> u32 {

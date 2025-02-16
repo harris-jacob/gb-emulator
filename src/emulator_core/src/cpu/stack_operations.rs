@@ -122,8 +122,10 @@ pub fn stack_pop(cpu: &mut CPU) -> u16 {
 mod tests {
     use std::sync::Arc;
 
-    use cartridge::NoMBC;
-    use mmu::TestRenderer;
+    use crate::cartridge::NoMBC;
+    use crate::mmu::ppu::PPU;
+    use crate::mmu::TestRenderer;
+    use crate::Joypad;
 
     use super::*;
 
@@ -243,7 +245,8 @@ mod tests {
     fn mock_cpu() -> CPU {
         let cartridge = Box::new(NoMBC::new(vec![0; 0x8000]));
         let ppu = PPU::new(Arc::new(TestRenderer));
-        let mmu = MMU::new(ppu, cartridge);
+        let joypad = Arc::new(Joypad::new());
+        let mmu = MMU::new(ppu, cartridge, joypad);
 
         CPU::new(mmu)
     }

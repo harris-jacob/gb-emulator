@@ -9,7 +9,8 @@ use alu_operations::*;
 use jp_operations::*;
 use stack_operations::*;
 
-use crate::core::*;
+use crate::registers::*;
+use crate::MMU;
 
 pub struct CPU {
     halted: bool,

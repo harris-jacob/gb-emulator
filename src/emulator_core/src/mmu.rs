@@ -1,27 +1,33 @@
 mod interrupts;
+mod joypad;
 pub mod ppu;
 mod timer;
+
+use std::sync::Arc;
 
 use ppu::BGMapSelection;
 use ppu::SpritePaletteSelection;
 use ppu::ViewportRegister;
 use ppu::WindowPositionRegister;
 
-use crate::core::cartridge::Cartridge;
-pub use crate::core::mmu::ppu::Color;
-pub use crate::core::mmu::ppu::Renderer;
-pub use crate::core::mmu::ppu::PPU;
+use crate::cartridge::Cartridge;
+pub use crate::mmu::ppu::Color;
+pub use crate::mmu::ppu::Renderer;
+pub use crate::mmu::ppu::PPU;
 pub use interrupts::Interrupt;
 pub use interrupts::Interrupts;
+pub use joypad::Button;
+pub use joypad::Joypad;
 
 #[cfg(test)]
-pub use crate::core::mmu::ppu::TestRenderer;
+pub use crate::mmu::ppu::TestRenderer;
 
 pub struct MMU {
     cartridge: Box<dyn Cartridge>,
     empty: [u8; 0x60],
     hram: [u8; 0x80],
     io: [u8; 0x80],
+    joypad: Arc<Joypad>,
     pub ppu: PPU,
     pub serial: Vec<char>,
     timer: timer::Timer,
@@ -30,7 +36,7 @@ pub struct MMU {
 }
 
 impl MMU {
-    pub fn new(ppu: PPU, cartridge: Box<dyn Cartridge>) -> MMU {
+    pub fn new(ppu: PPU, cartridge: Box<dyn Cartridge>, joypad: Arc<Joypad>) -> MMU {
         let mut mmu = MMU {
             cartridge,
             empty: [0; 0x60],
@@ -41,6 +47,7 @@ impl MMU {
             timer: timer::Timer::new(),
             wrams: [0; 0x2000],
             interrupts: Interrupts::new(),
+            joypad,
         };
 
         // Pretend we loaded the boot rom values
@@ -85,9 +92,9 @@ impl MMU {
             0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize], // Echo ram
             0xFE00..=0xFE9F => self.ppu.read_oam(addr - 0xFE00),
             0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize],
-            0xFF00 => 0xF,                                        // Joypad
+            0xFF00 => self.joypad.read(), // Joypad
             0xFF01..=0xFF02 => self.io[(addr - 0xFF00) as usize], // Serial transfer,
-            0xFF03 => 0,                                          // Nothing
+            0xFF03 => 0,                  // Nothing
             0xFF04 => self.timer.read_divider(),
             0xFF05 => self.timer.read_counter(),
             0xFF06 => self.timer.read_modulo(),
@@ -141,7 +148,7 @@ impl MMU {
             0xE000..=0xFDFF => self.wrams[(addr - 0xE000) as usize] = value,
             0xFE00..=0xFE9F => self.ppu.write_oam(addr - 0xFE00, value),
             0xFEA0..=0xFEFF => self.empty[(addr - 0xFEA0) as usize] = value,
-            0xFF00 => self.io[(addr - 0xFF00) as usize] = value,
+            0xFF00 => self.joypad.write(value),
             0xFF01 => self.serial.push(value as char),
             0xFF02 => self.io[(addr - 0xFF00) as usize] = value,
             0xFF03 => {} // Nothing
@@ -209,6 +216,11 @@ impl MMU {
         if self.ppu.interrupt_request.vblank {
             self.interrupts.request_interrupt(Interrupt::VBlank);
             self.ppu.interrupt_request.vblank = false;
+        }
+
+        if self.joypad.interrupt_requested() {
+            self.interrupts.request_interrupt(Interrupt::Joypad);
+            self.joypad.reset_interrupt();
         }
     }
 

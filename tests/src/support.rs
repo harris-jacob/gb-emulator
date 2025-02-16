@@ -1,5 +1,7 @@
 use std::{fs::File, io::Read, sync::Arc};
 
+use emulator_core::*;
+
 pub trait BlarggTestCase {
     /// Path to the test ROM
     fn filepath() -> String;
@@ -52,20 +54,21 @@ pub trait MooneyeTestCase {
     }
 }
 
-pub fn setup_emulator(rom_path: &str) -> emulator::CPU {
+pub fn setup_emulator(rom_path: &str) -> CPU {
     let mut fp = File::open(rom_path).expect("Should exist");
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
 
-    let cartridge = emulator::create_cartridge(data);
-    let ppu = emulator::PPU::new(Arc::new(TestRenderer));
-    let mmu = emulator::MMU::new(ppu, cartridge);
+    let cartridge = create_cartridge(data);
+    let ppu = PPU::new(Arc::new(TestRenderer));
+    let joypad = Arc::new(Joypad::new());
+    let mmu = MMU::new(ppu, cartridge, joypad);
 
-    emulator::CPU::new(mmu)
+    CPU::new(mmu)
 }
 
 pub struct TestRenderer;
 
-impl emulator::Renderer for TestRenderer {
+impl Renderer for TestRenderer {
     fn render(&self, _: [u32; 160 * 144]) {}
 }
