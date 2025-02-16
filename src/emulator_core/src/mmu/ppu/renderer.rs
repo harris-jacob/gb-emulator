@@ -14,8 +14,8 @@ pub trait Renderer: Send + Sync {
     fn palette(&self, color: Color) -> u32 {
         match color {
             Color::White => 0xFFFFFF,
-            Color::LightGray => 0x454545,
-            Color::DarkGray => 0xA8A8A8,
+            Color::LightGray => 0xA8A8A8,
+            Color::DarkGray => 0x454545,
             Color::Black => 0,
         }
     }
