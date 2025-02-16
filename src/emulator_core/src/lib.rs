@@ -1,14 +1,17 @@
-mod core;
+mod cartridge;
+mod cpu;
+mod mmu;
+mod registers;
 
-pub use core::create_cartridge;
-pub use core::Button;
-pub use core::Color;
-pub use core::EightBitRegister;
-pub use core::Joypad;
-pub use core::Renderer;
-pub use core::CPU;
-pub use core::MMU;
-pub use core::PPU;
+pub use cartridge::create_cartridge;
+pub use cartridge::Cartridge;
+pub use cpu::CPU;
+pub use mmu::Button;
+pub use mmu::Color;
+pub use mmu::Joypad;
+pub use mmu::Renderer;
+pub use mmu::MMU;
+pub use mmu::PPU;
 
 use std::time::Duration;
 use std::time::Instant;
@@ -29,19 +32,6 @@ impl Emulator {
             let cycles = self.cpu.step();
             limiter.step(cycles);
         }
-    }
-
-    pub fn dump_tilset(&mut self) -> Vec<u32> {
-        let mut limiter = Limiter::new();
-        let mut clock = 0;
-
-        while clock < 4000000 {
-            let cycles = self.cpu.step();
-            clock += cycles as u32;
-            limiter.step(cycles);
-        }
-
-        return self.cpu.mmu.ppu.dump_tileset();
     }
 }
 

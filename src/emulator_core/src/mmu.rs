@@ -10,17 +10,17 @@ use ppu::SpritePaletteSelection;
 use ppu::ViewportRegister;
 use ppu::WindowPositionRegister;
 
-use crate::core::cartridge::Cartridge;
-pub use crate::core::mmu::ppu::Color;
-pub use crate::core::mmu::ppu::Renderer;
-pub use crate::core::mmu::ppu::PPU;
+use crate::cartridge::Cartridge;
+pub use crate::mmu::ppu::Color;
+pub use crate::mmu::ppu::Renderer;
+pub use crate::mmu::ppu::PPU;
 pub use interrupts::Interrupt;
 pub use interrupts::Interrupts;
 pub use joypad::Button;
 pub use joypad::Joypad;
 
 #[cfg(test)]
-pub use crate::core::mmu::ppu::TestRenderer;
+pub use crate::mmu::ppu::TestRenderer;
 
 pub struct MMU {
     cartridge: Box<dyn Cartridge>,
@@ -219,7 +219,6 @@ impl MMU {
         }
 
         if self.joypad.interrupt_requested() {
-            println!("Triggering joypad interrupt");
             self.interrupts.request_interrupt(Interrupt::Joypad);
             self.joypad.reset_interrupt();
         }

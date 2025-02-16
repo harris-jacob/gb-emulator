@@ -122,8 +122,10 @@ pub fn stack_pop(cpu: &mut CPU) -> u16 {
 mod tests {
     use std::sync::Arc;
 
-    use cartridge::NoMBC;
-    use mmu::TestRenderer;
+    use crate::cartridge::NoMBC;
+    use crate::mmu::ppu::PPU;
+    use crate::mmu::TestRenderer;
+    use crate::Joypad;
 
     use super::*;
 
