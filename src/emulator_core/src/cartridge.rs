@@ -1,10 +1,12 @@
 mod header;
 mod mbc1;
 mod no_mbc;
+mod mbc3;
 
 use header::CartridgeType;
 pub use header::Header;
 pub use mbc1::MBC1;
+use mbc3::MBC3;
 pub use no_mbc::NoMBC;
 
 #[cfg_attr(test, mockall::automock)]
@@ -37,5 +39,6 @@ pub fn create_cartridge(rom: Vec<u8>) -> Box<dyn Cartridge> {
     match header.cartridge_type {
         CartridgeType::ROMOnly => Box::new(NoMBC::new(rom)),
         CartridgeType::MBC1 => Box::new(MBC1::new(rom)),
+        CartridgeType::MBC3 => Box::new(MBC3::new(rom))
     }
 }

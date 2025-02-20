@@ -1,7 +1,8 @@
 use super::*;
 
-/// MBC1 Cartridge. Supports up to 2 MiB ROM and 32 KiB RAM
-pub struct MBC1 {
+/// MBC3 Cartridge. Supports up to 2 MiB ROM and 32 KiB RAM
+///
+pub struct MBC3 {
     rom: Vec<u8>,
     ram: Vec<u8>,
     rom_bank: u8,
@@ -17,7 +18,7 @@ enum BankingMode {
     RAM,
 }
 
-impl Cartridge for MBC1 {
+impl Cartridge for MBC3 {
     /// Read RAM at address range 0xA000-0xBFFF, range access depends on which ram bank is selected
     /// If ram is not enabled, 0xFF is returned. Panics if address is out of range
     fn read_ram(&self, address: u16) -> u8 {
@@ -61,7 +62,7 @@ impl Cartridge for MBC1 {
                 let offset = self.rom_bank() as usize * 0x4000;
                 offset + (address as usize - 0x4000)
             }
-            _ => panic!("Invalid address for MBC1: {:#06x}", address),
+            _ => panic!("Invalid address for MBC3: {:#06x}", address),
         };
 
         *self.rom.get(remapped_address).unwrap_or(&0xff)
@@ -80,12 +81,17 @@ impl Cartridge for MBC1 {
             0x0000..=0x1FFF => {
                 self.ram_enabled = (value & 0x0F) == 0x0A;
             }
-            // Unlike MBC1 all 7 bits of the ROM bank number are written
-            // directly to the address
+            // ROM bank selected using 5 bit value
+            // If the ROM Bank Number is set to a higher value
+            // than the number of banks in the cart, the bank number
+            // is masked to the required number of bits.
+            // e.g. a 256 KiB cart only needs a 4-bit bank number to
+            // address all of its 16 banks, so this register is masked
+            // to 4 bits. The upper bit would be ignored for bank selection.
             0x2000..=0x3FFF => {
-                let nibble = value & 0b1111111;
+                let nibble = value & self.rom_bank_mask();
 
-                if value & 0b1111111 == 0 {
+                if value & 0b11111 == 0 {
                     self.rom_bank = 1;
                 } else {
                     self.rom_bank = nibble;
@@ -115,12 +121,12 @@ impl Cartridge for MBC1 {
                 };
             }
 
-            _ => panic!("Invalid address for MBC1: {:#06x}", address),
+            _ => panic!("Invalid address for MBC3: {:#06x}", address),
         }
     }
 }
 
-impl MBC1 {
+impl MBC3 {
     pub fn new(rom: Vec<u8>) -> Self {
         let header = Header::new(&rom);
 
@@ -129,18 +135,18 @@ impl MBC1 {
 
         if rom_banks > 128 {
             panic!(
-                "MBC1 only supports up to 128 ROM banks, found {}",
+                "MBC3 only supports up to 128 ROM banks, found {}",
                 rom_banks
             );
         }
 
         if ram_banks > 4 {
-            panic!("MBC1 only supports up to 4 RAM banks, found {}", ram_banks);
+            panic!("MBC3 only supports up to 4 RAM banks, found {}", ram_banks);
         }
 
         let ram = vec![0; 8000 * ram_banks];
 
-        MBC1 {
+        MBC3 {
             rom,
             ram,
             rom_bank: 1,
@@ -187,103 +193,103 @@ mod tests {
         #[test]
         #[should_panic]
         fn read_ram_panics_if_address_out_of_range() {
-            let mbc1 = mock_mbc1();
+            let mbc3 = mock_mbc3();
 
-            mbc1.read_ram(0x0000);
+            mbc3.read_ram(0x0000);
         }
 
         #[test]
         #[should_panic]
         fn write_ram_panics_if_address_out_of_range() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
-            mbc1.write_ram(0x0000, 0);
+            mbc3.write_ram(0x0000, 0);
         }
 
         #[test]
         fn read_ram_ram_disabled() {
-            let mbc1 = mock_mbc1();
+            let mbc3 = mock_mbc3();
 
-            assert_eq!(mbc1.read_ram(0xA000), 0xFF);
+            assert_eq!(mbc3.read_ram(0xA000), 0xFF);
         }
 
         #[test]
         fn enable_ram() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
-            mbc1.write_rom(0x0000, 0x0A);
+            mbc3.write_rom(0x0000, 0x0A);
 
-            assert_eq!(mbc1.ram_enabled, true);
+            assert_eq!(mbc3.ram_enabled, true);
         }
 
         #[test]
         fn write_ram_ram_disabled() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
-            mbc1.write_ram(0xA000, 0x42);
+            mbc3.write_ram(0xA000, 0x42);
 
             // Enable RAM
-            mbc1.write_rom(0x0000, 0x0A);
+            mbc3.write_rom(0x0000, 0x0A);
 
-            assert_eq!(mbc1.read_ram(0xA000), 0);
+            assert_eq!(mbc3.read_ram(0xA000), 0);
         }
 
         #[test]
         fn change_ram_bank() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
-            mbc1.write_rom(0x4000, 0b11);
+            mbc3.write_rom(0x4000, 0b11);
 
-            assert_eq!(mbc1.ram_bank, 3);
+            assert_eq!(mbc3.ram_bank, 3);
         }
 
         #[test]
         fn can_read_and_write_ram_banks_in_ram_banking_mode() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
             // Enable RAM
-            mbc1.write_rom(0x0000, 0x0A);
+            mbc3.write_rom(0x0000, 0x0A);
 
             // Switch to RAM banking mode
-            mbc1.write_rom(0x6000, 1);
+            mbc3.write_rom(0x6000, 1);
 
             // write to each bank
             for i in 0..3 {
-                mbc1.ram_bank = i;
-                mbc1.write_ram(0xA000, i);
+                mbc3.ram_bank = i;
+                mbc3.write_ram(0xA000, i);
             }
 
             // read from each bank
             for i in 0..3 {
-                mbc1.ram_bank = i;
-                assert_eq!(mbc1.read_ram(0xA000), i);
+                mbc3.ram_bank = i;
+                assert_eq!(mbc3.read_ram(0xA000), i);
             }
         }
 
         #[test]
         fn only_first_ram_bank_available_in_rom_banking_mode() {
-            let mut mbc1 = mock_mbc1();
-            mbc1.ram = vec![0; 0x2000 * 4];
+            let mut mbc3 = mock_mbc3();
+            mbc3.ram = vec![0; 0x2000 * 4];
 
             // Enable RAM
-            mbc1.write_rom(0x0000, 0x0A);
+            mbc3.write_rom(0x0000, 0x0A);
 
             // Switch to RAM banking mode
-            mbc1.write_rom(0x6000, 0);
+            mbc3.write_rom(0x6000, 0);
 
             // write to each bank
             for i in 0..3 {
-                mbc1.ram_bank = i;
-                mbc1.write_ram(0xA000, i);
+                mbc3.ram_bank = i;
+                mbc3.write_ram(0xA000, i);
             }
 
             //Switch to ROM banking mode
-            mbc1.write_rom(0x6000, 0);
+            mbc3.write_rom(0x6000, 0);
 
             // read from each bank
             for i in 0..3 {
-                mbc1.ram_bank = i;
-                assert_eq!(mbc1.read_ram(0xA000), 0);
+                mbc3.ram_bank = i;
+                assert_eq!(mbc3.read_ram(0xA000), 0);
             }
         }
     }
@@ -294,43 +300,43 @@ mod tests {
         #[test]
         #[should_panic]
         fn read_rom_panics_if_address_out_of_range() {
-            let mbc1 = mock_mbc1();
+            let mbc3 = mock_mbc3();
 
-            mbc1.read_rom(0x8000);
+            mbc3.read_rom(0x8000);
         }
 
         #[test]
         fn read_static_rom_memory() {
-            let mut mbc1 = mock_mbc1();
-            mbc1.rom[0x0000] = 0x42;
+            let mut mbc3 = mock_mbc3();
+            mbc3.rom[0x0000] = 0x42;
 
-            assert_eq!(mbc1.read_rom(0x0000), 0x42);
+            assert_eq!(mbc3.read_rom(0x0000), 0x42);
         }
 
         #[test]
         fn read_rom_banked_memory() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
             // Write known values to each bank
             for i in 1..4 {
-                mbc1.rom[i * 0x4000] = i as u8;
+                mbc3.rom[i * 0x4000] = i as u8;
             }
 
             for i in 1..4 {
                 // Switch to ith bank
-                mbc1.write_rom(0x2000, i as u8);
-                assert_eq!(mbc1.read_rom(0x4000), i as u8);
+                mbc3.write_rom(0x2000, i as u8);
+                assert_eq!(mbc3.read_rom(0x4000), i as u8);
             }
         }
 
         #[test]
         fn change_rom_bank_to_zero() {
-            let mut mbc1 = mock_mbc1();
+            let mut mbc3 = mock_mbc3();
 
             // The first rom bank is fixed so trying to set the banked rom to 0
             // sets it to 1.
-            mbc1.write_rom(0x2000, 0x00);
-            assert_eq!(mbc1.rom_bank, 1);
+            mbc3.write_rom(0x2000, 0x00);
+            assert_eq!(mbc3.rom_bank, 1);
         }
 
         #[test]
@@ -338,20 +344,20 @@ mod tests {
             // If the ROM Bank Number is set to a higher value
             // than the number of banks in the cart, the bank number
             // is masked to the required number of bits.
-            let mut mbc1 = mock_mbc1();
-            mbc1.header.rom_size = header::ROMSize::KB64;
-            mbc1.write_rom(0x2000, 0b11111111);
-            assert_eq!(mbc1.rom_bank, 3);
+            let mut mbc3 = mock_mbc3();
+            mbc3.header.rom_size = header::ROMSize::KB64;
+            mbc3.write_rom(0x2000, 0b11111111);
+            assert_eq!(mbc3.rom_bank, 3);
 
-            mbc1.header.rom_size = header::ROMSize::KB32;
-            mbc1.write_rom(0x2000, 0b11111111);
-            assert_eq!(mbc1.rom_bank, 1);
+            mbc3.header.rom_size = header::ROMSize::KB32;
+            mbc3.write_rom(0x2000, 0b11111111);
+            assert_eq!(mbc3.rom_bank, 1);
         }
 
         #[test]
         fn change_rom_bank_to_zero_edge_case() {
-            let mut mbc1 = mock_mbc1();
-            mbc1.header.rom_size = header::ROMSize::KB64;
+            let mut mbc3 = mock_mbc3();
+            mbc3.header.rom_size = header::ROMSize::KB64;
 
             // Even with smaller ROMs that use less than 5 bits for bank selection,
             // the full 5-bit register is still compared for the bank 00→01 translation
@@ -360,43 +366,43 @@ mod tests {
             // prevent the 00→01 translation (which looks at the full 5-bit register,
             // and sees the value $10, not $00), while the bits actually used for bank
             // selection (4, in this example) are all 0, so bank $00 is selected.
-            mbc1.write_rom(0x2000, 0b10000);
-            assert_eq!(mbc1.rom_bank, 0);
+            mbc3.write_rom(0x2000, 0b10000);
+            assert_eq!(mbc3.rom_bank, 0);
         }
 
         #[test]
         fn in_rom_banking_mode_higher_banks_are_available() {
-            let mut mbc1 = mock_mbc1();
-            mbc1.rom = vec![0; 0x4000 * 130];
-            mbc1.rom[0x4000 * 0b1111111] = 0x42;
+            let mut mbc3 = mock_mbc3();
+            mbc3.rom = vec![0; 0x4000 * 130];
+            mbc3.rom[0x4000 * 0b1111111] = 0x42;
 
             // Switch to ROM banking mode
-            mbc1.write_rom(0x6000, 0);
+            mbc3.write_rom(0x6000, 0);
 
-            mbc1.write_rom(0x2000, 0b11111);
-            mbc1.write_rom(0x4000, 0b11);
-            assert_eq!(mbc1.read_rom(0x4000), 0x42);
+            mbc3.write_rom(0x2000, 0b11111);
+            mbc3.write_rom(0x4000, 0b11);
+            assert_eq!(mbc3.read_rom(0x4000), 0x42);
         }
 
         #[test]
         fn in_ram_banking_mode_higher_bits_are_ignored() {
-            let mut mbc1 = mock_mbc1();
-            mbc1.rom = vec![0; 0x4000 * 130];
+            let mut mbc3 = mock_mbc3();
+            mbc3.rom = vec![0; 0x4000 * 130];
 
             // Switch to RAM banking mode
-            mbc1.write_rom(0x6000, 1);
+            mbc3.write_rom(0x6000, 1);
 
-            mbc1.write_rom(0x2000, 0b11111);
-            mbc1.write_rom(0x4000, 0b11);
-            assert_eq!(mbc1.read_rom(0x4000), 0);
+            mbc3.write_rom(0x2000, 0b11111);
+            mbc3.write_rom(0x4000, 0b11);
+            assert_eq!(mbc3.read_rom(0x4000), 0);
         }
     }
-    fn mock_mbc1() -> MBC1 {
+    fn mock_mbc3() -> MBC3 {
         let mut rom = vec![0; 0x8000 * 128];
         rom[0x147] = 0x01;
         rom[0x148] = 0x06;
         rom[0x149] = 0x03;
 
-        MBC1::new(rom)
+        MBC3::new(rom)
     }
 }
