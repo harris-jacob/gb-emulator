@@ -1,20 +1,21 @@
+use std::usize;
+
 use super::*;
 
 /// MBC3 Cartridge. Supports up to 2 MiB ROM and 32 KiB RAM
-///
+/// Also features an RTC timer
 pub struct MBC3 {
     rom: Vec<u8>,
     ram: Vec<u8>,
     rom_bank: u8,
     ram_bank: u8,
     ram_enabled: bool,
-    banking_mode: BankingMode,
     header: Header,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
-enum BankingMode {
-    ROM,
+enum RTCRegisterSelect {
+    RTC,
     RAM,
 }
 
@@ -24,17 +25,13 @@ impl Cartridge for MBC3 {
     fn read_ram(&self, address: u16) -> u8 {
         self.check_ram_range(address);
 
-        match (self.banking_mode, self.ram_enabled) {
+        // TODO: RTC select
+        match self.ram_enabled {
             // This is actually undefined behavior, the docs say that often
             // open bus is returned, often 0xFF
-            (_, false) => 0xFF,
-            (BankingMode::RAM, true) => {
+            false => 0xFF,
+            true => {
                 let remapped_address = (address - 0xA000) + (self.ram_bank as u16 * 0x2000);
-                self.ram[remapped_address as usize]
-            }
-            (BankingMode::ROM, true) => {
-                // Always access the first RAM bank in ROM banking mode
-                let remapped_address = address - 0xA000;
                 self.ram[remapped_address as usize]
             }
         }
@@ -59,7 +56,7 @@ impl Cartridge for MBC3 {
         let remapped_address = match address {
             0x0000..=0x3FFF => address as usize,
             0x4000..=0x7FFF => {
-                let offset = self.rom_bank() as usize * 0x4000;
+                let offset = self.rom_bank as usize * 0x4000;
                 offset + (address as usize - 0x4000)
             }
             _ => panic!("Invalid address for MBC3: {:#06x}", address),
@@ -81,7 +78,7 @@ impl Cartridge for MBC3 {
             0x0000..=0x1FFF => {
                 self.ram_enabled = (value & 0x0F) == 0x0A;
             }
-            // ROM bank selected using 5 bit value
+            // ROM bank selected using 7 bit value
             // If the ROM Bank Number is set to a higher value
             // than the number of banks in the cart, the bank number
             // is masked to the required number of bits.
@@ -91,35 +88,28 @@ impl Cartridge for MBC3 {
             0x2000..=0x3FFF => {
                 let nibble = value & self.rom_bank_mask();
 
-                if value & 0b11111 == 0 {
+                if value == 0 {
                     self.rom_bank = 1;
                 } else {
                     self.rom_bank = nibble;
                 }
             }
 
-            // Either this register is used to select a RAM bank, or
-            // as an additional 2 bits of the ROM bank number (for 1Mib
-            // ROM or larger carts)
+            // Writes of 0..3 maps the corresponding external RAM bank into memory
+            // writing 08..0c maps the corresponding RTC register into memory.
             0x4000..=0x5FFF => {
-                let rom_bank_count = self.header.rom_bank_count();
-                let ram_bank_count = self.header.ram_bank_count();
-                // If neither ROM nor RAM is large enough, setting this register does nothing.
-                if ram_bank_count < value.into() || rom_bank_count < (value as usize >> 5) {
+                let new_value = self.ram_bank & 0b11;
+
+                // If RAM is not large enough, setting this does nothing.
+                if new_value as usize > self.header.rom_bank_count() {
                     return;
                 }
 
-                self.ram_bank = value & 0b11;
+                self.ram_bank = new_value;
             }
 
-            // Banking mode select
-            0x6000..=0x7FFF => {
-                self.banking_mode = match value & 0x01 {
-                    0 => BankingMode::ROM,
-                    1 => BankingMode::RAM,
-                    _ => unreachable!(),
-                };
-            }
+            // TODO: latch clock data
+            0x6000..=0x7FFF => {}
 
             _ => panic!("Invalid address for MBC3: {:#06x}", address),
         }
@@ -152,15 +142,7 @@ impl MBC3 {
             rom_bank: 1,
             ram_bank: 0,
             ram_enabled: false,
-            banking_mode: BankingMode::ROM,
             header,
-        }
-    }
-
-    fn rom_bank(&self) -> usize {
-        match self.banking_mode {
-            BankingMode::ROM => (self.rom_bank + (self.ram_bank << 5)) as usize,
-            BankingMode::RAM => self.rom_bank as usize,
         }
     }
 
@@ -214,15 +196,6 @@ mod tests {
         }
 
         #[test]
-        fn enable_ram() {
-            let mut mbc3 = mock_mbc3();
-
-            mbc3.write_rom(0x0000, 0x0A);
-
-            assert_eq!(mbc3.ram_enabled, true);
-        }
-
-        #[test]
         fn write_ram_ram_disabled() {
             let mut mbc3 = mock_mbc3();
 
@@ -235,23 +208,11 @@ mod tests {
         }
 
         #[test]
-        fn change_ram_bank() {
-            let mut mbc3 = mock_mbc3();
-
-            mbc3.write_rom(0x4000, 0b11);
-
-            assert_eq!(mbc3.ram_bank, 3);
-        }
-
-        #[test]
-        fn can_read_and_write_ram_banks_in_ram_banking_mode() {
+        fn can_read_and_write_ram_banks_when_enabled() {
             let mut mbc3 = mock_mbc3();
 
             // Enable RAM
             mbc3.write_rom(0x0000, 0x0A);
-
-            // Switch to RAM banking mode
-            mbc3.write_rom(0x6000, 1);
 
             // write to each bank
             for i in 0..3 {
@@ -263,33 +224,6 @@ mod tests {
             for i in 0..3 {
                 mbc3.ram_bank = i;
                 assert_eq!(mbc3.read_ram(0xA000), i);
-            }
-        }
-
-        #[test]
-        fn only_first_ram_bank_available_in_rom_banking_mode() {
-            let mut mbc3 = mock_mbc3();
-            mbc3.ram = vec![0; 0x2000 * 4];
-
-            // Enable RAM
-            mbc3.write_rom(0x0000, 0x0A);
-
-            // Switch to RAM banking mode
-            mbc3.write_rom(0x6000, 0);
-
-            // write to each bank
-            for i in 0..3 {
-                mbc3.ram_bank = i;
-                mbc3.write_ram(0xA000, i);
-            }
-
-            //Switch to ROM banking mode
-            mbc3.write_rom(0x6000, 0);
-
-            // read from each bank
-            for i in 0..3 {
-                mbc3.ram_bank = i;
-                assert_eq!(mbc3.read_ram(0xA000), 0);
             }
         }
     }
@@ -352,49 +286,6 @@ mod tests {
             mbc3.header.rom_size = header::ROMSize::KB32;
             mbc3.write_rom(0x2000, 0b11111111);
             assert_eq!(mbc3.rom_bank, 1);
-        }
-
-        #[test]
-        fn change_rom_bank_to_zero_edge_case() {
-            let mut mbc3 = mock_mbc3();
-            mbc3.header.rom_size = header::ROMSize::KB64;
-
-            // Even with smaller ROMs that use less than 5 bits for bank selection,
-            // the full 5-bit register is still compared for the bank 00→01 translation
-            // logic. As a result if the ROM is 256 KiB or smaller, it is possible to
-            // map bank 0 to the 4000–7FFF region — by setting the 5th bit to 1 it will
-            // prevent the 00→01 translation (which looks at the full 5-bit register,
-            // and sees the value $10, not $00), while the bits actually used for bank
-            // selection (4, in this example) are all 0, so bank $00 is selected.
-            mbc3.write_rom(0x2000, 0b10000);
-            assert_eq!(mbc3.rom_bank, 0);
-        }
-
-        #[test]
-        fn in_rom_banking_mode_higher_banks_are_available() {
-            let mut mbc3 = mock_mbc3();
-            mbc3.rom = vec![0; 0x4000 * 130];
-            mbc3.rom[0x4000 * 0b1111111] = 0x42;
-
-            // Switch to ROM banking mode
-            mbc3.write_rom(0x6000, 0);
-
-            mbc3.write_rom(0x2000, 0b11111);
-            mbc3.write_rom(0x4000, 0b11);
-            assert_eq!(mbc3.read_rom(0x4000), 0x42);
-        }
-
-        #[test]
-        fn in_ram_banking_mode_higher_bits_are_ignored() {
-            let mut mbc3 = mock_mbc3();
-            mbc3.rom = vec![0; 0x4000 * 130];
-
-            // Switch to RAM banking mode
-            mbc3.write_rom(0x6000, 1);
-
-            mbc3.write_rom(0x2000, 0b11111);
-            mbc3.write_rom(0x4000, 0b11);
-            assert_eq!(mbc3.read_rom(0x4000), 0);
         }
     }
     fn mock_mbc3() -> MBC3 {

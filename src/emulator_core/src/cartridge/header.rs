@@ -7,7 +7,7 @@ pub struct Header {
 }
 
 impl Header {
-    pub fn new(data: &Vec<u8>) -> Self {
+    pub fn new(data: &[u8]) -> Self {
         Self {
             cartridge_type: (&data[0x147]).try_into().expect("Unknown cartridge type"),
             rom_size: (&data[0x148]).try_into().expect("Unknown rom size"),

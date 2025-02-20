@@ -47,7 +47,7 @@ impl CPU {
             panic!("CPU is stopped");
         }
 
-        self.debug_output();
+        // self.debug_output();
         let cycles = if !self.halted {
             let opcode = self.fetch_u8();
             self.handle_op(opcode)
@@ -81,6 +81,10 @@ impl CPU {
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 2),
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 3)
         );
+
+        if self.registers.read_sixteen(SixteenBitRegister::PC) == 0x38 {
+            panic!("Stop")
+        }
     }
 
     pub fn registers(self) -> RegisterDump {

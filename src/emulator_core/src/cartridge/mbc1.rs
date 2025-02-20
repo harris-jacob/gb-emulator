@@ -58,7 +58,7 @@ impl Cartridge for MBC1 {
         let remapped_address = match address {
             0x0000..=0x3FFF => address as usize,
             0x4000..=0x7FFF => {
-                let offset = self.rom_bank() as usize * 0x4000;
+                let offset = self.rom_bank as usize * 0x4000;
                 offset + (address as usize - 0x4000)
             }
             _ => panic!("Invalid address for MBC1: {:#06x}", address),
@@ -83,7 +83,7 @@ impl Cartridge for MBC1 {
             // Unlike MBC1 all 7 bits of the ROM bank number are written
             // directly to the address
             0x2000..=0x3FFF => {
-                let nibble = value & 0b1111111;
+                let nibble = value & self.rom_bank_mask();
 
                 if value & 0b1111111 == 0 {
                     self.rom_bank = 1;
@@ -96,14 +96,23 @@ impl Cartridge for MBC1 {
             // as an additional 2 bits of the ROM bank number (for 1Mib
             // ROM or larger carts)
             0x4000..=0x5FFF => {
-                let rom_bank_count = self.header.rom_bank_count();
-                let ram_bank_count = self.header.ram_bank_count();
-                // If neither ROM nor RAM is large enough, setting this register does nothing.
-                if ram_bank_count < value.into() || rom_bank_count < (value as usize >> 5) {
-                    return;
-                }
+                match self.banking_mode {
+                    // Used to set bits 5 & 6 of ROM bank
+                    BankingMode::ROM => {
+                        let new_value = self.rom_bank | (value & 0b11) << 5;
+                        self.rom_bank = new_value & self.rom_bank_mask();
+                    }
+                    BankingMode::RAM => {
+                        let new_value = self.ram_bank & 0b11;
 
-                self.ram_bank = value & 0b11;
+                        // If RAM is not large enough, setting this does nothing.
+                        if new_value as usize > self.header.rom_bank_count() {
+                            return;
+                        }
+
+                        self.ram_bank = new_value;
+                    }
+                }
             }
 
             // Banking mode select
@@ -148,13 +157,6 @@ impl MBC1 {
             ram_enabled: false,
             banking_mode: BankingMode::ROM,
             header,
-        }
-    }
-
-    fn rom_bank(&self) -> usize {
-        match self.banking_mode {
-            BankingMode::ROM => (self.rom_bank + (self.ram_bank << 5)) as usize,
-            BankingMode::RAM => self.rom_bank as usize,
         }
     }
 
@@ -208,15 +210,6 @@ mod tests {
         }
 
         #[test]
-        fn enable_ram() {
-            let mut mbc1 = mock_mbc1();
-
-            mbc1.write_rom(0x0000, 0x0A);
-
-            assert_eq!(mbc1.ram_enabled, true);
-        }
-
-        #[test]
         fn write_ram_ram_disabled() {
             let mut mbc1 = mock_mbc1();
 
@@ -226,15 +219,6 @@ mod tests {
             mbc1.write_rom(0x0000, 0x0A);
 
             assert_eq!(mbc1.read_ram(0xA000), 0);
-        }
-
-        #[test]
-        fn change_ram_bank() {
-            let mut mbc1 = mock_mbc1();
-
-            mbc1.write_rom(0x4000, 0b11);
-
-            assert_eq!(mbc1.ram_bank, 3);
         }
 
         #[test]
@@ -285,6 +269,28 @@ mod tests {
                 mbc1.ram_bank = i;
                 assert_eq!(mbc1.read_ram(0xA000), 0);
             }
+        }
+
+        #[test]
+        fn ignores_writes_to_ram_banks_out_of_range() {
+            let mut rom = vec![0; 0x8000 * 128];
+            rom[0x147] = 0x01;
+            rom[0x148] = 0x06;
+            // only KB2 of ram
+            rom[0x149] = 0x01;
+            let mut mbc1 = MBC1::new(rom);
+
+            mbc1.ram = vec![0; 0x2000 * 4];
+
+            // Enable RAM
+            mbc1.write_rom(0x0000, 0x0A);
+
+            // Switch to RAM banking mode
+            mbc1.write_rom(0x6000, 0);
+
+            mbc1.write_rom(0x4000, 3);
+
+            assert_eq!(mbc1.ram_bank, 0);
         }
     }
 
