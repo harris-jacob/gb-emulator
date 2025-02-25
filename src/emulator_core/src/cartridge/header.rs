@@ -7,7 +7,7 @@ pub struct Header {
 }
 
 impl Header {
-    pub fn new(data: &Vec<u8>) -> Self {
+    pub fn new(data: &[u8]) -> Self {
         Self {
             cartridge_type: (&data[0x147]).try_into().expect("Unknown cartridge type"),
             rom_size: (&data[0x148]).try_into().expect("Unknown rom size"),
@@ -45,6 +45,7 @@ impl Header {
 pub enum CartridgeType {
     ROMOnly,
     MBC1,
+    MBC3,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -75,8 +76,28 @@ impl TryFrom<&u8> for CartridgeType {
 
     fn try_from(value: &u8) -> Result<Self, Self::Error> {
         match value {
+            // Rom Only
             0x00 => Ok(CartridgeType::ROMOnly),
+            // MBC1
             0x01 => Ok(CartridgeType::MBC1),
+            // MBC1+RAM
+            0x02 => Ok(CartridgeType::MBC1),
+            // MBC1+RAM+BATTERY
+            0x03 => Ok(CartridgeType::MBC1),
+            // ROM+RAM
+            0x8 => Ok(CartridgeType::ROMOnly),
+            // ROM+RAM+BATTERY
+            0x9 => Ok(CartridgeType::ROMOnly),
+            // MBC3+Timer+BATTERY
+            0x0F => Ok(CartridgeType::MBC3),
+            // MBC3+Timer+RAM+BATTERY
+            0x10 => Ok(CartridgeType::MBC3),
+            // MBC3
+            0x11 => Ok(CartridgeType::MBC3),
+            // MBC3+RAM
+            0x12 => Ok(CartridgeType::MBC3),
+            // MBC3+RAM+BATTERY
+            0x13 => Ok(CartridgeType::MBC3),
             n => {
                 let error = format!("Unsupported Cartridge type {:X}", n);
                 Err(error)

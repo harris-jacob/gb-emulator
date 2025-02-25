@@ -7,7 +7,7 @@ pub fn main() {
     let window_buffer = Arc::new(WindowBuffer::new());
 
     // Setup Emulator
-    let cartridge = cartridge_from_filepath("./roms/dr-mario.gb");
+    let cartridge = cartridge_from_filepath("./roms/pokemon-red.gb");
     let joypad = Arc::new(emulator_core::Joypad::new());
     let ppu = emulator_core::PPU::new(window_buffer.clone());
     let mmu = emulator_core::MMU::new(ppu, cartridge, joypad.clone());
