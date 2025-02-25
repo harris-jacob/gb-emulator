@@ -106,31 +106,6 @@ impl PPU {
         }
     }
 
-    ///// FIXME: DELETE ME LATER
-    pub fn dump_tileset(&self) -> Vec<u32> {
-        let mut tiles = vec![0; 64 * 2];
-
-        for i in 0u8..2 {
-            let tile = self.tiledata.tile_at(i, TileAddressingMethod::Unsigned);
-
-            // dbg!(&tile);
-
-            // 0..128
-            for x in 0..8 {
-                for y in 0..8 {
-                    let pixel = tile.pixel_at(x, y);
-                    let color = self.background_palette.color_from_pixel(pixel);
-                    let x = x as usize + i as usize * 8;
-                    let y = y as usize;
-                    let idx = y * 16 + x;
-                    tiles[idx] = self.renderer.palette(color.into());
-                }
-            }
-        }
-
-        tiles
-    }
-
     /// Read from the SCX, SCY registers.
     pub(crate) fn read_background_viewport(&self, viewport_register: ViewportRegister) -> u8 {
         match viewport_register {

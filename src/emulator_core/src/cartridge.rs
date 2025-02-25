@@ -1,7 +1,8 @@
 mod header;
 mod mbc1;
-mod no_mbc;
 mod mbc3;
+mod no_mbc;
+mod rtc;
 
 use header::CartridgeType;
 pub use header::Header;
@@ -20,8 +21,15 @@ pub trait Cartridge: Send {
     /// Write a byte to the cartridge's ROM
     fn write_rom(&mut self, address: u16, value: u8);
 
+    // Update is called every emulation cycle and provides cartridges with a
+    // way to update their state cyclicly. The default impl of this method does
+    // nothing because most cartridges have no cyclic functionality.
+    // The primary exception is cartridge types that contain RTCs (real time
+    // clocks), RTC registers must be updated every step of the emulation.
+    fn step(&mut self, _ticks: u8) {}
+
     fn check_ram_range(&self, address: u16) {
-        if address < 0xA000 || address > 0xBFFF {
+        if !(0xA000..=0xBFFF).contains(&address) {
             panic!("Invalid address for MBC1 RAM: {:#06x}", address);
         }
     }
@@ -39,6 +47,6 @@ pub fn create_cartridge(rom: Vec<u8>) -> Box<dyn Cartridge> {
     match header.cartridge_type {
         CartridgeType::ROMOnly => Box::new(NoMBC::new(rom)),
         CartridgeType::MBC1 => Box::new(MBC1::new(rom)),
-        CartridgeType::MBC3 => Box::new(MBC3::new(rom))
+        CartridgeType::MBC3 => Box::new(MBC3::new(rom)),
     }
 }

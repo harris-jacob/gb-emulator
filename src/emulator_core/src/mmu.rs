@@ -202,6 +202,7 @@ impl MMU {
     pub(crate) fn step(&mut self, m_cycles: u8) {
         self.timer.step(m_cycles);
         self.ppu.step(m_cycles);
+        self.cartridge.step(m_cycles);
 
         if self.timer.interrupt_request {
             self.interrupts.request_interrupt(Interrupt::Timer);
