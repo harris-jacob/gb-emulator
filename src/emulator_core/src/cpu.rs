@@ -81,10 +81,6 @@ impl CPU {
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 2),
                  self.mmu.read_u8(self.registers.read_sixteen(SixteenBitRegister::PC) + 3)
         );
-
-        if self.registers.read_sixteen(SixteenBitRegister::PC) == 0x38 {
-            panic!("Stop")
-        }
     }
 
     pub fn registers(self) -> RegisterDump {
