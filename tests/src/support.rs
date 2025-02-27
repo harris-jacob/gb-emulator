@@ -79,11 +79,5 @@ impl CartridgePersistence for TestPersister {
         Vec::new()
     }
 
-    fn write_ram(&mut self, ram: &[u8]) {}
-
-    fn load_rtc(&mut self) -> RTCState {
-        RTCState { zero: 0 }
-    }
-
-    fn write_rtc(&mut self, rtc: RTCState) {}
+    fn write_ram(&mut self, _ram: &[u8]) {}
 }

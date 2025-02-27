@@ -225,7 +225,9 @@ impl MMU {
         }
     }
 
-    // TODO: is there a better API for this?
+    /// Calls the Cartridge persister interface to save the current state of RAM. Can
+    /// be called manually, but is generally handled by the emulation context
+    /// automatically on shutdown.
     pub fn save(&mut self) {
         self.cartridge.save();
     }
