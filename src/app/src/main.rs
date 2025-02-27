@@ -1,14 +1,6 @@
 use app::{JoypadManager, SaveState, WindowBuffer, HEIGHT, WIDTH};
 use emulator_core::Cartridge;
-use std::{
-    fs::File,
-    io::Read,
-    sync::{
-        mpsc::{self, TryRecvError},
-        Arc,
-    },
-    thread,
-};
+use std::{fs::File, io::Read, sync::Arc};
 
 pub fn main() {
     // Buffer written to by PPU and rendered by window
@@ -21,7 +13,7 @@ pub fn main() {
     let mmu = emulator_core::MMU::new(ppu, cartridge, joypad.clone());
     let cpu = emulator_core::CPU::new(mmu);
 
-    let mut emulator = emulator_core::Emulator::new(cpu);
+    let emulator = emulator_core::Emulator::new(cpu);
 
     let mut window = minifb::Window::new(
         "GB Emulator",
@@ -55,7 +47,6 @@ pub fn main() {
 
 fn cartridge_from_filepath(rom_name: &str) -> Box<dyn Cartridge> {
     let rom_path = "./roms/".to_string() + rom_name + ".gb";
-    dbg!(&rom_path);
     let mut fp = File::open(rom_path).expect("Should exist");
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
