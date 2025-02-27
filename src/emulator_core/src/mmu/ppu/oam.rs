@@ -72,8 +72,8 @@ impl SpriteFlags {
         Self(value)
     }
     
-    /// If true, sprite is always rendered above the BG, otherwise the sprite
-    /// is only rendered above Color0.
+    /// If true, background has priority over the sprite pixel:
+    /// Background colors 1-3 overlay sprite, sprite still rendered above 0.
     pub fn bg_priority(&self) -> bool {
         self.0 & 0b10000000 != 0
     }

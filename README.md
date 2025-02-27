@@ -4,6 +4,7 @@ super robust and accurate. Example uses [rust_minifb](https://github.com/emoon/r
 for window display. Tested on macos but theoretically runs cross platform. 
 
 ![DR Mario Demo](gifs/mario-demo.gif)
+![Pokemon Red Intro](gifs/pokemon-red.gif)
 
 ## Features
 The emulator is still a WIP but currently has the following:

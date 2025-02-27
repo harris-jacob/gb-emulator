@@ -1,8 +1,6 @@
-use std::usize;
-
 use lcdc_status::PPUMode;
 
-use super::{background_palette::BackgroundColor, *};
+use super::{oam::Sprite, *};
 
 // TODO: double check these
 const HBLANK_CYCLES: u32 = 204 / 4;
@@ -144,7 +142,8 @@ impl PPU {
                 .tiledata
                 .sprite_tile_at(sprite.tile_number, sprite_size);
             let pixel = tile.pixel_at(x, y, sprite.flags);
-            self.render_sprite_pixel(pixel, &sprite, x, y);
+
+            self.render_sprite_pixel(pixel, &sprite, x);
         }
     }
 
@@ -152,18 +151,18 @@ impl PPU {
     /// into the buffer over the background pixel if the following
     /// conditions are met:
     /// 1) If the color number of the Sprite Pixel is 0,
-    ///   the Background Pixel is pushed to the LCD.
+    ///    the Background Pixel is pushed to the LCD.
     /// 2) If the BG-to-OBJ-Priority bit is 1 and the color
-    /// number of the Background Pixel is anything other than 0,
-    /// the Background Pixel is pushed to the LCD.
+    ///    number of the Background Pixel is anything other than 0,
+    ///    the Background Pixel is pushed to the LCD.
     /// 3) If none of the above conditions apply, the Sprite
-    /// Pixel is pushed to the LCD.
+    ///    Pixel is pushed to the LCD.
     ///
     /// NOTE: this function has a few caveats for it to be valid:
     /// - The background scanline must always be rendered before the sprite
     /// - Background scanline rendering function must push BG pixel
     /// to the bg_priority buffer
-    fn render_sprite_pixel(&mut self, sprite_pixel: Pixel, sprite: &oam::Sprite, x: u8, y: u8) {
+    fn render_sprite_pixel(&mut self, sprite_pixel: Pixel, sprite: &oam::Sprite, x: u8) {
         let x = x as i16 + sprite.x();
 
         // sprite pixel outside of LCD range
@@ -171,21 +170,23 @@ impl PPU {
             return;
         }
 
-        // If the sprite pixel is Color0, the background pixel is pushed to the LCD.
+        // If the sprite pixel is Color0 (its transparent), the background pixel is pushed to the LCD.
         if sprite_pixel == Pixel::Color0 {
             return;
         }
 
-        let background_pixel = self.bg_priority[self.ly as usize * WIDTH + x as usize];
+        let bg_priority = self.bg_priority[self.ly as usize * WIDTH + x as usize];
 
         // If the BG priority is set and the bg pixel is not a Color0. The
         // BG pixel is pushed to the LCD.
-        if sprite.flags.bg_priority() && background_pixel != Pixel::Color0 {
+        if sprite.flags.bg_priority() && bg_priority != Pixel::Color0 {
             return;
         }
 
+        // Otherwise, the sprite pixel has priority and is rendered over the BG
         let palette = self.sprite_palette(sprite.flags);
         let color = palette.color_from_pixel(sprite_pixel);
+
         self.buffer[self.ly as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
     }
 
