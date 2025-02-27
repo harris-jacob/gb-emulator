@@ -59,7 +59,7 @@ pub fn setup_emulator(rom_path: &str) -> CPU {
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
 
-    let cartridge = create_cartridge(data);
+    let cartridge = create_cartridge(data, Box::new(TestPersister));
     let ppu = PPU::new(Arc::new(TestRenderer));
     let joypad = Arc::new(Joypad::new());
     let mmu = MMU::new(ppu, cartridge, joypad);
@@ -68,7 +68,22 @@ pub fn setup_emulator(rom_path: &str) -> CPU {
 }
 
 pub struct TestRenderer;
+pub struct TestPersister;
 
 impl Renderer for TestRenderer {
     fn render(&self, _: [u32; 160 * 144]) {}
+}
+
+impl CartridgePersistence for TestPersister {
+    fn load_ram(&mut self) -> Vec<u8> {
+        Vec::new()
+    }
+
+    fn write_ram(&mut self, ram: &[u8]) {}
+
+    fn load_rtc(&mut self) -> RTCState {
+        RTCState { zero: 0 }
+    }
+
+    fn write_rtc(&mut self, rtc: RTCState) {}
 }

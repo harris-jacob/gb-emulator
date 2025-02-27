@@ -5,8 +5,7 @@ mod registers;
 
 pub use cartridge::create_cartridge;
 pub use cartridge::Cartridge;
-pub use cartridge::CartridgeSaver;
-pub use cartridge::RTCState;
+pub use cartridge::CartridgePersistence;
 pub use cpu::CPU;
 pub use mmu::Button;
 pub use mmu::Color;

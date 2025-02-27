@@ -10,7 +10,7 @@ pub struct MBC1 {
     banking_mode: BankingMode,
     header: Header,
     // Used to persist state
-    saver: Option<Box<dyn CartridgeSaver>>,
+    saver: Option<Box<dyn CartridgePersistence>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -138,7 +138,7 @@ impl Cartridge for MBC1 {
 }
 
 impl MBC1 {
-    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgeSaver>>) -> Self {
+    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgePersistence>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();

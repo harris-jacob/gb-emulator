@@ -16,7 +16,7 @@ pub struct MBC3 {
     register_select: RegisterSelect,
     header: Header,
     rtc: RTC,
-    saver: Option<Box<dyn CartridgeSaver>>,
+    persister: Option<Box<dyn CartridgePersistence>>,
 }
 
 enum RegisterSelect {
@@ -65,7 +65,6 @@ impl Cartridge for MBC3 {
 
     /// Write to RAM at address range 0xA000-0xBFFF, to the selected ram bank
     /// Panics if address is out of range
-    /// TODO: battery backed RAM will need to be saved to disk
     fn write_ram(&mut self, address: u16, value: u8) {
         self.check_ram_range(address);
         if self.ram_and_rtc_enabled {
@@ -153,15 +152,14 @@ impl Cartridge for MBC3 {
     }
 
     fn save(&mut self) {
-        // TODO: save RTC
-        self.saver.as_mut().map(|saver| {
-            saver.write_ram(&self.ram);
-        });
+        if let Some(persister) = &mut self.persister {
+            persister.write_ram(&self.ram);
+        }
     }
 }
 
 impl MBC3 {
-    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgeSaver>>) -> Self {
+    pub fn new(rom: Vec<u8>, mut persister: Option<Box<dyn CartridgePersistence>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();
@@ -178,7 +176,7 @@ impl MBC3 {
             panic!("MBC3 only supports up to 4 RAM banks, found {}", ram_banks);
         }
 
-        let ram = saver
+        let ram = persister
             .as_mut()
             .and_then(|saver| {
                 let ram = saver.load_ram();
@@ -199,9 +197,8 @@ impl MBC3 {
             register_select: RegisterSelect::RamBank(0),
             ram_and_rtc_enabled: false,
             header,
-            // TODO: Load RTC zero
             rtc: RTC::new(SystemTime::now()),
-            saver,
+            persister,
         }
     }
 

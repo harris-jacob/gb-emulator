@@ -1,4 +1,4 @@
-use app::{JoypadManager, SaveState, WindowBuffer, HEIGHT, WIDTH};
+use app::{FileSaver, JoypadManager, WindowBuffer, HEIGHT, WIDTH};
 use emulator_core::Cartridge;
 use std::{fs::File, io::Read, sync::Arc};
 
@@ -51,7 +51,7 @@ fn cartridge_from_filepath(rom_name: &str) -> Box<dyn Cartridge> {
     let mut data = Vec::new();
     fp.read_to_end(&mut data).expect("Should read");
 
-    let saver = Box::new(SaveState::new(rom_name));
+    let saver = Box::new(FileSaver::new(rom_name));
 
     emulator_core::create_cartridge(data, saver)
 }
