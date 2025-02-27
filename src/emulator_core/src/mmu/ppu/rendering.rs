@@ -1,6 +1,8 @@
+use std::usize;
+
 use lcdc_status::PPUMode;
 
-use super::*;
+use super::{background_palette::BackgroundColor, *};
 
 // TODO: double check these
 const HBLANK_CYCLES: u32 = 204 / 4;
@@ -165,30 +167,26 @@ impl PPU {
         let x = x as i16 + sprite.x();
 
         // sprite pixel outside of LCD range
-        if x > 160 || x < 0 {
+        if !(0..=160).contains(&x) {
             return;
         }
 
+        // If the sprite pixel is Color0, the background pixel is pushed to the LCD.
         if sprite_pixel == Pixel::Color0 {
             return;
         }
 
-        let background_pixel = self.bg_priority[y as usize * WIDTH + x as usize];
+        let background_pixel = self.bg_priority[self.ly as usize * WIDTH + x as usize];
+
+        // If the BG priority is set and the bg pixel is not a Color0. The
+        // BG pixel is pushed to the LCD.
         if sprite.flags.bg_priority() && background_pixel != Pixel::Color0 {
-            let palette = self.sprite_palette(sprite.flags);
-
-            let color = palette.color_from_pixel(sprite_pixel);
-
-            self.buffer[self.ly as usize * WIDTH + x as usize] =
-                self.renderer.palette(color.into());
-        } else {
-            let palette = self.sprite_palette(sprite.flags);
-
-            let color = palette.color_from_pixel(sprite_pixel);
-
-            self.buffer[self.ly as usize * WIDTH + x as usize] =
-                self.renderer.palette(color.into());
+            return;
         }
+
+        let palette = self.sprite_palette(sprite.flags);
+        let color = palette.color_from_pixel(sprite_pixel);
+        self.buffer[self.ly as usize * WIDTH + x as usize] = self.renderer.palette(color.into());
     }
 
     fn render_background_scanline(&mut self) {
@@ -207,7 +205,7 @@ impl PPU {
         }
 
         // TODO: handle cases where wx is < 7
-        return x >= self.window_position.wx() && y >= self.window_position.wy();
+        x >= self.window_position.wx() && y >= self.window_position.wy()
     }
 
     fn render_window_layer_pixel(&mut self, x: u8, y: u8) {

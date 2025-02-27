@@ -71,6 +71,7 @@ impl SpriteFlags {
     pub fn new(value: u8) -> Self {
         Self(value)
     }
+    
     /// If true, sprite is always rendered above the BG, otherwise the sprite
     /// is only rendered above Color0.
     pub fn bg_priority(&self) -> bool {

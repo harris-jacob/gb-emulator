@@ -66,20 +66,10 @@ pub struct PPU {
     renderer: Arc<dyn Renderer>,
 }
 
-/// TODO: this can be a more compact type
-/// with an API that matches the timer interrupt
+#[derive(Default)]
 pub struct InterruptRequests {
     pub vblank: bool,
     pub stat: bool,
-}
-
-impl Default for InterruptRequests {
-    fn default() -> Self {
-        Self {
-            vblank: false,
-            stat: false,
-        }
-    }
 }
 
 impl PPU {
