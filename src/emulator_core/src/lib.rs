@@ -17,19 +17,27 @@ pub use mmu::PPU;
 use std::time::Duration;
 use std::time::Instant;
 
+/// Wrapper struct for emulation contect. Wraps the CPU and creates a 'limiter'
+/// to control the execution speed of the emulator and keep it to approximately
+/// the correct speed. Provides convience functions for operating the emulator
+/// in a 'realtime' way.
 pub struct Emulator {
     cpu: CPU,
     limiter: Limiter,
 }
 
+/// A handle which can be used to signal shutdown of the emulator thread gracefully
+/// Should always be used, if the program is aborted while the emulator thread
+/// is still running, RAM data will not be saved and you will lose your saves.
 pub struct EmulatorHandle {
     shutdown_sender: std::sync::mpsc::Sender<()>,
     join_handle: std::thread::JoinHandle<()>,
 }
 
 impl EmulatorHandle {
+    /// Signal shutdown of the emulator thread. Calls join handle and waits
+    /// for the thread to gracefully terminate.
     pub fn shutdown(self) {
-        // Signal shutdown and join the thread.
         let _ = self.shutdown_sender.send(());
         let _ = self.join_handle.join();
     }
@@ -78,7 +86,7 @@ impl Emulator {
 /// maximum allowed value for the frame, the function blocks until the next frame
 /// can begin. This isn't a 'correct' emulation of the CPU speed but its good
 /// enough for our purposes.
-pub struct Limiter {
+struct Limiter {
     next_frame: Instant,
     frame_cycles: u64,
 }
@@ -89,14 +97,14 @@ const CYCLES_PER_FRAME: u64 = CYCLES_PER_SECOND / FPS;
 const TARGET_FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS);
 
 impl Limiter {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             next_frame: Instant::now() + TARGET_FRAME_DURATION,
             frame_cycles: 0,
         }
     }
 
-    pub fn step(&mut self, cycles: u8) {
+    fn step(&mut self, cycles: u8) {
         self.frame_cycles += cycles as u64;
 
         if self.frame_cycles < CYCLES_PER_FRAME {
