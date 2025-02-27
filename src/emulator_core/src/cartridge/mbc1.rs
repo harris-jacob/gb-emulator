@@ -10,7 +10,7 @@ pub struct MBC1 {
     banking_mode: BankingMode,
     header: Header,
     // Used to persist state
-    saver: Option<Box<dyn CartridgePersistence>>,
+    persister: Option<Box<dyn CartridgePersistence>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -131,43 +131,25 @@ impl Cartridge for MBC1 {
     }
 
     fn save(&mut self) {
-        self.saver.as_mut().map(|saver| {
-            saver.write_ram(&self.ram);
-        });
+        if let Some(persister) = &mut self.persister {
+            persister.write_ram(&self.ram);
+        }
     }
 }
 
 impl MBC1 {
-    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgePersistence>>) -> Self {
+    pub fn new(rom: Vec<u8>, mut persister: Option<Box<dyn CartridgePersistence>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();
         let rom_banks = header.rom_bank_count();
 
-        if rom_banks > 128 {
-            panic!(
-                "MBC1 only supports up to 128 ROM banks, found {}",
-                rom_banks
-            );
-        }
+        validate_rom_bank_size(rom_banks);
+        validate_ram_bank_size(ram_banks);
 
-        if ram_banks > 4 {
-            panic!("MBC1 only supports up to 4 RAM banks, found {}", ram_banks);
-        }
+        let ram = persister.as_mut().map(|persister| persister.load_ram());
 
-        let ram = saver
-            .as_mut()
-            .map(|saver| {
-                let ram = saver.load_ram();
-
-                if ram.len() != 8000 * ram_banks {
-                    // TODO: this could just warn and initialise with empty state.
-                    panic!("Saver returned RAM that does not match expected size.")
-                }
-
-                ram
-            })
-            .unwrap_or(vec![0; 8000 * ram_banks]);
+        let ram = valid_ram(ram, ram_banks);
 
         MBC1 {
             rom,
@@ -177,7 +159,7 @@ impl MBC1 {
             ram_enabled: false,
             banking_mode: BankingMode::ROM,
             header,
-            saver,
+            persister,
         }
     }
 
@@ -196,6 +178,41 @@ impl MBC1 {
             header::ROMSize::KB4096 => 0b11111111,
             header::ROMSize::KB8192 => 0b11111111,
         }
+    }
+}
+
+/// Panic if the number of ROM banks in the header exceeds the number supported
+/// by MBC1.
+fn validate_rom_bank_size(rom_bank_count: usize) {
+    if rom_bank_count <= 128 {
+        return;
+    }
+
+    panic!(
+        "MBC1 only supports up to 128 ROM banks, found {}",
+        rom_bank_count
+    );
+}
+
+/// Panic if hte number of RAM banks in the header exceeds the number supported
+/// by MBC1
+fn validate_ram_bank_size(ram_bank_count: usize) {
+    if ram_bank_count <= 4 {
+        return;
+    }
+    panic!(
+        "MBC1 only supports up to 4 RAM banks, found {}",
+        ram_bank_count
+    );
+}
+
+/// When we load RAM from disk we need to ensure its the size we expect, otherwise
+/// we run the risk of out of bounds access etc. So, if we find our loaded ram
+/// to be 'corrupted' we just ignore it and create a new empty RAM vec.
+fn valid_ram(suspect_ram: Option<Vec<u8>>, ram_banks: usize) -> Vec<u8> {
+    match suspect_ram {
+        Some(suspect_ram) if suspect_ram.len() == 8000 * ram_banks => suspect_ram,
+        _ => vec![0; 8000 * ram_banks],
     }
 }
 

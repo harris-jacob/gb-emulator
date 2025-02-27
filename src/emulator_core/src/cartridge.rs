@@ -48,6 +48,10 @@ pub trait Cartridge: Send {
 /// cartridge state when it is loaded and to save its state when ejected.
 pub trait CartridgePersistence: Send {
     // Called when trying to initialise battery backed RAM.
+    // The size of the output RAM is important, it should
+    // be exactly the same size as the array provided in the `write_ram`
+    // call. If the size of the Vec is incorrect, the emulator will ignore
+    // this and start from a blank RAM state.
     fn load_ram(&mut self) -> Vec<u8>;
     // Called when trying to save battery backed RAM.
     fn write_ram(&mut self, ram: &[u8]);

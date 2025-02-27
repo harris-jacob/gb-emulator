@@ -165,30 +165,12 @@ impl MBC3 {
         let ram_banks = header.ram_bank_count();
         let rom_banks = header.rom_bank_count();
 
-        if rom_banks > 128 {
-            panic!(
-                "MBC3 only supports up to 128 ROM banks, found {}",
-                rom_banks
-            );
-        }
+        validate_rom_bank_size(rom_banks);
+        validate_ram_bank_size(ram_banks);
 
-        if ram_banks > 4 {
-            panic!("MBC3 only supports up to 4 RAM banks, found {}", ram_banks);
-        }
+        let ram = persister.as_mut().map(|persister| persister.load_ram());
 
-        let ram = persister
-            .as_mut()
-            .and_then(|saver| {
-                let ram = saver.load_ram();
-
-                // TODO: this isn't great its also not covered in mbc1
-                if ram.len() == 8000 * ram_banks {
-                    Some(ram)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or(vec![0; 8000 * ram_banks]);
+        let ram = valid_ram(ram, ram_banks);
 
         MBC3 {
             rom,
@@ -217,6 +199,41 @@ impl MBC3 {
             header::ROMSize::KB4096 => 0b11111111,
             header::ROMSize::KB8192 => 0b11111111,
         }
+    }
+}
+
+/// Panic if the number of ROM banks in the header exceeds the number supported
+/// by MBC3.
+fn validate_rom_bank_size(rom_bank_count: usize) {
+    if rom_bank_count <= 128 {
+        return;
+    }
+
+    panic!(
+        "MBC3 only supports up to 128 ROM banks, found {}",
+        rom_bank_count
+    );
+}
+
+/// Panic if hte number of RAM banks in the header exceeds the number supported
+/// by MBC3
+fn validate_ram_bank_size(ram_bank_count: usize) {
+    if ram_bank_count <= 4 {
+        return;
+    }
+    panic!(
+        "MBC3 only supports up to 4 RAM banks, found {}",
+        ram_bank_count
+    );
+}
+
+/// When we load RAM from disk we need to ensure its the size we expect, otherwise
+/// we run the risk of out of bounds access etc. So, if we find our loaded ram
+/// to be 'corrupted' we just ignore it and create a new empty RAM vec.
+fn valid_ram(suspect_ram: Option<Vec<u8>>, ram_banks: usize) -> Vec<u8> {
+    match suspect_ram {
+        Some(suspect_ram) if suspect_ram.len() == 8000 * ram_banks => suspect_ram,
+        _ => vec![0; 8000 * ram_banks],
     }
 }
 
