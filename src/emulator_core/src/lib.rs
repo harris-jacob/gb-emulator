@@ -5,6 +5,8 @@ mod registers;
 
 pub use cartridge::create_cartridge;
 pub use cartridge::Cartridge;
+pub use cartridge::CartridgeSaver;
+pub use cartridge::RTCState;
 pub use cpu::CPU;
 pub use mmu::Button;
 pub use mmu::Color;
@@ -18,20 +20,56 @@ use std::time::Instant;
 
 pub struct Emulator {
     cpu: CPU,
+    limiter: Limiter,
+}
+
+pub struct EmulatorHandle {
+    shutdown_sender: std::sync::mpsc::Sender<()>,
+    join_handle: std::thread::JoinHandle<()>,
+}
+
+impl EmulatorHandle {
+    pub fn shutdown(self) {
+        // Signal shutdown and join the thread.
+        let _ = self.shutdown_sender.send(());
+        let _ = self.join_handle.join();
+    }
 }
 
 impl Emulator {
     pub fn new(cpu: CPU) -> Self {
-        Self { cpu }
+        let limiter = Limiter::new();
+        Self { cpu, limiter }
     }
 
-    pub fn run(&mut self) {
-        let mut limiter = Limiter::new();
+    /// Spawns a new thread that runs the emulator. Returns handle which
+    /// can be used to shutdown the emulator.
+    pub fn spawn(mut self) -> EmulatorHandle {
+        let (shutdown_sender, shutdown_receiver) = std::sync::mpsc::channel::<()>();
 
-        loop {
-            let cycles = self.cpu.step();
-            limiter.step(cycles);
+        // Move the emulator into its own thread.
+        let join_handle = std::thread::spawn(move || {
+            // Main loop: execute cycles until shutdown signal is received.
+            while shutdown_receiver.try_recv().is_err() {
+                self.step();
+            }
+            // Before exiting, save state.
+            self.save();
+        });
+
+        EmulatorHandle {
+            shutdown_sender,
+            join_handle,
         }
+    }
+
+    fn step(&mut self) {
+        let cycles = self.cpu.step();
+        self.limiter.step(cycles);
+    }
+
+    fn save(&mut self) {
+        self.cpu.mmu.save();
     }
 }
 
@@ -42,7 +80,7 @@ impl Emulator {
 /// can begin. This isn't a 'correct' emulation of the CPU speed but its good
 /// enough for our purposes.
 pub struct Limiter {
-    frame_start: Instant,
+    next_frame: Instant,
     frame_cycles: u64,
 }
 
@@ -54,7 +92,7 @@ const TARGET_FRAME_DURATION: Duration = Duration::from_millis(1000 / FPS);
 impl Limiter {
     pub fn new() -> Self {
         Self {
-            frame_start: Instant::now(),
+            next_frame: Instant::now() + TARGET_FRAME_DURATION,
             frame_cycles: 0,
         }
     }
@@ -67,18 +105,12 @@ impl Limiter {
         }
 
         let now = Instant::now();
-        let frame_duration = now - self.frame_start;
 
-        let sleep_for = TARGET_FRAME_DURATION
-            .checked_sub(frame_duration)
-            .unwrap_or_else(|| Duration::from_secs(0));
+        if self.next_frame > now {
+            std::thread::sleep(self.next_frame - now);
+        }
 
-        std::thread::sleep(sleep_for);
-        self.next_frame();
-    }
-
-    fn next_frame(&mut self) {
         self.frame_cycles = 0;
-        self.frame_start = Instant::now();
+        self.next_frame = now + TARGET_FRAME_DURATION;
     }
 }

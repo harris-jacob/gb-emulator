@@ -9,6 +9,8 @@ pub struct MBC1 {
     ram_enabled: bool,
     banking_mode: BankingMode,
     header: Header,
+    // Used to persist state
+    saver: Option<Box<dyn CartridgeSaver>>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -85,7 +87,7 @@ impl Cartridge for MBC1 {
             0x2000..=0x3FFF => {
                 let nibble = value & self.rom_bank_mask();
 
-                if value & 0b1111111 == 0 {
+                if value & 0b11111 == 0 {
                     self.rom_bank = 1;
                 } else {
                     self.rom_bank = nibble;
@@ -127,10 +129,16 @@ impl Cartridge for MBC1 {
             _ => panic!("Invalid address for MBC1: {:#06x}", address),
         }
     }
+
+    fn save(&mut self) {
+        self.saver.as_mut().map(|saver| {
+            saver.write_ram(&self.ram);
+        });
+    }
 }
 
 impl MBC1 {
-    pub fn new(rom: Vec<u8>) -> Self {
+    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgeSaver>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();
@@ -147,7 +155,19 @@ impl MBC1 {
             panic!("MBC1 only supports up to 4 RAM banks, found {}", ram_banks);
         }
 
-        let ram = vec![0; 8000 * ram_banks];
+        let ram = saver
+            .as_mut()
+            .map(|saver| {
+                let ram = saver.load_ram();
+
+                if ram.len() != 8000 * ram_banks {
+                    // TODO: this could just warn and initialise with empty state.
+                    panic!("Saver returned RAM that does not match expected size.")
+                }
+
+                ram
+            })
+            .unwrap_or(vec![0; 8000 * ram_banks]);
 
         MBC1 {
             rom,
@@ -157,6 +177,7 @@ impl MBC1 {
             ram_enabled: false,
             banking_mode: BankingMode::ROM,
             header,
+            saver,
         }
     }
 
@@ -278,7 +299,7 @@ mod tests {
             rom[0x148] = 0x06;
             // only KB2 of ram
             rom[0x149] = 0x01;
-            let mut mbc1 = MBC1::new(rom);
+            let mut mbc1 = MBC1::new(rom, None);
 
             mbc1.ram = vec![0; 0x2000 * 4];
 
@@ -403,6 +424,6 @@ mod tests {
         rom[0x148] = 0x06;
         rom[0x149] = 0x03;
 
-        MBC1::new(rom)
+        MBC1::new(rom, None)
     }
 }

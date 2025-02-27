@@ -6,9 +6,10 @@ mod rtc;
 
 use header::CartridgeType;
 pub use header::Header;
-pub use mbc1::MBC1;
+use mbc1::MBC1;
 use mbc3::MBC3;
 pub use no_mbc::NoMBC;
+pub use rtc::RTCState;
 
 #[cfg_attr(test, mockall::automock)]
 pub trait Cartridge: Send {
@@ -20,6 +21,9 @@ pub trait Cartridge: Send {
     fn read_rom(&self, address: u16) -> u8;
     /// Write a byte to the cartridge's ROM
     fn write_rom(&mut self, address: u16, value: u8);
+
+    /// Save the state of RAM
+    fn save(&mut self) {}
 
     // Update is called every emulation cycle and provides cartridges with a
     // way to update their state cyclicly. The default impl of this method does
@@ -41,12 +45,26 @@ pub trait Cartridge: Send {
     }
 }
 
-pub fn create_cartridge(rom: Vec<u8>) -> Box<dyn Cartridge> {
+// TODO: come up with a better name.
+pub trait CartridgeSaver: Send {
+    // Called when trying to initialise battery backed RAM.
+    fn load_ram(&mut self) -> Vec<u8>;
+    // Called when trying to save battery backed RAM.
+    fn write_ram(&mut self, ram: &[u8]);
+    // Called when trying to initialise the state of the RTC clock
+    fn load_rtc(&mut self) -> RTCState;
+    // Called when trying to save the state of the RTC clock
+    fn write_rtc(&mut self, rtc: RTCState);
+}
+
+pub fn create_cartridge(rom: Vec<u8>, saver: Box<dyn CartridgeSaver>) -> Box<dyn Cartridge> {
     let header = Header::new(&rom);
 
     match header.cartridge_type {
         CartridgeType::ROMOnly => Box::new(NoMBC::new(rom)),
-        CartridgeType::MBC1 => Box::new(MBC1::new(rom)),
-        CartridgeType::MBC3 => Box::new(MBC3::new(rom)),
+        CartridgeType::MBC1 => Box::new(MBC1::new(rom, None)),
+        CartridgeType::MBC1Battery => Box::new(MBC1::new(rom, Some(saver))),
+        CartridgeType::MBC3 => Box::new(MBC3::new(rom, None)),
+        CartridgeType::MBC3Battery => Box::new(MBC3::new(rom, Some(saver))),
     }
 }

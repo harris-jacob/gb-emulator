@@ -18,6 +18,12 @@ pub struct RTC {
     latched: Option<LatchedClockData>,
 }
 
+/// State struct which represents the 'persisted' RTC state that is used to
+/// emulate 'battery' backed hardware.
+pub struct RTCState {
+    pub zero: u64,
+}
+
 /// When writing $00, and then $01 to this register, the current time becomes
 /// latched into the RTC registers. The latched data will not change until it
 /// becomes latched again, by repeating the write $00->$01 procedure. This

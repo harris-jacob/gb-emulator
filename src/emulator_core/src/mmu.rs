@@ -225,6 +225,11 @@ impl MMU {
         }
     }
 
+    // TODO: is there a better API for this?
+    pub fn save(&mut self) {
+        self.cartridge.save();
+    }
+
     fn dma_transfer(&mut self, value: u8) {
         let start_address: u16 = (value as u16) << 8;
 

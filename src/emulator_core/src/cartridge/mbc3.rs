@@ -16,6 +16,7 @@ pub struct MBC3 {
     register_select: RegisterSelect,
     header: Header,
     rtc: RTC,
+    saver: Option<Box<dyn CartridgeSaver>>,
 }
 
 enum RegisterSelect {
@@ -150,10 +151,17 @@ impl Cartridge for MBC3 {
             _ => panic!("Invalid address for MBC3: {:#06x}", address),
         }
     }
+
+    fn save(&mut self) {
+        // TODO: save RTC
+        self.saver.as_mut().map(|saver| {
+            saver.write_ram(&self.ram);
+        });
+    }
 }
 
 impl MBC3 {
-    pub fn new(rom: Vec<u8>) -> Self {
+    pub fn new(rom: Vec<u8>, mut saver: Option<Box<dyn CartridgeSaver>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();
@@ -170,7 +178,19 @@ impl MBC3 {
             panic!("MBC3 only supports up to 4 RAM banks, found {}", ram_banks);
         }
 
-        let ram = vec![0; 8000 * ram_banks];
+        let ram = saver
+            .as_mut()
+            .and_then(|saver| {
+                let ram = saver.load_ram();
+
+                // TODO: this isn't great its also not covered in mbc1
+                if ram.len() == 8000 * ram_banks {
+                    Some(ram)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or(vec![0; 8000 * ram_banks]);
 
         MBC3 {
             rom,
@@ -179,7 +199,9 @@ impl MBC3 {
             register_select: RegisterSelect::RamBank(0),
             ram_and_rtc_enabled: false,
             header,
+            // TODO: Load RTC zero
             rtc: RTC::new(SystemTime::now()),
+            saver,
         }
     }
 
@@ -331,6 +353,6 @@ mod tests {
         rom[0x148] = 0x06;
         rom[0x149] = 0x03;
 
-        MBC3::new(rom)
+        MBC3::new(rom, None)
     }
 }
