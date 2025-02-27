@@ -16,6 +16,7 @@ pub struct MBC3 {
     register_select: RegisterSelect,
     header: Header,
     rtc: RTC,
+    persister: Option<Box<dyn CartridgePersistence>>,
 }
 
 enum RegisterSelect {
@@ -64,7 +65,6 @@ impl Cartridge for MBC3 {
 
     /// Write to RAM at address range 0xA000-0xBFFF, to the selected ram bank
     /// Panics if address is out of range
-    /// TODO: battery backed RAM will need to be saved to disk
     fn write_ram(&mut self, address: u16, value: u8) {
         self.check_ram_range(address);
         if self.ram_and_rtc_enabled {
@@ -150,27 +150,27 @@ impl Cartridge for MBC3 {
             _ => panic!("Invalid address for MBC3: {:#06x}", address),
         }
     }
+
+    fn save(&mut self) {
+        if let Some(persister) = &mut self.persister {
+            persister.write_ram(&self.ram);
+        }
+    }
 }
 
 impl MBC3 {
-    pub fn new(rom: Vec<u8>) -> Self {
+    pub fn new(rom: Vec<u8>, mut persister: Option<Box<dyn CartridgePersistence>>) -> Self {
         let header = Header::new(&rom);
 
         let ram_banks = header.ram_bank_count();
         let rom_banks = header.rom_bank_count();
 
-        if rom_banks > 128 {
-            panic!(
-                "MBC3 only supports up to 128 ROM banks, found {}",
-                rom_banks
-            );
-        }
+        validate_rom_bank_size(rom_banks);
+        validate_ram_bank_size(ram_banks);
 
-        if ram_banks > 4 {
-            panic!("MBC3 only supports up to 4 RAM banks, found {}", ram_banks);
-        }
+        let ram = persister.as_mut().map(|persister| persister.load_ram());
 
-        let ram = vec![0; 8000 * ram_banks];
+        let ram = valid_ram(ram, ram_banks);
 
         MBC3 {
             rom,
@@ -180,6 +180,7 @@ impl MBC3 {
             ram_and_rtc_enabled: false,
             header,
             rtc: RTC::new(SystemTime::now()),
+            persister,
         }
     }
 
@@ -198,6 +199,41 @@ impl MBC3 {
             header::ROMSize::KB4096 => 0b11111111,
             header::ROMSize::KB8192 => 0b11111111,
         }
+    }
+}
+
+/// Panic if the number of ROM banks in the header exceeds the number supported
+/// by MBC3.
+fn validate_rom_bank_size(rom_bank_count: usize) {
+    if rom_bank_count <= 128 {
+        return;
+    }
+
+    panic!(
+        "MBC3 only supports up to 128 ROM banks, found {}",
+        rom_bank_count
+    );
+}
+
+/// Panic if hte number of RAM banks in the header exceeds the number supported
+/// by MBC3
+fn validate_ram_bank_size(ram_bank_count: usize) {
+    if ram_bank_count <= 4 {
+        return;
+    }
+    panic!(
+        "MBC3 only supports up to 4 RAM banks, found {}",
+        ram_bank_count
+    );
+}
+
+/// When we load RAM from disk we need to ensure its the size we expect, otherwise
+/// we run the risk of out of bounds access etc. So, if we find our loaded ram
+/// to be 'corrupted' we just ignore it and create a new empty RAM vec.
+fn valid_ram(suspect_ram: Option<Vec<u8>>, ram_banks: usize) -> Vec<u8> {
+    match suspect_ram {
+        Some(suspect_ram) if suspect_ram.len() == 8000 * ram_banks => suspect_ram,
+        _ => vec![0; 8000 * ram_banks],
     }
 }
 
@@ -331,6 +367,6 @@ mod tests {
         rom[0x148] = 0x06;
         rom[0x149] = 0x03;
 
-        MBC3::new(rom)
+        MBC3::new(rom, None)
     }
 }

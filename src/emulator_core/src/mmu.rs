@@ -225,6 +225,13 @@ impl MMU {
         }
     }
 
+    /// Calls the Cartridge persister interface to save the current state of RAM. Can
+    /// be called manually, but is generally handled by the emulation context
+    /// automatically on shutdown.
+    pub fn save(&mut self) {
+        self.cartridge.save();
+    }
+
     fn dma_transfer(&mut self, value: u8) {
         let start_address: u16 = (value as u16) << 8;
 

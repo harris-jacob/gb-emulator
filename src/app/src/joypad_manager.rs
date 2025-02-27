@@ -13,9 +13,7 @@ impl JoypadManager {
     }
 }
 impl InputCallback for JoypadManager {
-    fn add_char(&mut self, _uni_char: u32) {
-        ()
-    }
+    fn add_char(&mut self, _uni_char: u32) {}
 
     fn set_key_state(&mut self, key: minifb::Key, state: bool) {
         match (key, state) {

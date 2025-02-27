@@ -45,7 +45,9 @@ impl Header {
 pub enum CartridgeType {
     ROMOnly,
     MBC1,
+    MBC1Battery,
     MBC3,
+    MBC3Battery,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -89,15 +91,15 @@ impl TryFrom<&u8> for CartridgeType {
             // ROM+RAM+BATTERY
             0x9 => Ok(CartridgeType::ROMOnly),
             // MBC3+Timer+BATTERY
-            0x0F => Ok(CartridgeType::MBC3),
+            0x0F => Ok(CartridgeType::MBC3Battery),
             // MBC3+Timer+RAM+BATTERY
-            0x10 => Ok(CartridgeType::MBC3),
+            0x10 => Ok(CartridgeType::MBC3Battery),
             // MBC3
             0x11 => Ok(CartridgeType::MBC3),
             // MBC3+RAM
             0x12 => Ok(CartridgeType::MBC3),
             // MBC3+RAM+BATTERY
-            0x13 => Ok(CartridgeType::MBC3),
+            0x13 => Ok(CartridgeType::MBC3Battery),
             n => {
                 let error = format!("Unsupported Cartridge type {:X}", n);
                 Err(error)
