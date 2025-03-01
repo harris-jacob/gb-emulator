@@ -54,12 +54,11 @@ impl Emulator {
     pub fn spawn(mut self) -> EmulatorHandle {
         let (shutdown_sender, shutdown_receiver) = std::sync::mpsc::channel::<()>();
 
-        // Move the emulator into its own thread.
         let join_handle = std::thread::spawn(move || {
-            // Main loop: execute cycles until shutdown signal is received.
             while shutdown_receiver.try_recv().is_err() {
                 self.step();
             }
+
             // Before exiting, save state.
             self.save();
         });

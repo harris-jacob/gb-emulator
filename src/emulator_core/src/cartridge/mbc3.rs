@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use rtc::{LatchedClockData, RTC};
+use rtc::RTC;
 
 use super::*;
 

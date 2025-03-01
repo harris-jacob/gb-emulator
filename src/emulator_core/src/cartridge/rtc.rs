@@ -208,20 +208,8 @@ impl Days {
         self.0 = (new & 0x1FF) | (self.0 & !0x1FF);
     }
 
-    fn overflow(&self) -> bool {
-        self.0 & (1 << 15) != 0
-    }
-
     fn halted(&self) -> bool {
         self.0 & (1 << 14) != 0
-    }
-
-    fn set_halted(&mut self, value: bool) {
-        if value {
-            self.0 |= 1 << 14
-        } else {
-            self.0 &= !(1 << 14)
-        };
     }
 
     fn days(&self) -> u16 {
@@ -529,21 +517,7 @@ mod tests {
             days.update_days(600);
 
             assert_eq!(days.days(), 88);
-            assert!(days.overflow());
-        }
-
-        #[test]
-        fn halt() {
-            let mut days = Days::new();
-
-            days.set_halted(true);
-
-            assert_eq!(days.upper(), 0b01000000);
-            assert!(days.halted());
-
-            days.set_halted(false);
-            assert_eq!(days.upper(), 0);
-            assert!(!days.halted());
+            assert_eq!(days.upper(), 128);
         }
     }
 }

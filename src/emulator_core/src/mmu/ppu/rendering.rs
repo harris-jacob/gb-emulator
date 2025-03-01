@@ -1,6 +1,6 @@
 use lcdc_status::PPUMode;
 
-use super::{oam::Sprite, *};
+use super::*;
 
 // TODO: double check these
 const HBLANK_CYCLES: u32 = 204 / 4;

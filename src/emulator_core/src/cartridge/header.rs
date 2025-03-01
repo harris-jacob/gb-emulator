@@ -85,10 +85,10 @@ impl TryFrom<&u8> for CartridgeType {
             // MBC1+RAM
             0x02 => Ok(CartridgeType::MBC1),
             // MBC1+RAM+BATTERY
-            0x03 => Ok(CartridgeType::MBC1),
+            0x03 => Ok(CartridgeType::MBC1Battery),
             // ROM+RAM
             0x8 => Ok(CartridgeType::ROMOnly),
-            // ROM+RAM+BATTERY
+            // ROM+RAM+BATTERY, TODO: save
             0x9 => Ok(CartridgeType::ROMOnly),
             // MBC3+Timer+BATTERY
             0x0F => Ok(CartridgeType::MBC3Battery),
