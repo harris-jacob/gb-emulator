@@ -159,10 +159,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = srl_val(&mut registers, value);
         assert_eq!(result, 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -171,10 +171,10 @@ mod tests {
         let value = 0b0000_0001;
         let result = srl_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -183,10 +183,10 @@ mod tests {
         let value = 0b0000_0001;
         let result = srl_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -195,10 +195,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         srl(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -207,10 +207,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = rr_val(&mut registers, value);
         assert_eq!(result, 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -220,10 +220,10 @@ mod tests {
         registers.set_carry_flag(true);
         let result = rr_val(&mut registers, value);
         assert_eq!(result, 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -233,10 +233,10 @@ mod tests {
         registers.set_carry_flag(false);
         let result = rr_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -245,10 +245,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         rr(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -257,10 +257,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = rlc_val(&mut registers, value);
         assert_eq!(result, 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -269,10 +269,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = rlc_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -281,10 +281,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         rlc(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -293,10 +293,10 @@ mod tests {
         let value = 0b1010_1001;
         let result = rrc_val(&mut registers, value);
         assert_eq!(result, 0b1101_0100);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -305,10 +305,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = rrc_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -317,10 +317,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1001);
         rrc(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b1101_0100);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -329,10 +329,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = rl_val(&mut registers, value);
         assert_eq!(result, 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -342,10 +342,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = rl_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -354,10 +354,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         rl(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b0101_0101);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -366,10 +366,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = sla_val(&mut registers, value);
         assert_eq!(result, 0b0101_0100);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -378,10 +378,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = sla_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -390,10 +390,10 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         sla(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b0101_0100);
-        assert_eq!(registers.get_carry_flag(), true);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -402,10 +402,10 @@ mod tests {
         let value = 0b1010_1010;
         let result = sra_val(&mut registers, value);
         assert_eq!(result, 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 
     #[test]
@@ -414,10 +414,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = sra_val(&mut registers, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(registers.get_zero_flag());
     }
 
     #[test]
@@ -426,9 +426,9 @@ mod tests {
         registers.write_eight(EightBitRegister::B, 0b1010_1010);
         sra(&mut registers, EightBitRegister::B);
         assert_eq!(registers.read_eight(EightBitRegister::B), 0b1101_0101);
-        assert_eq!(registers.get_carry_flag(), false);
-        assert_eq!(registers.get_half_carry_flag(), false);
-        assert_eq!(registers.get_subtract_flag(), false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_carry_flag());
+        assert!(!registers.get_half_carry_flag());
+        assert!(!registers.get_subtract_flag());
+        assert!(!registers.get_zero_flag());
     }
 }

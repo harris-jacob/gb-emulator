@@ -47,7 +47,7 @@ impl<'a> TileData {
         let start = match addressing_method {
             TileAddressingMethod::Signed => {
                 let tile_number = tile_number as i8;
-                (0x1000 + (tile_number as i8) as i16 * 16) as usize
+                (0x1000 + tile_number as i16 * 16) as usize
             }
 
             TileAddressingMethod::Unsigned => tile_number as usize * 16,

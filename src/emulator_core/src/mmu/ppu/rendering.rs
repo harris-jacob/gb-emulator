@@ -21,7 +21,7 @@ impl PPU {
         match self.lcd_stat.ppu_mode() {
             PPUMode::HBlank => self.hblank_step(),
             PPUMode::VBlank => self.vblank_step(),
-            PPUMode::OAM => self.oam_step(),
+            PPUMode::Oam => self.oam_step(),
             PPUMode::Drawing => self.drawing_step(),
         }
     }
@@ -39,7 +39,7 @@ impl PPU {
 
         if self.ly < 143 {
             self.update_ly(self.ly + 1);
-            self.switch_mode(PPUMode::OAM)
+            self.switch_mode(PPUMode::Oam)
         } else {
             self.renderer.render(self.buffer);
             self.reset_buffer();
@@ -57,7 +57,7 @@ impl PPU {
 
         if self.ly >= 153 {
             self.update_ly(0);
-            self.switch_mode(PPUMode::OAM)
+            self.switch_mode(PPUMode::Oam)
         }
     }
 
@@ -98,12 +98,12 @@ impl PPU {
 
                 self.lcd_stat.set_ppu_mode(PPUMode::VBlank)
             }
-            PPUMode::OAM => {
+            PPUMode::Oam => {
                 if self.lcd_stat.oam_stat_ie() {
                     self.request_stat_interrupt()
                 }
 
-                self.lcd_stat.set_ppu_mode(PPUMode::OAM)
+                self.lcd_stat.set_ppu_mode(PPUMode::Oam)
             }
             PPUMode::Drawing => self.lcd_stat.set_ppu_mode(PPUMode::Drawing),
         }
@@ -161,7 +161,7 @@ impl PPU {
     /// NOTE: this function has a few caveats for it to be valid:
     /// - The background scanline must always be rendered before the sprite
     /// - Background scanline rendering function must push BG pixel
-    /// to the bg_priority buffer
+    ///   to the bg_priority buffer
     fn render_sprite_pixel(&mut self, sprite_pixel: Pixel, sprite: &oam::Sprite, x: u8) {
         let x = x as i16 + sprite.x();
 

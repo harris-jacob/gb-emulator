@@ -106,8 +106,8 @@ impl MMU {
             0xFF30..=0xFF3F => self.io[(addr - 0xFF00) as usize], // Wave pattern
             0xFF40 => self.ppu.read_lcdc(),
             0xFF41 => self.ppu.read_lcd_stat(),
-            0xFF42 => self.ppu.read_background_viewport(ViewportRegister::SCY),
-            0xFF43 => self.ppu.read_background_viewport(ViewportRegister::SCX),
+            0xFF42 => self.ppu.read_background_viewport(ViewportRegister::Scy),
+            0xFF43 => self.ppu.read_background_viewport(ViewportRegister::Scx),
             0xFF44 => self.ppu.read_ly(),
             0xFF45 => self.ppu.read_lyc(),
             0xFF46 => 0, // DMA transfer
@@ -165,10 +165,10 @@ impl MMU {
             0xFF41 => self.ppu.write_lcd_stat(value),
             0xFF42 => self
                 .ppu
-                .write_background_viewport(ViewportRegister::SCY, value),
+                .write_background_viewport(ViewportRegister::Scy, value),
             0xFF43 => self
                 .ppu
-                .write_background_viewport(ViewportRegister::SCX, value),
+                .write_background_viewport(ViewportRegister::Scx, value),
             0xFF44 => {} // LY is read-only
             0xFF45 => self.ppu.write_lyc(value),
             0xFF46 => self.dma_transfer(value),

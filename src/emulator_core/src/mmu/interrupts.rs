@@ -12,6 +12,12 @@ pub struct Interrupts {
     interrupt_flag: u8,
 }
 
+impl Default for Interrupts {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Interrupts {
     pub fn new() -> Self {
         Self {
@@ -61,9 +67,9 @@ impl Interrupts {
     }
 }
 
-impl Into<u8> for Interrupt {
-    fn into(self) -> u8 {
-        match self {
+impl From<Interrupt> for u8 {
+    fn from(val: Interrupt) -> Self {
+        match val {
             Interrupt::VBlank => 0b1,
             Interrupt::LCDStat => 0b10,
             Interrupt::Timer => 0b100,
@@ -73,9 +79,9 @@ impl Into<u8> for Interrupt {
     }
 }
 
-impl Into<Interrupt> for u8 {
-    fn into(self) -> Interrupt {
-        match self {
+impl From<u8> for Interrupt {
+    fn from(val: u8) -> Self {
+        match val {
             0b1 => Interrupt::VBlank,
             0b10 => Interrupt::LCDStat,
             0b100 => Interrupt::Timer,

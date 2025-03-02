@@ -11,6 +11,12 @@ pub struct WindowBuffer {
 unsafe impl Sync for WindowBuffer {}
 unsafe impl Send for WindowBuffer {}
 
+impl Default for WindowBuffer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl WindowBuffer {
     pub fn new() -> Self {
         Self {

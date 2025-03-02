@@ -74,6 +74,12 @@ pub enum Button {
 /// 0 (unset) signifies the button being pressed.
 ///
 /// If both button and d-pad select is set (0x30) the lower nibble reads 0xF.
+impl Default for Joypad {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Joypad {
     pub fn new() -> Self {
         Self {
@@ -93,7 +99,7 @@ impl Joypad {
             return guard.button_signal | guard.mask;
         }
 
-        return guard.mask | 0xF;
+        guard.mask | 0xF
     }
 
     // Should be available at 0xFF00. Writes the state of the joypad register.
@@ -256,6 +262,6 @@ mod tests {
         joypad.write(0x10);
         joypad.button_down(Button::A);
 
-        assert_eq!(joypad.interrupt_requested(), true);
+        assert!(joypad.interrupt_requested());
     }
 }

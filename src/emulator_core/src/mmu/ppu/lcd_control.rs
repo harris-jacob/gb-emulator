@@ -109,10 +109,10 @@ mod tests {
     fn lcd_enable() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b10000000);
-        assert_eq!(lcdc.lcd_enable(), true);
+        assert!(lcdc.lcd_enable());
 
         lcdc.write(0b00000000);
-        assert_eq!(lcdc.lcd_enable(), false);
+        assert!(!lcdc.lcd_enable());
     }
 
     #[test]
@@ -129,10 +129,10 @@ mod tests {
     fn window_enabled() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b00100000);
-        assert_eq!(lcdc.window_enabled(), true);
+        assert!(lcdc.window_enabled());
 
         lcdc.write(0b00000000);
-        assert_eq!(lcdc.window_enabled(), false);
+        assert!(!lcdc.window_enabled());
     }
 
     #[test]
@@ -169,19 +169,19 @@ mod tests {
     fn sprites_enabled() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b00000010);
-        assert_eq!(lcdc.sprites_enabled(), true);
+        assert!(lcdc.sprites_enabled());
 
         lcdc.write(0b00000000);
-        assert_eq!(lcdc.sprites_enabled(), false);
+        assert!(!lcdc.sprites_enabled());
     }
 
     #[test]
     fn background_and_window_enabled() {
         let mut lcdc = LCDControl::new();
         lcdc.write(0b00000001);
-        assert_eq!(lcdc.background_and_window_enabled(), true);
+        assert!(lcdc.background_and_window_enabled());
 
         lcdc.write(0b00000000);
-        assert_eq!(lcdc.background_and_window_enabled(), false);
+        assert!(!lcdc.background_and_window_enabled());
     }
 }

@@ -23,7 +23,7 @@ use lcd_control::LCDControl;
 use lcdc_status::LCDStatus;
 use oam::SpriteFlags;
 use oam::SpriteSize;
-use oam::OAM;
+use oam::Oam;
 use pixel::Pixel;
 use sprite_palette::SpritePalette;
 use sprite_tile::SpriteTile;
@@ -58,7 +58,7 @@ pub struct PPU {
     lcdc: LCDControl,
     ly: u8,
     lyc: u8,
-    oam: OAM,
+    oam: Oam,
     sprite_palette_0: SpritePalette,
     sprite_palette_1: SpritePalette,
     tiledata: TileData,
@@ -89,7 +89,7 @@ impl PPU {
             lcdc: LCDControl::new(),
             ly: 0,
             lyc: 0,
-            oam: OAM::new(),
+            oam: Oam::new(),
             sprite_palette_0: SpritePalette::new(),
             sprite_palette_1: SpritePalette::new(),
             tiledata: TileData::new(),
@@ -101,8 +101,8 @@ impl PPU {
     /// Read from the SCX, SCY registers.
     pub(crate) fn read_background_viewport(&self, viewport_register: ViewportRegister) -> u8 {
         match viewport_register {
-            ViewportRegister::SCX => self.background_viewport.scx,
-            ViewportRegister::SCY => self.background_viewport.scy,
+            ViewportRegister::Scx => self.background_viewport.scx,
+            ViewportRegister::Scy => self.background_viewport.scy,
         }
     }
 
@@ -113,8 +113,8 @@ impl PPU {
         value: u8,
     ) {
         match viewport_register {
-            ViewportRegister::SCX => self.background_viewport.scx = value,
-            ViewportRegister::SCY => self.background_viewport.scy = value,
+            ViewportRegister::Scx => self.background_viewport.scx = value,
+            ViewportRegister::Scy => self.background_viewport.scy = value,
         }
     }
 

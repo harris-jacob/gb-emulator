@@ -15,8 +15,8 @@ pub struct MBC1 {
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum BankingMode {
-    ROM,
-    RAM,
+    Rom,
+    Ram,
 }
 
 impl Cartridge for MBC1 {
@@ -29,11 +29,11 @@ impl Cartridge for MBC1 {
             // This is actually undefined behavior, the docs say that often
             // open bus is returned, often 0xFF
             (_, false) => 0xFF,
-            (BankingMode::RAM, true) => {
+            (BankingMode::Ram, true) => {
                 let remapped_address = (address - 0xA000) + (self.ram_bank as u16 * 0x2000);
                 self.ram[remapped_address as usize]
             }
-            (BankingMode::ROM, true) => {
+            (BankingMode::Rom, true) => {
                 // Always access the first RAM bank in ROM banking mode
                 let remapped_address = address - 0xA000;
                 self.ram[remapped_address as usize]
@@ -43,7 +43,6 @@ impl Cartridge for MBC1 {
 
     /// Write to RAM at address range 0xA000-0xBFFF, to the selected ram bank
     /// Panics if address is out of range
-    /// TODO: battery backed RAM will need to be saved to disk
     fn write_ram(&mut self, address: u16, value: u8) {
         self.check_ram_range(address);
         if self.ram_enabled {
@@ -100,11 +99,11 @@ impl Cartridge for MBC1 {
             0x4000..=0x5FFF => {
                 match self.banking_mode {
                     // Used to set bits 5 & 6 of ROM bank
-                    BankingMode::ROM => {
+                    BankingMode::Rom => {
                         let new_value = self.rom_bank | (value & 0b11) << 5;
                         self.rom_bank = new_value & self.rom_bank_mask();
                     }
-                    BankingMode::RAM => {
+                    BankingMode::Ram => {
                         let new_value = self.ram_bank & 0b11;
 
                         // If RAM is not large enough, setting this does nothing.
@@ -120,8 +119,8 @@ impl Cartridge for MBC1 {
             // Banking mode select
             0x6000..=0x7FFF => {
                 self.banking_mode = match value & 0x01 {
-                    0 => BankingMode::ROM,
-                    1 => BankingMode::RAM,
+                    0 => BankingMode::Rom,
+                    1 => BankingMode::Ram,
                     _ => unreachable!(),
                 };
             }
@@ -157,7 +156,7 @@ impl MBC1 {
             rom_bank: 1,
             ram_bank: 0,
             ram_enabled: false,
-            banking_mode: BankingMode::ROM,
+            banking_mode: BankingMode::Rom,
             header,
             persister,
         }

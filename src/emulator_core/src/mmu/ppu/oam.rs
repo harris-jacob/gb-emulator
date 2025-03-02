@@ -2,7 +2,7 @@
 /// data used to display sprites (or objects). Each sprite is encoded in 4 bytes. For
 /// more information see the [Sprite] struct. There is room for 40 sprites to be
 /// displayed at any given time.
-pub struct OAM([u8; 160]);
+pub struct Oam([u8; 160]);
 
 /// A sprite is an Object displayed on the screen. It can be moved in increments of 1 pixel (unlike
 /// background and window tiles). There can only be 40 Sprites on the screen at a time (these
@@ -112,7 +112,7 @@ impl Sprite {
     }
 }
 
-impl OAM {
+impl Oam {
     pub fn new() -> Self {
         Self([0; 160])
     }
@@ -146,7 +146,7 @@ impl OAM {
 
     fn check_addr_range(addr: u16) {
         if addr > 160 {
-            panic!("Address out of range for OAM")
+            panic!("Address out of range for Oam")
         }
     }
 }
@@ -160,7 +160,7 @@ mod tests {
         #[test]
         #[should_panic]
         fn out_of_range_read_panics() {
-            let map = OAM::new();
+            let map = Oam::new();
 
             map.read(161);
         }
@@ -168,14 +168,14 @@ mod tests {
         #[test]
         #[should_panic]
         fn out_of_range_write_panics() {
-            let mut map = OAM::new();
+            let mut map = Oam::new();
 
             map.write(161, 0);
         }
 
         #[test]
         fn read_write() {
-            let mut map = OAM::new();
+            let mut map = Oam::new();
             for i in 0u16..160 {
                 map.write(i, 1);
 
@@ -185,7 +185,7 @@ mod tests {
 
         #[test]
         fn sprite_at_returns_correct_sprite() {
-            let mut map = OAM::new();
+            let mut map = Oam::new();
             map.write(20 * 4, 0x10);
             map.write(20 * 4 + 1, 0x20);
             map.write(20 * 4 + 2, 0x30);
@@ -206,28 +206,28 @@ mod tests {
         #[test]
         fn bg_priority() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.bg_priority(), false);
+            assert!(!flags.bg_priority());
 
             let flags = SpriteFlags::new(0b10000000);
-            assert_eq!(flags.bg_priority(), true);
+            assert!(flags.bg_priority());
         }
 
         #[test]
         fn y_flip() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.y_flip(), false);
+            assert!(!flags.y_flip());
 
             let flags = SpriteFlags::new(0b01000000);
-            assert_eq!(flags.y_flip(), true);
+            assert!(flags.y_flip());
         }
 
         #[test]
         fn x_flip() {
             let flags = SpriteFlags::new(0b00000000);
-            assert_eq!(flags.x_flip(), false);
+            assert!(!flags.x_flip());
 
             let flags = SpriteFlags::new(0b00100000);
-            assert_eq!(flags.x_flip(), true);
+            assert!(flags.x_flip());
         }
 
         #[test]
