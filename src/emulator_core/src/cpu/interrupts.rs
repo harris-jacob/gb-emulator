@@ -18,7 +18,7 @@ impl CPU {
         }
 
         self.halted = false;
-        return 0;
+        0
     }
 
     fn halted_interrupt(&mut self) -> u8 {
@@ -44,7 +44,7 @@ impl CPU {
             }
         }
 
-        return 0;
+        0
     }
 
     fn interrupt_jump(&mut self, interrupt: u8) {

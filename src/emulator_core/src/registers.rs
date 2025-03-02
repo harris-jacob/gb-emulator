@@ -216,11 +216,11 @@ mod tests {
     fn zero_flag() {
         let mut registers = Registers::new();
         registers.set_zero_flag(false);
-        assert_eq!(registers.get_zero_flag(), false);
+        assert!(!registers.get_zero_flag());
         assert_eq!(registers.af, 0x01b0 & !0x80);
 
         registers.set_zero_flag(true);
-        assert_eq!(registers.get_zero_flag(), true);
+        assert!(registers.get_zero_flag());
         assert_eq!(registers.af, 0x01b0 | 0x80);
     }
 
@@ -228,11 +228,11 @@ mod tests {
     fn subtract_flag() {
         let mut registers = Registers::new();
         registers.set_subtract_flag(true);
-        assert_eq!(registers.get_subtract_flag(), true);
+        assert!(registers.get_subtract_flag());
         assert_eq!(registers.af, 0x01b0 | 0x40);
 
         registers.set_subtract_flag(false);
-        assert_eq!(registers.get_subtract_flag(), false);
+        assert!(!registers.get_subtract_flag());
         assert_eq!(registers.af, 0x01b0 & !0x40);
     }
 
@@ -240,11 +240,11 @@ mod tests {
     fn half_carry_flag() {
         let mut registers = Registers::new();
         registers.set_half_carry_flag(true);
-        assert_eq!(registers.get_half_carry_flag(), true);
+        assert!(registers.get_half_carry_flag());
         assert_eq!(registers.af, 0x01b0 | 0x20);
 
         registers.set_half_carry_flag(false);
-        assert_eq!(registers.get_half_carry_flag(), false);
+        assert!(!registers.get_half_carry_flag());
         assert_eq!(registers.af, 0x01b0 & !0x20)
     }
 
@@ -252,11 +252,11 @@ mod tests {
     fn carry_flag() {
         let mut registers = Registers::new();
         registers.set_carry_flag(true);
-        assert_eq!(registers.get_carry_flag(), true);
+        assert!(registers.get_carry_flag());
         assert_eq!(registers.af, 0x01b0 | 0x10);
 
         registers.set_carry_flag(false);
-        assert_eq!(registers.get_carry_flag(), false);
+        assert!(!registers.get_carry_flag());
         assert_eq!(registers.af, 0x01b0 & !0x10);
     }
 }

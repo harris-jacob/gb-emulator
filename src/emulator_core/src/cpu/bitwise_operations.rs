@@ -64,10 +64,10 @@ mod tests {
         let value = 0b1010_0110;
         let result = swap_value(&mut reg, value);
         assert_eq!(result, 0b0110_1010);
-        assert_eq!(reg.get_zero_flag(), false);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), false);
-        assert_eq!(reg.get_carry_flag(), false);
+        assert!(!reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(!reg.get_half_carry_flag());
+        assert!(!reg.get_carry_flag());
     }
 
     #[test]
@@ -76,10 +76,10 @@ mod tests {
         let value = 0b0000_0000;
         let result = swap_value(&mut reg, value);
         assert_eq!(result, 0b0000_0000);
-        assert_eq!(reg.get_zero_flag(), true);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), false);
-        assert_eq!(reg.get_carry_flag(), false);
+        assert!(reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(!reg.get_half_carry_flag());
+        assert!(!reg.get_carry_flag());
     }
 
     #[test]
@@ -88,10 +88,10 @@ mod tests {
         reg.write_eight(EightBitRegister::B, 0b1110_0110);
         swap(&mut reg, EightBitRegister::B);
         assert_eq!(reg.read_eight(EightBitRegister::B), 0b0110_1110);
-        assert_eq!(reg.get_zero_flag(), false);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), false);
-        assert_eq!(reg.get_carry_flag(), false);
+        assert!(!reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(!reg.get_half_carry_flag());
+        assert!(!reg.get_carry_flag());
     }
 
     #[test]
@@ -99,9 +99,9 @@ mod tests {
         let mut reg = Registers::new();
         let value = 0b1010_1010;
         bit_val(&mut reg, value, 0);
-        assert_eq!(reg.get_zero_flag(), true);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), true);
+        assert!(reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(reg.get_half_carry_flag());
     }
 
     #[test]
@@ -109,9 +109,9 @@ mod tests {
         let mut reg = Registers::new();
         let value = 0b1010_1010;
         bit_val(&mut reg, value, 1);
-        assert_eq!(reg.get_zero_flag(), false);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), true);
+        assert!(!reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(reg.get_half_carry_flag());
     }
 
     #[test]
@@ -119,9 +119,9 @@ mod tests {
         let mut reg = Registers::new();
         reg.write_eight(EightBitRegister::B, 0b1010_1010);
         bit(&mut reg, EightBitRegister::B, 0);
-        assert_eq!(reg.get_zero_flag(), true);
-        assert_eq!(reg.get_subtract_flag(), false);
-        assert_eq!(reg.get_half_carry_flag(), true);
+        assert!(reg.get_zero_flag());
+        assert!(!reg.get_subtract_flag());
+        assert!(reg.get_half_carry_flag());
     }
 
     #[test]

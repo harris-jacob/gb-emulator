@@ -1,6 +1,6 @@
 use std::time::SystemTime;
 
-use rtc::{LatchedClockData, RTC};
+use rtc::Rtc;
 
 use super::*;
 
@@ -15,7 +15,7 @@ pub struct MBC3 {
     // RAM address range.
     register_select: RegisterSelect,
     header: Header,
-    rtc: RTC,
+    rtc: Rtc,
     persister: Option<Box<dyn CartridgePersistence>>,
 }
 
@@ -179,7 +179,7 @@ impl MBC3 {
             register_select: RegisterSelect::RamBank(0),
             ram_and_rtc_enabled: false,
             header,
-            rtc: RTC::new(SystemTime::now()),
+            rtc: Rtc::new(SystemTime::now()),
             persister,
         }
     }

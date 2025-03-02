@@ -2,7 +2,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 /// Real time clock that continues to tick when the gameboy is powered
 /// off.
-pub struct RTC {
+pub struct Rtc {
     // Because the RTC should 'continue to tick' when the emulator is off. We
     // keep track of a theoretical clock zero so we can emulate the clock
     // being active when the emulator is not running. For this to work, the
@@ -44,7 +44,7 @@ pub struct LatchedClockData {
 /// But 14 - Day Counter carry (1=Day Counter overflow)
 pub struct Days(u16);
 
-impl RTC {
+impl Rtc {
     pub fn new(now: SystemTime) -> Self {
         Self {
             zero: Self::since_epoch(now),
@@ -208,20 +208,8 @@ impl Days {
         self.0 = (new & 0x1FF) | (self.0 & !0x1FF);
     }
 
-    fn overflow(&self) -> bool {
-        self.0 & (1 << 15) != 0
-    }
-
     fn halted(&self) -> bool {
         self.0 & (1 << 14) != 0
-    }
-
-    fn set_halted(&mut self, value: bool) {
-        if value {
-            self.0 |= 1 << 14
-        } else {
-            self.0 &= !(1 << 14)
-        };
     }
 
     fn days(&self) -> u16 {
@@ -272,7 +260,7 @@ mod tests {
                 .checked_add(Duration::from_secs(3600 * 24 * 10))
                 .expect("valid time");
 
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             assert_eq!(rtc.read_seconds(), 0);
             assert_eq!(rtc.read_minutes(), 0);
@@ -280,7 +268,7 @@ mod tests {
             assert_eq!(rtc.read_days_lower(), 0);
             assert_eq!(rtc.read_days_upper(), 0);
 
-            // Clock the RTC forward to later
+            // Clock the Rtc forward to later
             rtc.update(later);
 
             assert_eq!(rtc.read_seconds(), 10);
@@ -304,7 +292,7 @@ mod tests {
                 .checked_add(Duration::from_secs(3600 * 24 * 10))
                 .expect("valid time");
 
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             assert_eq!(rtc.read_seconds(), 0);
             assert_eq!(rtc.read_minutes(), 0);
@@ -314,7 +302,7 @@ mod tests {
 
             rtc.latch();
 
-            // Clock the RTC forward to later
+            // Clock the Rtc forward to later
             rtc.update(later);
 
             assert_eq!(rtc.read_seconds(), 0);
@@ -338,7 +326,7 @@ mod tests {
                 .checked_add(Duration::from_secs(3600 * 24 * 10))
                 .expect("valid time");
 
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             assert_eq!(rtc.read_seconds(), 0);
             assert_eq!(rtc.read_minutes(), 0);
@@ -364,7 +352,7 @@ mod tests {
         #[test]
         fn test_write_seconds() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             let now = now
                 .checked_add(Duration::from_secs(50))
@@ -380,7 +368,7 @@ mod tests {
         #[test]
         fn test_write_minutes() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             let now = now
                 .checked_add(Duration::from_secs(100 * 60))
@@ -396,7 +384,7 @@ mod tests {
         #[test]
         fn test_write_hours() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             let now = now
                 .checked_add(Duration::from_secs(20 * 3600))
@@ -412,7 +400,7 @@ mod tests {
         #[test]
         fn test_write_days() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             let now = now
                 .checked_add(Duration::from_secs(100 * 3600 * 24))
@@ -430,7 +418,7 @@ mod tests {
         #[test]
         fn test_registers_halted() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             // Halt the RTC
             rtc.write_days_upper(now, 0b01000000);
@@ -446,11 +434,11 @@ mod tests {
         }
 
         // test to ensure the RTC registers don't 'jump' when unhalting
-        // the RTC.
+        // the Rtc.
         #[test]
         fn test_halted_then_unhalt() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             // Halt the RTC
             rtc.write_days_upper(now, 0b010000000);
@@ -475,7 +463,7 @@ mod tests {
         #[test]
         fn test_days_overflow() {
             let now = SystemTime::now();
-            let mut rtc = RTC::new(now);
+            let mut rtc = Rtc::new(now);
 
             rtc.write_days_lower(now, 0xFF);
             rtc.write_days_upper(now, 0b1);
@@ -529,21 +517,7 @@ mod tests {
             days.update_days(600);
 
             assert_eq!(days.days(), 88);
-            assert!(days.overflow());
-        }
-
-        #[test]
-        fn halt() {
-            let mut days = Days::new();
-
-            days.set_halted(true);
-
-            assert_eq!(days.upper(), 0b01000000);
-            assert!(days.halted());
-
-            days.set_halted(false);
-            assert_eq!(days.upper(), 0);
-            assert!(!days.halted());
+            assert_eq!(days.upper(), 128);
         }
     }
 }

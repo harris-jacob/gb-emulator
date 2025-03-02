@@ -22,7 +22,7 @@ pub enum PPUMode {
     // Mode 1
     VBlank,
     // Mode 2
-    OAM,
+    Oam,
     // Mode 3
     Drawing,
 }
@@ -32,7 +32,7 @@ impl From<u8> for PPUMode {
         match value {
             0 => Self::HBlank,
             1 => Self::VBlank,
-            2 => Self::OAM,
+            2 => Self::Oam,
             3 => Self::Drawing,
             _ => unreachable!(),
         }
@@ -44,7 +44,7 @@ impl From<PPUMode> for u8 {
         match value {
             PPUMode::HBlank => 0,
             PPUMode::VBlank => 1,
-            PPUMode::OAM => 2,
+            PPUMode::Oam => 2,
             PPUMode::Drawing => 3,
         }
     }
@@ -122,47 +122,47 @@ mod tests {
     fn lyc_ie_stat_ie() {
         let mut lcd_status = LCDStatus::new();
         lcd_status.write(0b01000000);
-        assert_eq!(lcd_status.lyc_ly_stat_ie(), true);
+        assert!(lcd_status.lyc_ly_stat_ie());
 
         lcd_status.write(0b00000000);
-        assert_eq!(lcd_status.lyc_ly_stat_ie(), false);
+        assert!(!lcd_status.lyc_ly_stat_ie());
     }
 
     #[test]
     fn oam_stat_ie() {
         let mut lcd_status = LCDStatus::new();
         lcd_status.write(0b00100000);
-        assert_eq!(lcd_status.oam_stat_ie(), true);
+        assert!(lcd_status.oam_stat_ie());
 
         lcd_status.write(0b00000000);
-        assert_eq!(lcd_status.oam_stat_ie(), false);
+        assert!(!lcd_status.oam_stat_ie());
     }
 
     #[test]
     fn vblank_stat_ie() {
         let mut lcd_status = LCDStatus::new();
         lcd_status.write(0b00010000);
-        assert_eq!(lcd_status.vblank_stat_ie(), true);
+        assert!(lcd_status.vblank_stat_ie());
 
         lcd_status.write(0b00000000);
-        assert_eq!(lcd_status.vblank_stat_ie(), false);
+        assert!(!lcd_status.vblank_stat_ie());
     }
 
     #[test]
     fn hblank_stat_ie() {
         let mut lcd_status = LCDStatus::new();
         lcd_status.write(0b00001000);
-        assert_eq!(lcd_status.hblank_stat_ie(), true);
+        assert!(lcd_status.hblank_stat_ie());
 
         lcd_status.write(0b00000000);
-        assert_eq!(lcd_status.hblank_stat_ie(), false);
+        assert!(!lcd_status.hblank_stat_ie());
     }
     #[test]
     fn ppu_mode() {
         let mut lcd_status = LCDStatus::new();
 
-        lcd_status.set_ppu_mode(PPUMode::OAM);
-        assert_eq!(lcd_status.ppu_mode(), PPUMode::OAM);
+        lcd_status.set_ppu_mode(PPUMode::Oam);
+        assert_eq!(lcd_status.ppu_mode(), PPUMode::Oam);
 
         lcd_status.set_ppu_mode(PPUMode::VBlank);
         assert_eq!(lcd_status.ppu_mode(), PPUMode::VBlank);
