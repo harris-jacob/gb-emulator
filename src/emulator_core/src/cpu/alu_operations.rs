@@ -367,7 +367,7 @@ mod tests {
 
         assert_eq!(value, 0x10);
         assert!(!registers.get_zero_flag());
-        assert!(registers.get_subtract_flag());
+        assert!(!registers.get_subtract_flag());
         assert!(registers.get_half_carry_flag());
     }
 
